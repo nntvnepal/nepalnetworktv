@@ -1,11 +1,27 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
+/* =========================
+   SLUG GENERATOR
+========================= */
+
+function generateSlug(name: string) {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, "-");
+}
+
 /* =========================
    GET ACTIVE CATEGORIES
 ========================= */
+
 export async function GET() {
   try {
+
     const categories = await prisma.category.findMany({
       where: {
         status: "active",
@@ -13,64 +29,116 @@ export async function GET() {
       orderBy: {
         name: "asc",
       },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        status: true,
+        createdAt: true
+      }
     });
 
-    return NextResponse.json(categories);
+    return NextResponse.json({
+      success: true,
+      categories
+    });
+
   } catch (error) {
+
     console.error("CATEGORY GET ERROR:", error);
+
     return NextResponse.json(
-      { error: "Failed to fetch categories" },
+      {
+        success: false,
+        error: "Failed to fetch categories"
+      },
       { status: 500 }
     );
+
   }
 }
 
 /* =========================
    CREATE CATEGORY
 ========================= */
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
 
-    if (!body.name) {
+export async function POST(req: Request) {
+
+  try {
+
+    let body;
+
+    try {
+      body = await req.json();
+    } catch {
       return NextResponse.json(
-        { error: "Category name required" },
+        { success: false, error: "Invalid request body" },
         { status: 400 }
       );
     }
 
-    const slug = body.name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9 ]/g, "")
-      .replace(/\s+/g, "-");
+    const name = body?.name?.trim();
 
-    // 🔎 Check if already exists
+    if (!name) {
+      return NextResponse.json(
+        { success: false, error: "Category name required" },
+        { status: 400 }
+      );
+    }
+
+    const slug = generateSlug(name);
+
+    /* =========================
+       CHECK EXISTING CATEGORY
+    ========================= */
+
     const existing = await prisma.category.findUnique({
       where: { slug },
     });
 
     if (existing) {
       return NextResponse.json(
-        { error: "Category already exists" },
-        { status: 400 }
+        { success: false, error: "Category already exists" },
+        { status: 409 }
       );
     }
 
+    /* =========================
+       CREATE CATEGORY
+    ========================= */
+
     const newCategory = await prisma.category.create({
       data: {
-        name: body.name,
+        name,
         slug,
         status: "active",
       },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        status: true,
+        createdAt: true
+      }
     });
 
-    return NextResponse.json(newCategory);
+    return NextResponse.json({
+      success: true,
+      category: newCategory
+    });
+
   } catch (error) {
-    console.error("CATEGORY POST ERROR:", error);
+
+    console.error("CATEGORY CREATE ERROR:", error);
+
     return NextResponse.json(
-      { error: "Failed to create category" },
+      {
+        success: false,
+        error: "Failed to create category"
+      },
       { status: 500 }
     );
+
   }
+
 }

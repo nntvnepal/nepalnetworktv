@@ -1,28 +1,34 @@
-import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export async function GET(){
+export const dynamic = "force-dynamic";
 
-const users = await prisma.user.findMany({
+export async function GET() {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        avatar: true
+      },
+      orderBy: {
+        name: "asc"
+      }
+    });
 
-where:{
-isActive:true
-},
+    return NextResponse.json({
+      success: true,
+      users
+    });
 
-select:{
-id:true,
-name:true,
-email:true,
-role:true,
-avatar:true
-},
+  } catch (error) {
+    console.error("Chat users error:", error);
 
-orderBy:{
-name:"asc"
-}
-
-})
-
-return NextResponse.json(users)
-
+    return NextResponse.json(
+      { error: "Failed to load users" },
+      { status: 500 }
+    );
+  }
 }

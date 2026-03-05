@@ -23,7 +23,7 @@ isAstrology:false
 },
 include:{category:true},
 orderBy:{createdAt:"desc"},
-take:20
+take:30
 })
 
 }catch(e){console.log(e)}
@@ -72,6 +72,10 @@ const hero=articles[0]
 const feature=articles.slice(1,5)
 const latest=articles.slice(5,15)
 
+const politics=articles.filter(a=>a?.category?.slug==="politics").slice(0,4)
+const defence=articles.filter(a=>a?.category?.slug==="defence").slice(0,4)
+const technology=articles.filter(a=>a?.category?.slug==="technology").slice(0,4)
+
 function url(a:any){
 if(!a?.category?.slug) return "#"
 return `/${a.category.slug}/${a.slug}`
@@ -107,15 +111,21 @@ return(
 
 )}
 
+{/* TOP AD PLACEHOLDER */}
+
+<div className="border border-dashed h-[90px] flex items-center justify-center text-gray-400 mb-10">
+TOP AD 970x90
+</div>
+
 {/* HERO */}
 
 {hero &&(
 
-<section className="mb-10">
+<section className="mb-12">
 
 <Link href={url(hero)}>
 
-<h1 className="text-5xl font-bold mb-4">
+<h1 className="text-5xl font-bold mb-6 leading-tight">
 {hero.title}
 </h1>
 
@@ -126,8 +136,9 @@ return(
 <Image
 src={hero.images[0]}
 alt={hero.title}
-width={1000}
-height={500}
+width={1200}
+height={600}
+className="mb-6"
 />
 
 )}
@@ -155,7 +166,7 @@ height={250}
 
 )}
 
-<h3 className="font-semibold mt-2">
+<h3 className="font-semibold mt-3 leading-snug">
 {a.title}
 </h3>
 
@@ -164,6 +175,12 @@ height={250}
 ))}
 
 </section>
+
+{/* MID AD */}
+
+<div className="border border-dashed h-[90px] flex items-center justify-center text-gray-400 mb-10">
+MID AD 970x90
+</div>
 
 {/* LATEST + SIDEBAR */}
 
@@ -179,7 +196,7 @@ Latest News
 
 {latest.map(a=>(
 
-<div key={a.id}>
+<div key={a.id} className="border-b pb-4">
 
 <Link href={url(a)}>
 
@@ -205,7 +222,7 @@ Latest News
 Editorial
 </h2>
 
-<div className="space-y-4">
+<div className="space-y-4 mb-10">
 
 {editorials.map(e=>(
 
@@ -220,6 +237,44 @@ Editorial
 ))}
 
 </div>
+
+{/* SIDEBAR AD */}
+
+<div className="border border-dashed h-[250px] flex items-center justify-center text-gray-400">
+SIDEBAR AD 300x250
+</div>
+
+</div>
+
+</section>
+
+{/* CATEGORY BLOCKS */}
+
+<CategoryBlock title="Politics" articles={politics} />
+<CategoryBlock title="Defence" articles={defence} />
+<CategoryBlock title="Technology" articles={technology} />
+
+{/* EDITORIAL */}
+
+<section className="mt-16">
+
+<h2 className="text-2xl font-bold mb-6">
+Editorial
+</h2>
+
+<div className="grid md:grid-cols-3 gap-6">
+
+{editorials.map(e=>(
+
+<Link key={e.id} href={`/editorial/${e.slug}`}>
+
+<h3 className="font-semibold">
+{e.title}
+</h3>
+
+</Link>
+
+))}
 
 </div>
 
@@ -253,7 +308,47 @@ Daily Horoscope
 
 </section>
 
+{/* BOTTOM AD */}
+
+<div className="border border-dashed h-[90px] flex items-center justify-center text-gray-400 mt-16">
+BOTTOM AD 970x90
+</div>
+
 </main>
+
+)
+
+}
+
+function CategoryBlock({title,articles}:any){
+
+if(!articles?.length) return null
+
+return(
+
+<section className="mt-16">
+
+<h2 className="text-2xl font-bold mb-6">
+{title}
+</h2>
+
+<div className="grid md:grid-cols-4 gap-6">
+
+{articles.map((a:any)=>(
+
+<Link key={a.id} href={`/${a.category?.slug}/${a.slug}`}>
+
+<h3 className="font-semibold hover:text-blue-700">
+{a.title}
+</h3>
+
+</Link>
+
+))}
+
+</div>
+
+</section>
 
 )
 

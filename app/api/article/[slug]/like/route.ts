@@ -1,42 +1,55 @@
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/getCurrentUser";
 
 export async function POST(
   req: Request,
   { params }: { params: { slug: string } }
 ) {
   try {
-    const body = await req.json();
-    const { userEmail } = body;
+    const user = await getCurrentUser();
 
-    if (!userEmail)
-      return NextResponse.json({ error: "Login required" });
+    if (!user) {
+      return NextResponse.json(
+        { error: "Login required" },
+        { status: 401 }
+      );
+    }
 
-    const client = await clientPromise;
-    const db = client.db("nationpath");
-
-    const article = await db
-      .collection("articles")
-      .findOne({ slug: params.slug });
+    const article = await prisma.article.findUnique({
+      where: {
+        slug: params.slug,
+      },
+    });
 
     if (!article) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Article not found" },
+        { status: 404 }
+      );
     }
 
-    if (article.likedBy?.includes(userEmail)) {
-      return NextResponse.json({ message: "Already liked" });
-    }
+    const updated = await prisma.article.update({
+      where: {
+        slug: params.slug,
+      },
+      data: {
+        likes: {
+          increment: 1,
+        },
+      },
+    });
 
-    await db.collection("articles").updateOne(
-      { slug: params.slug },
-      {
-        $inc: { likes: 1 },
-        $push: { likedBy: userEmail },
-      }
-    );
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      likes: updated.likes,
+    });
   } catch (error) {
-    return NextResponse.json({ error: "Like failed" }, { status: 500 });
+    console.error("Like error:", error);
+
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
   }
 }

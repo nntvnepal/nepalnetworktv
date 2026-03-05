@@ -82,6 +82,7 @@ model Category {
 
   @@index([status])
   @@index([priority])
+  @@index([slug])
 
   @@map("Category")
 }
@@ -103,41 +104,25 @@ model Article {
   images    String[]
   videoUrl  String?
 
-  //////////////////////////////////////////////////////
-  // FLAGS
-  //////////////////////////////////////////////////////
-
   breaking         Boolean @default(false)
-  flash            Boolean @default(false)  // NEW FLASH NEWS FLAG
+  flash            Boolean @default(false)
   featured         Boolean @default(false)
   isEditorial      Boolean @default(false)
   isAstrology      Boolean @default(false)
   isDeleted        Boolean @default(false)
   isEditorsPick    Boolean @default(false)
-  isLive           Boolean @default(false) // FUTURE LIVE COVERAGE
+  isLive           Boolean @default(false)
 
   homepagePriority Int @default(0)
 
-  breakingPriority Int @default(0) // PRIORITY FOR BREAKING BAR
-  flashPriority    Int @default(0) // PRIORITY FOR FLASH BAR
-
-  //////////////////////////////////////////////////////
-  // HOROSCOPE
-  //////////////////////////////////////////////////////
+  breakingPriority Int @default(0)
+  flashPriority    Int @default(0)
 
   zodiacSign     String?
   horoscopeDate  DateTime?
 
-  //////////////////////////////////////////////////////
-  // STATUS
-  //////////////////////////////////////////////////////
-
   status       PostStatus @default(pending)
   publishedAt  DateTime?
-
-  //////////////////////////////////////////////////////
-  // ENGAGEMENT
-  //////////////////////////////////////////////////////
 
   views         Int @default(0)
   likes         Int @default(0)
@@ -148,22 +133,10 @@ model Article {
   surprising    Int @default(0)
   concerning    Int @default(0)
 
-  //////////////////////////////////////////////////////
-  // TRENDING SYSTEM
-  //////////////////////////////////////////////////////
-
   trendingScore Int      @default(0)
   lastViewAt    DateTime?
 
-  //////////////////////////////////////////////////////
-  // TAGS
-  //////////////////////////////////////////////////////
-
   tags String[]
-
-  //////////////////////////////////////////////////////
-  // SEO
-  //////////////////////////////////////////////////////
 
   readingTime       Int?
   metaTitle         String?
@@ -173,16 +146,8 @@ model Article {
   ogImage           String?
   structuredData    String?
 
-  //////////////////////////////////////////////////////
-  // TIMESTAMPS
-  //////////////////////////////////////////////////////
-
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
-
-  //////////////////////////////////////////////////////
-  // RELATIONS
-  //////////////////////////////////////////////////////
 
   categoryId String?   @db.ObjectId
   category   Category? @relation(fields: [categoryId], references: [id])
@@ -192,25 +157,17 @@ model Article {
 
   comments Comment[]
 
-  //////////////////////////////////////////////////////
-  // INDEXES
-  //////////////////////////////////////////////////////
-
+  @@index([slug])
   @@index([status])
   @@index([createdAt])
   @@index([publishedAt])
   @@index([views])
   @@index([likes])
   @@index([trendingScore])
-  @@index([lastViewAt])
   @@index([breaking])
   @@index([flash])
   @@index([featured])
-  @@index([isEditorsPick])
   @@index([homepagePriority])
-  @@index([isEditorial])
-  @@index([isAstrology])
-  @@index([isDeleted])
   @@index([tags])
 
   @@map("Article")
@@ -266,6 +223,7 @@ model User {
   sentMessages     ChatMessage[] @relation("MessageSender")
   receivedMessages ChatMessage[] @relation("MessageReceiver")
 
+  @@index([email])
   @@index([role])
   @@index([isActive])
 
@@ -380,7 +338,7 @@ model ActivityLog {
 }
 
 //////////////////////////////////////////////////////
-// VISITOR CHAT (WEBSITE CHAT WITH US)
+// VISITOR CHAT
 //////////////////////////////////////////////////////
 
 model VisitorChat {
@@ -396,7 +354,7 @@ model VisitorChat {
   userAgent String?
 
   isRead    Boolean  @default(false)
-  status    String   @default("open") // open, replied, closed
+  status    String   @default("open")
 
   createdAt DateTime @default(now())
 

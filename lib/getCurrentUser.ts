@@ -23,7 +23,7 @@ export async function getCurrentUser() {
 
     if (!user) return null;
 
-    if (user.status === "blocked") return null;
+    if (!user.isActive) return null;
 
     return user;
   } catch (error) {

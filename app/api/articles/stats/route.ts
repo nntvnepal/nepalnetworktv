@@ -2,7 +2,11 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { PostStatus } from "@prisma/client";
 
+/* IMPORTANT: prevents build-time execution */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
+
   try {
 
     const [
@@ -19,31 +23,31 @@ export async function GET() {
       prisma.article.count(),
 
       prisma.article.count({
-        where: { status: PostStatus.pending },
+        where: { status: PostStatus.pending }
       }),
 
       prisma.article.count({
-        where: { status: PostStatus.approved},
+        where: { status: PostStatus.approved }
       }),
 
       prisma.article.count({
-        where: { status: PostStatus.rejected },
+        where: { status: PostStatus.rejected }
       }),
 
       prisma.article.count({
-        where: { status: PostStatus.draft},
+        where: { status: PostStatus.draft }
       }),
 
       prisma.article.count({
-        where: { featured: true },
+        where: { featured: true }
       }),
 
       prisma.article.count({
-        where: { breaking: true },
+        where: { breaking: true }
       }),
 
       prisma.article.count({
-        where: { isEditorial: true },
+        where: { isEditorial: true }
       }),
 
     ]);
@@ -58,18 +62,22 @@ export async function GET() {
         draft,
         featured,
         breaking,
-        editorial,
-      },
+        editorial
+      }
     });
 
   } catch (error) {
 
-    console.error("STATS ERROR:", error);
+    console.error("ARTICLE STATS ERROR:", error);
 
     return NextResponse.json(
-      { success: false, error: "Failed to fetch stats" },
+      {
+        success: false,
+        error: "Failed to fetch article stats"
+      },
       { status: 500 }
     );
 
   }
+
 }

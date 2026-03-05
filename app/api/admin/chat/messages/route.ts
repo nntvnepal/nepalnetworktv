@@ -2,11 +2,15 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
   try {
-    const senderId = req.nextUrl.searchParams.get("sender");
-    const receiverId = req.nextUrl.searchParams.get("receiver");
+    const { searchParams } = new URL(req.url);
+
+    const senderId = searchParams.get("sender");
+    const receiverId = searchParams.get("receiver");
 
     if (!senderId || !receiverId) {
       return NextResponse.json(
@@ -18,8 +22,14 @@ export async function GET(req: NextRequest) {
     const messages = await prisma.chatMessage.findMany({
       where: {
         OR: [
-          { senderId, receiverId },
-          { senderId: receiverId, receiverId: senderId },
+          {
+            senderId: senderId,
+            receiverId: receiverId,
+          },
+          {
+            senderId: receiverId,
+            receiverId: senderId,
+          },
         ],
       },
       orderBy: {
@@ -47,6 +57,7 @@ export async function GET(req: NextRequest) {
       success: true,
       messages,
     });
+
   } catch (error) {
     console.error("Chat API error:", error);
 

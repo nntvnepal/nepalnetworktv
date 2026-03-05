@@ -17,6 +17,9 @@ import {
 import NewsletterForm from "@/components/NewsletterForm";
 import type { Metadata } from "next";
 
+/* ⭐ IMPORTANT FIX */
+export const dynamic = "force-dynamic";
+
 /* ================= FONTS ================= */
 
 const playfair = Playfair_Display({
@@ -66,13 +69,19 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
 
-  const breaking = await prisma.article.findFirst({
-    where: {
-      status: "approved",
-      breaking: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  let breaking = null;
+
+  try {
+    breaking = await prisma.article.findFirst({
+      where: {
+        status: "approved",
+        breaking: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error) {
+    console.error("Breaking fetch failed", error);
+  }
 
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
@@ -80,22 +89,19 @@ export default async function RootLayout({
 
         <Providers>
 
-          {/* SCROLL PROGRESS BAR */}
           <div
             id="scrollBar"
             className="fixed top-0 left-0 h-[3px] bg-red-600 z-[999] w-0"
           />
 
-          {/* ================= TOP BAR ================= */}
+          {/* TOP BAR */}
 
           <div className="sticky top-0 z-50 backdrop-blur-xl bg-white/30 dark:bg-black/30 border-b border-white/20">
 
             <div className="max-w-7xl mx-auto px-6 py-2 flex justify-between items-center text-xs">
 
-              {/* LEFT */}
               <TopDateTime />
 
-              {/* RIGHT */}
               <div className="flex items-center gap-4">
 
                 <Link
@@ -131,7 +137,7 @@ export default async function RootLayout({
 
           </div>
 
-          {/* ================= BREAKING BAR ================= */}
+          {/* BREAKING BAR */}
 
           {breaking && (
             <div className="bg-[#0e1a33] text-white overflow-hidden">
@@ -156,13 +162,11 @@ export default async function RootLayout({
             </div>
           )}
 
-          {/* ================= HEADER ================= */}
+          {/* HEADER */}
 
           <header className="border-b bg-white dark:bg-[#0a0f1c] sticky top-[36px] z-40">
 
             <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-
-              {/* LOGO */}
 
               <Link href="/" className="flex items-center gap-4">
 
@@ -179,31 +183,14 @@ export default async function RootLayout({
 
               </Link>
 
-              {/* NAVIGATION */}
-
               <nav className="hidden md:flex items-center gap-6 text-sm font-medium tracking-wide">
 
                 <Link href="/" className="hover:text-red-600">Home</Link>
-
-                <Link href="/category/politics" className="hover:text-red-600">
-                  Politics
-                </Link>
-
-                <Link href="/category/defence" className="hover:text-red-600">
-                  Defence
-                </Link>
-
-                <Link href="/category/world" className="hover:text-red-600">
-                  World
-                </Link>
-
-                <Link href="/category/technology" className="hover:text-red-600">
-                  Technology
-                </Link>
-
-                <Link href="/category/entertainment" className="hover:text-red-600">
-                  Entertainment
-                </Link>
+                <Link href="/category/politics" className="hover:text-red-600">Politics</Link>
+                <Link href="/category/defence" className="hover:text-red-600">Defence</Link>
+                <Link href="/category/world" className="hover:text-red-600">World</Link>
+                <Link href="/category/technology" className="hover:text-red-600">Technology</Link>
+                <Link href="/category/entertainment" className="hover:text-red-600">Entertainment</Link>
 
               </nav>
 
@@ -211,11 +198,9 @@ export default async function RootLayout({
 
           </header>
 
-          {/* ================= MAIN ================= */}
-
           <main className="flex-grow">{children}</main>
 
-          {/* ================= FOOTER ================= */}
+          {/* FOOTER */}
 
           <footer className="mt-24 bg-gradient-to-br from-[#0e1a33] to-[#081224] text-gray-300">
 
@@ -323,33 +308,6 @@ export default async function RootLayout({
           </footer>
 
         </Providers>
-
-        {/* SCROLL PROGRESS SCRIPT */}
-
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            window.addEventListener("scroll", function() {
-              const scrollTop = window.scrollY;
-              const height = document.body.scrollHeight - window.innerHeight;
-              const progress = (scrollTop / height) * 100;
-              const bar = document.getElementById("scrollBar");
-              if(bar) bar.style.width = progress + "%";
-            });
-          `,
-          }}
-        />
-
-        <style>{`
-          @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-          }
-
-          .animate-marquee {
-            animation: marquee 20s linear infinite;
-          }
-        `}</style>
 
       </body>
     </html>

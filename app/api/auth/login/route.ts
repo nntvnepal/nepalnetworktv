@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (user.status === "blocked") {
+    if (!user.isActive) {
       return NextResponse.json(
         { error: "Account blocked" },
         { status: 403 }

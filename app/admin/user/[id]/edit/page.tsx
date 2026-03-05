@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/getCurrentUser";
 import EditUserForm from "@/components/admin/EditUserForm";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 type Params = {
   params: {
     id: string;

@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import EditForm from "./EditForm";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function EditAdPage({
   params,

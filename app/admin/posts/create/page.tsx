@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Editor from "@/components/Editor";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 function generateSlug(title: string) {
   return title
     .toLowerCase()

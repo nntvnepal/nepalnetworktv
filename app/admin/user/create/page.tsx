@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export default function CreateUserPage() {
   async function createUser(formData: FormData) {
     "use server";

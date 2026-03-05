@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { PostStatus } from "@prisma/client";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 const zodiacList = [
   "aries","taurus","gemini","cancer","leo","virgo",
   "libra","scorpio","sagittarius","capricorn","aquarius","pisces"

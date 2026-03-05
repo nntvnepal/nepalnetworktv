@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { AD_PLACEMENTS } from "@/lib/adPlacements";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export default function CreateAd() {
 
   const router = useRouter();

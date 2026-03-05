@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import RevenueDashboard from "@/components/admin/RevenueDashboard";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export default async function RevenuePage() {
 
   const ads = await prisma.ad.findMany({

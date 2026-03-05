@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export default function EditorialDashboard() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);

@@ -27,10 +27,6 @@ enum PostStatus {
   archived
 }
 
-//////////////////////////////////////////////////////
-// AD SYSTEM ENUMS
-//////////////////////////////////////////////////////
-
 enum AdPlacement {
   homepage_top
   homepage_after_hero
@@ -80,7 +76,6 @@ model Category {
 
   @@index([status])
   @@index([priority])
-
   @@map("Category")
 }
 
@@ -89,6 +84,7 @@ model Category {
 //////////////////////////////////////////////////////
 
 model Article {
+
   id        String @id @default(auto()) @map("_id") @db.ObjectId
 
   title     String
@@ -97,12 +93,8 @@ model Article {
   content   String
   excerpt   String?
 
-  images    String[]
+  images    String[] @default([])
   videoUrl  String?
-
-  //////////////////////////////////////////////////////
-  // FLAGS
-  //////////////////////////////////////////////////////
 
   breaking         Boolean @default(false)
   flash            Boolean @default(false)
@@ -114,27 +106,14 @@ model Article {
   isLive           Boolean @default(false)
 
   homepagePriority Int @default(0)
-
   breakingPriority Int @default(0)
   flashPriority    Int @default(0)
-
-  //////////////////////////////////////////////////////
-  // HOROSCOPE
-  //////////////////////////////////////////////////////
 
   zodiacSign     String?
   horoscopeDate  DateTime?
 
-  //////////////////////////////////////////////////////
-  // STATUS
-  //////////////////////////////////////////////////////
-
   status       PostStatus @default(pending)
   publishedAt  DateTime?
-
-  //////////////////////////////////////////////////////
-  // ENGAGEMENT
-  //////////////////////////////////////////////////////
 
   views      Int @default(0)
   likes      Int @default(0)
@@ -145,22 +124,10 @@ model Article {
   surprising Int @default(0)
   concerning Int @default(0)
 
-  //////////////////////////////////////////////////////
-  // TRENDING
-  //////////////////////////////////////////////////////
-
   trendingScore Int      @default(0)
   lastViewAt    DateTime?
 
-  //////////////////////////////////////////////////////
-  // TAGS
-  //////////////////////////////////////////////////////
-
-  tags String[]
-
-  //////////////////////////////////////////////////////
-  // SEO
-  //////////////////////////////////////////////////////
+  tags String[] @default([])
 
   readingTime       Int?
   metaTitle         String?
@@ -170,16 +137,8 @@ model Article {
   ogImage           String?
   structuredData    String?
 
-  //////////////////////////////////////////////////////
-  // TIMESTAMPS
-  //////////////////////////////////////////////////////
-
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
-
-  //////////////////////////////////////////////////////
-  // RELATIONS
-  //////////////////////////////////////////////////////
 
   categoryId String?   @db.ObjectId
   category   Category? @relation(fields: [categoryId], references: [id])
@@ -189,13 +148,8 @@ model Article {
 
   comments Comment[]
 
-  //////////////////////////////////////////////////////
-  // INDEXES
-  //////////////////////////////////////////////////////
-
   @@index([status])
   @@index([createdAt])
-  @@index([publishedAt])
   @@index([views])
   @@index([likes])
   @@index([trendingScore])
@@ -206,6 +160,10 @@ model Article {
   @@index([isEditorial])
   @@index([isAstrology])
   @@index([isDeleted])
+  @@index([categoryId])
+
+  @@index([status, createdAt])
+  @@index([status, views])
 
   @@map("Article")
 }
@@ -215,7 +173,9 @@ model Article {
 //////////////////////////////////////////////////////
 
 model Comment {
+
   id        String @id @default(auto()) @map("_id") @db.ObjectId
+
   content   String
 
   userId    String? @db.ObjectId
@@ -225,6 +185,7 @@ model Comment {
   article   Article @relation(fields: [articleId], references: [id])
 
   isDeleted Boolean @default(false)
+
   createdAt DateTime @default(now())
 
   @@index([articleId])
@@ -238,6 +199,7 @@ model Comment {
 //////////////////////////////////////////////////////
 
 model User {
+
   id        String @id @default(auto()) @map("_id") @db.ObjectId
 
   name      String?
@@ -246,6 +208,7 @@ model User {
 
   role      Role @default(user)
   isActive  Boolean @default(true)
+
   avatar    String?
 
   createdAt DateTime @default(now())
@@ -269,6 +232,7 @@ model User {
 //////////////////////////////////////////////////////
 
 model ChatMessage {
+
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
 
   senderId   String? @db.ObjectId
@@ -294,6 +258,7 @@ model ChatMessage {
 //////////////////////////////////////////////////////
 
 model Ad {
+
   id          String @id @default(auto()) @map("_id") @db.ObjectId
 
   title       String
@@ -310,12 +275,9 @@ model Ad {
   startDate   DateTime?
   endDate     DateTime?
 
-  totalBudget Float?
-  cpc         Float?
-  maxClicks   Int?
-
   views       Int @default(0)
   clicks      Int @default(0)
+
   completed   Boolean @default(false)
 
   createdAt   DateTime @default(now())
@@ -333,6 +295,7 @@ model Ad {
 //////////////////////////////////////////////////////
 
 model NewsletterSubscriber {
+
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   createdAt DateTime @default(now())
@@ -347,6 +310,7 @@ model NewsletterSubscriber {
 //////////////////////////////////////////////////////
 
 model ActivityLog {
+
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
 
   action    String
@@ -369,6 +333,7 @@ model ActivityLog {
 //////////////////////////////////////////////////////
 
 model VisitorChat {
+
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
 
   name      String?

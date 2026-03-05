@@ -1,56 +1,59 @@
-import { prisma } from "@/lib/prisma"
-import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json()
+    const body = await request.json();
 
-    const { senderId, receiverId, message } = body
+    const { senderId, receiverId, message } = body;
 
     if (!senderId || !receiverId || !message) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { success: false, error: "Missing required fields" },
         { status: 400 }
-      )
+      );
     }
 
     const newMessage = await prisma.chatMessage.create({
       data: {
-        senderId,
-        receiverId,
-        message
+        senderId: String(senderId),
+        receiverId: String(receiverId),
+        message: String(message),
       },
       include: {
         sender: {
           select: {
             id: true,
             name: true,
-            email: true
-          }
+            email: true,
+          },
         },
         receiver: {
           select: {
             id: true,
             name: true,
-            email: true
-          }
-        }
-      }
-    })
+            email: true,
+          },
+        },
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      message: newMessage
-    })
+      message: newMessage,
+    });
 
   } catch (error) {
-    console.error("Chat send error:", error)
+    console.error("Chat send error:", error);
 
     return NextResponse.json(
-      { error: "Failed to send message" },
+      {
+        success: false,
+        error: "Failed to send message",
+      },
       { status: 500 }
-    )
+    );
   }
 }

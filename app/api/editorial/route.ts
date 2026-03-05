@@ -1,21 +1,58 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
+
   try {
-    const body = await req.json();
+
+    /* ================= SAFE BODY PARSE ================= */
+
+    let body;
+
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
+
+    const { title, slug, content, excerpt, images } = body;
+
+    /* ================= VALIDATION ================= */
+
+    if (!title || !content) {
+      return NextResponse.json(
+        { success: false, error: "Title and content required" },
+        { status: 400 }
+      );
+    }
+
+    /* ================= CREATE EDITORIAL ================= */
 
     const article = await prisma.article.create({
+
       data: {
-        title: body.title,
-        slug: body.slug,
-        content: body.content,
-        excerpt: body.excerpt || "",
-        images: body.images || [],
+        title: title.trim(),
+        slug,
+        content,
+        excerpt: excerpt || "",
+        images: Array.isArray(images) ? images : [],
         isEditorial: true,
         status: "approved",
         publishedAt: new Date()
+      },
+
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        createdAt: true
       }
+
     });
 
     return NextResponse.json({
@@ -24,11 +61,14 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    console.error("Editorial create error:", error);
+
+    console.error("EDITORIAL CREATE ERROR:", error);
 
     return NextResponse.json(
-      { error: "Failed to create editorial" },
+      { success: false, error: "Failed to create editorial" },
       { status: 500 }
     );
+
   }
+
 }

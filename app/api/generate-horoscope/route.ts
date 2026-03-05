@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const zodiacSigns = [
   "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
   "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
@@ -11,12 +13,15 @@ export async function GET(request: Request) {
   try {
 
     /* 🔐 SECRET PROTECTION */
+
     const { searchParams } = new URL(request.url);
     const secret = searchParams.get("secret");
 
-    if (secret !== process.env.CRON_SECRET) {
+    if (!secret || secret !== process.env.CRON_SECRET) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    /* 📅 TODAY DATE */
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -28,13 +33,18 @@ export async function GET(request: Request) {
       const slug = `${sign.toLowerCase()}-${dateString}`;
 
       /* 🛑 CHECK DUPLICATE */
+
       const existing = await prisma.article.findUnique({
         where: { slug }
       });
 
-      if (existing) continue;
+      if (existing) {
+        console.log(`Horoscope already exists for ${sign}`);
+        continue;
+      }
 
       /* 🔥 CALL OPENAI */
+
       const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -46,7 +56,8 @@ export async function GET(request: Request) {
           messages: [
             {
               role: "system",
-              content: "You are a professional astrologer writing daily horoscope predictions in a medium, punchy and confident tone."
+              content:
+                "You are a professional astrologer writing daily horoscope predictions in a medium, punchy and confident tone."
             },
             {
               role: "user",
@@ -84,7 +95,7 @@ Format STRICTLY in clean HTML like:
 Keep content between 350–450 words.
 Do not include markdown.
 Only valid HTML.
-              `
+`
             }
           ],
           temperature: 0.8,
@@ -93,7 +104,7 @@ Only valid HTML.
 
       const aiData = await aiRes.json();
 
-      if (!aiData.choices || !aiData.choices[0]) {
+      if (!aiData?.choices?.[0]?.message?.content) {
         console.error("OpenAI Error:", aiData);
         continue;
       }
@@ -101,6 +112,7 @@ Only valid HTML.
       const content = aiData.choices[0].message.content;
 
       /* 💾 SAVE TO DATABASE */
+
       await prisma.article.create({
         data: {
           title: `${sign} Horoscope Today`,
@@ -117,10 +129,23 @@ Only valid HTML.
       console.log(`Generated horoscope for ${sign}`);
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      message: "Horoscope generation completed"
+    });
 
   } catch (error) {
+
     console.error("CRON ERROR:", error);
-    return NextResponse.json({ success: false, error: "Generation failed" });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Generation failed"
+      },
+      { status: 500 }
+    );
+
   }
+
 }

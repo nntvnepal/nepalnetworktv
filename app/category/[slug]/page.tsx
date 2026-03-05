@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import AdRenderer from "@/components/AdRenderer";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 interface Props {
   params: { slug: string };
 }

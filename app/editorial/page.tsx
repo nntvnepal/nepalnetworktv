@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 type Editorial = {
   id: string;
   slug: string;

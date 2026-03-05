@@ -2,7 +2,8 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import ZodiacIcon from "@/components/ZodiacIcon";
 import type { Metadata } from "next";
-
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export const metadata: Metadata = {
   title: "Daily Horoscope Today – All Zodiac Signs | Nation Path",
   description:

@@ -4,8 +4,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, role } = await req.json();
+    const body = await req.json();
+    const { name, email, password, role } = body;
 
+    // Validation
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "Name, email and password are required" },
@@ -13,6 +15,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check existing user
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -24,16 +27,18 @@ export async function POST(req: Request) {
       );
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create user
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
         role: role || "admin", // first user can be admin
-        status: "active",
-      },
+        isActive: true
+      }
     });
 
     return NextResponse.json({
@@ -42,11 +47,12 @@ export async function POST(req: Request) {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
-      },
+        role: user.role
+      }
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("Register error:", error);
 
     return NextResponse.json(
       { error: "Server error" },

@@ -7,7 +7,6 @@ export const fetchCache = "force-no-store";
 
 import Link from "next/link";
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
 import { Playfair_Display, Inter } from "next/font/google";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import TopDateTime from "@/components/TopDateTime";
@@ -50,29 +49,11 @@ export const metadata: Metadata = {
 
 /* ================= LAYOUT ================= */
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-
-  let breaking = null;
-
-  try {
-    breaking = await prisma.article.findFirst({
-      where: {
-        status: "approved",
-        breaking: true,
-      },
-      orderBy: { createdAt: "desc" },
-      select: {
-        slug: true,
-        title: true
-      }
-    });
-  } catch (error) {
-    console.error("Breaking fetch failed:", error);
-  }
 
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
@@ -90,7 +71,10 @@ export default async function RootLayout({
 
               <div className="flex items-center gap-4">
 
-                <Link href="/search" className="flex items-center gap-1 hover:text-red-600">
+                <Link
+                  href="/search"
+                  className="flex items-center gap-1 hover:text-red-600"
+                >
                   <Search size={14}/>
                   Search
                 </Link>
@@ -99,7 +83,10 @@ export default async function RootLayout({
                   <DarkModeToggle />
                 </div>
 
-                <Link href="/login" className="border px-3 py-1 rounded-md">
+                <Link
+                  href="/login"
+                  className="border px-3 py-1 rounded-md"
+                >
                   Login
                 </Link>
 
@@ -108,28 +95,6 @@ export default async function RootLayout({
             </div>
 
           </div>
-
-          {/* BREAKING NEWS */}
-
-          {breaking && (
-            <div className="bg-[#0e1a33] text-white overflow-hidden">
-
-              <div className="max-w-7xl mx-auto flex items-center h-10 relative">
-
-                <span className="bg-red-600 px-4 py-2 text-xs font-semibold">
-                  BREAKING
-                </span>
-
-                <div className="absolute whitespace-nowrap animate-marquee px-6 text-sm">
-                  <Link href={`/article/${breaking.slug}`} className="hover:underline">
-                    {breaking.title}
-                  </Link>
-                </div>
-
-              </div>
-
-            </div>
-          )}
 
           {/* HEADER */}
 
@@ -166,7 +131,7 @@ export default async function RootLayout({
 
           </header>
 
-          {/* PAGE */}
+          {/* MAIN */}
 
           <main className="flex-grow">
             {children}

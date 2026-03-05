@@ -1,15 +1,32 @@
 "use client";
+
 import { useEffect, useState } from "react";
 
+type Category = {
+  _id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  status: "active" | "hidden";
+  postCount?: number;
+};
+
+type FormType = {
+  name: string;
+  description: string;
+  color: string;
+  status: "active" | "hidden";
+};
+
 export default function AdminCategories() {
-const [categories, setCategories] = useState<any[]>([]);
-  const [form, setForm] = useState({
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [form, setForm] = useState<FormType>({
     name: "",
     description: "",
     color: "#f97316",
     status: "active",
   });
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -20,7 +37,6 @@ const [categories, setCategories] = useState<any[]>([]);
       const res = await fetch("/api/categories");
       const data = await res.json();
 
-      // 🔥 SAFE FIX
       if (Array.isArray(data)) {
         setCategories(data);
       } else if (Array.isArray(data.categories)) {
@@ -34,11 +50,18 @@ const [categories, setCategories] = useState<any[]>([]);
     }
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const url = editingId
@@ -59,11 +82,12 @@ const [categories, setCategories] = useState<any[]>([]);
       color: "#f97316",
       status: "active",
     });
+
     setEditingId(null);
     fetchCategories();
   };
 
-  const toggleStatus = async (cat) => {
+  const toggleStatus = async (cat: Category) => {
     await fetch(`/api/categories/${cat._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -76,7 +100,7 @@ const [categories, setCategories] = useState<any[]>([]);
     fetchCategories();
   };
 
-  const deleteCategory = async (id) => {
+  const deleteCategory = async (id: string) => {
     if (!confirm("Delete this category?")) return;
 
     const res = await fetch(`/api/categories/${id}`, {
@@ -90,8 +114,9 @@ const [categories, setCategories] = useState<any[]>([]);
     fetchCategories();
   };
 
-  const editCategory = (cat) => {
+  const editCategory = (cat: Category) => {
     setEditingId(cat._id);
+
     setForm({
       name: cat.name,
       description: cat.description || "",
@@ -100,14 +125,11 @@ const [categories, setCategories] = useState<any[]>([]);
     });
   };
 
-  // 🔥 SAFE STATS (No crash possible)
-  const safeCategories = Array.isArray(categories) ? categories : [];
-
-  const totalCategories = safeCategories.length;
-  const activeCategories = safeCategories.filter(
+  const totalCategories = categories.length;
+  const activeCategories = categories.filter(
     (c) => c.status === "active"
   ).length;
-  const hiddenCategories = safeCategories.filter(
+  const hiddenCategories = categories.filter(
     (c) => c.status === "hidden"
   ).length;
 
@@ -181,17 +203,20 @@ const [categories, setCategories] = useState<any[]>([]);
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {safeCategories.map((cat) => (
+            {categories.map((cat) => (
               <tr key={cat._id} className="border-t border-gray-700">
                 <td className="p-3 flex items-center gap-2">
                   <span
                     className="w-3 h-3 rounded-full"
                     style={{ background: cat.color }}
-                  ></span>
+                  />
                   {cat.name}
                 </td>
+
                 <td>{cat.postCount || 0}</td>
+
                 <td>
                   <button
                     onClick={() => toggleStatus(cat)}
@@ -204,6 +229,7 @@ const [categories, setCategories] = useState<any[]>([]);
                     {cat.status}
                   </button>
                 </td>
+
                 <td className="space-x-2">
                   <button
                     onClick={() => editCategory(cat)}
@@ -211,6 +237,7 @@ const [categories, setCategories] = useState<any[]>([]);
                   >
                     Edit
                   </button>
+
                   <button
                     onClick={() => deleteCategory(cat._id)}
                     className="bg-red-600 px-3 py-1 rounded"
@@ -227,7 +254,13 @@ const [categories, setCategories] = useState<any[]>([]);
   );
 }
 
-function StatBox({ label, value }) {
+function StatBox({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
   return (
     <div className="bg-[#1f2937] p-6 rounded-xl border border-gray-700 text-center">
       <p className="text-gray-400 text-sm">{label}</p>

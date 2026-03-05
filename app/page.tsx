@@ -2,8 +2,19 @@ import { prisma } from "@/lib/prisma"
 import { PostStatus } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
+import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+title: "Nation Path – Breaking News, Editorial & Analysis",
+description:
+"Latest breaking news, politics, defence, world, technology and editorial insights from Nation Path.",
+openGraph:{
+title:"Nation Path",
+description:"Independent digital newsroom delivering credible journalism."
+}
+}
 
 export default async function Home(){
 
@@ -85,22 +96,18 @@ return(
 
 <main className="max-w-7xl mx-auto px-4 pt-8">
 
-{/* FLASH NEWS */}
+{/* FLASH TICKER */}
 
 {flash.length>0 &&(
 
-<div className="bg-red-600 text-white p-2 mb-8">
+<div className="bg-red-600 text-white py-2 px-3 mb-8 rounded">
 
-<div className="flex gap-6 overflow-x-auto whitespace-nowrap">
+<div className="flex gap-8 overflow-x-auto whitespace-nowrap text-sm font-semibold">
 
 {flash.map(f=>(
 
 <Link key={f.id} href={url(f)}>
-
-<span className="font-semibold">
 ⚡ {f.title}
-</span>
-
 </Link>
 
 ))}
@@ -111,7 +118,7 @@ return(
 
 )}
 
-{/* TOP AD PLACEHOLDER */}
+{/* TOP AD */}
 
 <div className="border border-dashed h-[90px] flex items-center justify-center text-gray-400 mb-10">
 TOP AD 970x90
@@ -121,11 +128,11 @@ TOP AD 970x90
 
 {hero &&(
 
-<section className="mb-12">
+<section className="mb-14">
 
 <Link href={url(hero)}>
 
-<h1 className="text-5xl font-bold mb-6 leading-tight">
+<h1 className="text-5xl font-bold leading-tight mb-6 hover:text-blue-800">
 {hero.title}
 </h1>
 
@@ -137,8 +144,8 @@ TOP AD 970x90
 src={hero.images[0]}
 alt={hero.title}
 width={1200}
-height={600}
-className="mb-6"
+height={650}
+className="rounded-lg"
 />
 
 )}
@@ -149,11 +156,11 @@ className="mb-6"
 
 {/* FEATURE GRID */}
 
-<section className="grid md:grid-cols-4 gap-6 mb-12">
+<section className="grid md:grid-cols-4 gap-6 mb-14">
 
 {feature.map(a=>(
 
-<Link key={a.id} href={url(a)}>
+<Link key={a.id} href={url(a)} className="group">
 
 {a?.images?.[0] &&(
 
@@ -162,11 +169,12 @@ src={a.images[0]}
 alt={a.title}
 width={400}
 height={250}
+className="rounded"
 />
 
 )}
 
-<h3 className="font-semibold mt-3 leading-snug">
+<h3 className="font-semibold mt-3 leading-snug group-hover:text-blue-700">
 {a.title}
 </h3>
 
@@ -178,17 +186,17 @@ height={250}
 
 {/* MID AD */}
 
-<div className="border border-dashed h-[90px] flex items-center justify-center text-gray-400 mb-10">
+<div className="border border-dashed h-[90px] flex items-center justify-center text-gray-400 mb-12">
 MID AD 970x90
 </div>
 
 {/* LATEST + SIDEBAR */}
 
-<section className="grid lg:grid-cols-3 gap-10">
+<section className="grid lg:grid-cols-3 gap-12">
 
 <div className="lg:col-span-2">
 
-<h2 className="text-2xl font-bold mb-6">
+<h2 className="text-2xl font-bold mb-6 border-b pb-2">
 Latest News
 </h2>
 
@@ -196,7 +204,7 @@ Latest News
 
 {latest.map(a=>(
 
-<div key={a.id} className="border-b pb-4">
+<div key={a.id} className="border-b pb-5">
 
 <Link href={url(a)}>
 
@@ -218,7 +226,7 @@ Latest News
 
 <div>
 
-<h2 className="text-xl font-bold mb-6">
+<h2 className="text-xl font-bold mb-6 border-b pb-2">
 Editorial
 </h2>
 
@@ -250,15 +258,15 @@ SIDEBAR AD 300x250
 
 {/* CATEGORY BLOCKS */}
 
-<CategoryBlock title="Politics" articles={politics} />
-<CategoryBlock title="Defence" articles={defence} />
-<CategoryBlock title="Technology" articles={technology} />
+<CategoryBlock title="Politics" articles={politics}/>
+<CategoryBlock title="Defence" articles={defence}/>
+<CategoryBlock title="Technology" articles={technology}/>
 
-{/* EDITORIAL */}
+{/* EDITORIAL GRID */}
 
 <section className="mt-16">
 
-<h2 className="text-2xl font-bold mb-6">
+<h2 className="text-2xl font-bold mb-6 border-b pb-2">
 Editorial
 </h2>
 
@@ -268,7 +276,7 @@ Editorial
 
 <Link key={e.id} href={`/editorial/${e.slug}`}>
 
-<h3 className="font-semibold">
+<h3 className="font-semibold hover:text-blue-700">
 {e.title}
 </h3>
 
@@ -284,7 +292,7 @@ Editorial
 
 <section className="mt-16">
 
-<h2 className="text-2xl font-bold mb-6">
+<h2 className="text-2xl font-bold mb-6 border-b pb-2">
 Daily Horoscope
 </h2>
 
@@ -294,7 +302,7 @@ Daily Horoscope
 
 <Link key={h.id} href={`/astrology/${h.slug}`}>
 
-<div className="border p-4 text-center">
+<div className="border rounded p-4 text-center hover:bg-gray-100">
 
 {h.zodiacSign}
 
@@ -328,7 +336,7 @@ return(
 
 <section className="mt-16">
 
-<h2 className="text-2xl font-bold mb-6">
+<h2 className="text-2xl font-bold mb-6 border-b pb-2">
 {title}
 </h2>
 

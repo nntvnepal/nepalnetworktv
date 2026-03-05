@@ -28,7 +28,7 @@ enum PostStatus {
 }
 
 //////////////////////////////////////////////////////
-// AD ENUMS
+// AD SYSTEM ENUMS
 //////////////////////////////////////////////////////
 
 enum AdPlacement {
@@ -62,7 +62,6 @@ enum AdType {
 //////////////////////////////////////////////////////
 
 model Category {
-
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   slug        String   @unique
@@ -90,7 +89,6 @@ model Category {
 //////////////////////////////////////////////////////
 
 model Article {
-
   id        String @id @default(auto()) @map("_id") @db.ObjectId
 
   title     String
@@ -99,7 +97,7 @@ model Article {
   content   String
   excerpt   String?
 
-  images    String[] @default([])
+  images    String[]
   videoUrl  String?
 
   //////////////////////////////////////////////////////
@@ -116,6 +114,7 @@ model Article {
   isLive           Boolean @default(false)
 
   homepagePriority Int @default(0)
+
   breakingPriority Int @default(0)
   flashPriority    Int @default(0)
 
@@ -157,7 +156,7 @@ model Article {
   // TAGS
   //////////////////////////////////////////////////////
 
-  tags String[] @default([])
+  tags String[]
 
   //////////////////////////////////////////////////////
   // SEO
@@ -196,7 +195,10 @@ model Article {
 
   @@index([status])
   @@index([createdAt])
+  @@index([publishedAt])
   @@index([views])
+  @@index([likes])
+  @@index([trendingScore])
   @@index([breaking])
   @@index([flash])
   @@index([featured])
@@ -213,7 +215,6 @@ model Article {
 //////////////////////////////////////////////////////
 
 model Comment {
-
   id        String @id @default(auto()) @map("_id") @db.ObjectId
   content   String
 
@@ -224,7 +225,6 @@ model Comment {
   article   Article @relation(fields: [articleId], references: [id])
 
   isDeleted Boolean @default(false)
-
   createdAt DateTime @default(now())
 
   @@index([articleId])
@@ -238,7 +238,6 @@ model Comment {
 //////////////////////////////////////////////////////
 
 model User {
-
   id        String @id @default(auto()) @map("_id") @db.ObjectId
 
   name      String?
@@ -254,6 +253,10 @@ model User {
 
   articles  Article[]
   comments  Comment[]
+  activity  ActivityLog[]
+
+  sentMessages     ChatMessage[] @relation("MessageSender")
+  receivedMessages ChatMessage[] @relation("MessageReceiver")
 
   @@index([role])
   @@index([isActive])
@@ -262,11 +265,35 @@ model User {
 }
 
 //////////////////////////////////////////////////////
-// ADS
+// CHAT
+//////////////////////////////////////////////////////
+
+model ChatMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  senderId   String? @db.ObjectId
+  sender     User?   @relation("MessageSender", fields:[senderId], references:[id])
+
+  receiverId String? @db.ObjectId
+  receiver   User?   @relation("MessageReceiver", fields:[receiverId], references:[id])
+
+  message    String
+  isRead     Boolean  @default(false)
+
+  createdAt  DateTime @default(now())
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+
+  @@map("ChatMessage")
+}
+
+//////////////////////////////////////////////////////
+// AD SYSTEM
 //////////////////////////////////////////////////////
 
 model Ad {
-
   id          String @id @default(auto()) @map("_id") @db.ObjectId
 
   title       String
@@ -306,10 +333,59 @@ model Ad {
 //////////////////////////////////////////////////////
 
 model NewsletterSubscriber {
-
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   createdAt DateTime @default(now())
 
+  @@index([createdAt])
+
   @@map("NewsletterSubscriber")
+}
+
+//////////////////////////////////////////////////////
+// ACTIVITY LOG
+//////////////////////////////////////////////////////
+
+model ActivityLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  action    String
+  entity    String?
+  entityId  String?
+
+  userId    String?  @db.ObjectId
+  user      User?    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+
+  @@map("ActivityLog")
+}
+
+//////////////////////////////////////////////////////
+// VISITOR CHAT
+//////////////////////////////////////////////////////
+
+model VisitorChat {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  name      String?
+  email     String?
+  message   String
+
+  ip        String?
+  userAgent String?
+
+  isRead    Boolean  @default(false)
+  status    String   @default("open")
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([isRead])
+  @@index([status])
+
+  @@map("VisitorChat")
 }

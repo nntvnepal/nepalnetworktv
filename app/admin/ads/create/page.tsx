@@ -205,7 +205,7 @@ export default function CreateAd() {
           className="w-full p-3 bg-gray-800 rounded"
           value={form.priority}
           onChange={(e) =>
-            setForm({ ...form, priority: e.target.value })
+            setForm({ ...form, priority: Number(e.target.value) })
           }
         />
 

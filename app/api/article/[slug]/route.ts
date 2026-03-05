@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { PostStatus } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 /* ================= GET SINGLE ARTICLE ================= */
 
 export async function GET(
@@ -9,23 +11,32 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
+
+    if (!params?.slug) {
+      return NextResponse.json(
+        { success: false, error: "Article slug required" },
+        { status: 400 }
+      );
+    }
+
     const article = await prisma.article.findFirst({
       where: {
         slug: params.slug,
         status: PostStatus.approved,
-        isDeleted: false,
-        // ❌ removed isEditorial restriction
-        // so it works for normal + horoscope
+        isDeleted: false
       },
       include: {
         category: true,
         author: {
-          select: { id: true, name: true },
+          select: {
+            id: true,
+            name: true
+          }
         },
         comments: {
-          orderBy: { createdAt: "desc" },
-        },
-             },
+          orderBy: { createdAt: "desc" }
+        }
+      }
     });
 
     if (!article) {
@@ -35,25 +46,27 @@ export async function GET(
       );
     }
 
-    /* ===== SAFE VIEW INCREMENT (non blocking) ===== */
-    prisma.article
-      .update({
-        where: { id: article.id },
-        data: { views: { increment: 1 } },
-      })
-      .catch(() => {});
+    /* ===== SAFE VIEW INCREMENT ===== */
 
-    /* ===== RETURN FIXED FORMAT (frontend compatible) ===== */
+    prisma.article.update({
+      where: { id: article.id },
+      data: { views: { increment: 1 } }
+    }).catch(() => {});
+
     return NextResponse.json({
       success: true,
-      article, // ✅ IMPORTANT: was "data"
+      article
     });
+
   } catch (error) {
+
     console.error("FETCH ARTICLE ERROR:", error);
+
     return NextResponse.json(
       { success: false, error: "Failed to fetch article" },
       { status: 500 }
     );
+
   }
 }
 
@@ -64,6 +77,14 @@ export async function POST(
   { params }: { params: { slug: string } }
 ) {
   try {
+
+    if (!params?.slug) {
+      return NextResponse.json(
+        { success: false, error: "Article slug required" },
+        { status: 400 }
+      );
+    }
+
     const body = await req.json();
 
     if (!body.comment?.trim()) {
@@ -77,8 +98,8 @@ export async function POST(
       where: {
         slug: params.slug,
         status: PostStatus.approved,
-        isDeleted: false,
-      },
+        isDeleted: false
+      }
     });
 
     if (!article) {
@@ -91,20 +112,24 @@ export async function POST(
     const comment = await prisma.comment.create({
       data: {
         content: body.comment.trim(),
-        articleId: article.id,
-      },
+        articleId: article.id
+      }
     });
 
     return NextResponse.json({
       success: true,
-      comment,
+      comment
     });
+
   } catch (error) {
+
     console.error("ADD COMMENT ERROR:", error);
+
     return NextResponse.json(
       { success: false, error: "Failed to add comment" },
       { status: 500 }
     );
+
   }
 }
 
@@ -112,6 +137,7 @@ export async function POST(
 
 export async function DELETE(req: Request) {
   try {
+
     const body = await req.json();
 
     if (!body.commentId) {
@@ -122,15 +148,19 @@ export async function DELETE(req: Request) {
     }
 
     await prisma.comment.delete({
-      where: { id: body.commentId },
+      where: { id: body.commentId }
     });
 
     return NextResponse.json({ success: true });
+
   } catch (error) {
+
     console.error("DELETE COMMENT ERROR:", error);
+
     return NextResponse.json(
       { success: false, error: "Failed to delete comment" },
       { status: 500 }
     );
+
   }
 }

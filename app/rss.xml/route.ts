@@ -1,81 +1,96 @@
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
 
-  const baseUrl = "https://www.nationpathindia.com";
+  try {
 
-  const articles = await prisma.article.findMany({
-    where: {
-      status: "approved",
-      isDeleted: false,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: 50,
-    include: {
-      category: true,
-    },
-  });
+    const baseUrl = "https://www.nationpathindia.com";
 
-  const rssItems = articles
-    .map((article) => {
+    const articles = await prisma.article.findMany({
+      where: {
+        status: "approved",
+        isDeleted: false,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 50,
+      include: {
+        category: true,
+      },
+    });
 
-      const url = `${baseUrl}/${article.category?.slug}/${article.slug}`;
-      const image = article.images?.[0] || "";
+    const rssItems = articles
+      .map((article) => {
 
-      return `
-      <item>
-        <title><![CDATA[${article.title}]]></title>
-        <link>${url}</link>
-        <guid isPermaLink="true">${url}</guid>
-        <pubDate>${new Date(article.createdAt).toUTCString()}</pubDate>
-        <description><![CDATA[${article.excerpt || article.title}]]></description>
-        ${
-          image
-            ? `<enclosure url="${image}" type="image/jpeg" />`
-            : ""
-        }
-      </item>
-      `;
-    })
-    .join("");
+        const url = `${baseUrl}/${article.category?.slug}/${article.slug}`;
+        const image = article.images?.[0] || "";
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-  <rss version="2.0"
-    xmlns:atom="http://www.w3.org/2005/Atom"
-    xmlns:media="http://search.yahoo.com/mrss/">
+        return `
+        <item>
+          <title><![CDATA[${article.title}]]></title>
+          <link>${url}</link>
+          <guid isPermaLink="true">${url}</guid>
+          <pubDate>${new Date(article.createdAt).toUTCString()}</pubDate>
+          <description><![CDATA[${article.excerpt || article.title}]]></description>
+          ${
+            image
+              ? `<enclosure url="${image}" type="image/jpeg" />`
+              : ""
+          }
+        </item>
+        `;
+      })
+      .join("");
 
-    <channel>
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    <rss version="2.0"
+      xmlns:atom="http://www.w3.org/2005/Atom"
+      xmlns:media="http://search.yahoo.com/mrss/">
 
-      <title>Nation Path</title>
+      <channel>
 
-      <link>${baseUrl}</link>
+        <title>Nation Path</title>
 
-      <description>
-        Latest breaking news, political insights, defence analysis and global affairs from Nation Path.
-      </description>
+        <link>${baseUrl}</link>
 
-      <language>en-IN</language>
+        <description>
+          Latest breaking news, political insights, defence analysis and global affairs from Nation Path.
+        </description>
 
-      <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+        <language>en-IN</language>
 
-      <atom:link
-        href="${baseUrl}/rss.xml"
-        rel="self"
-        type="application/rss+xml"
-      />
+        <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 
-      ${rssItems}
+        <atom:link
+          href="${baseUrl}/rss.xml"
+          rel="self"
+          type="application/rss+xml"
+        />
 
-    </channel>
+        ${rssItems}
 
-  </rss>`;
+      </channel>
 
-  return new Response(xml, {
-    headers: {
-      "Content-Type": "application/xml",
-      "Cache-Control": "s-maxage=3600, stale-while-revalidate",
-    },
-  });
+    </rss>`;
+
+    return new Response(xml, {
+      headers: {
+        "Content-Type": "application/xml",
+        "Cache-Control": "s-maxage=3600, stale-while-revalidate",
+      },
+    });
+
+  } catch (error) {
+
+    console.error("RSS ERROR:", error);
+
+    return new Response("Error generating RSS", {
+      status: 500,
+    });
+
+  }
+
 }

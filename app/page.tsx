@@ -3,11 +3,12 @@ import { PostStatus } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-
-import FlashNewsBar from "@/components/FlashNewsBar";
+import ZodiacIcon from "@/components/ZodiacIcon";
 import AdRenderer from "@/components/AdRenderer";
+import ChatWidget from "@/components/ChatWidget";
+import FlashNewsBar from "@/components/FlashNewsBar";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: "Nation Path – Breaking News, Editorial & Analysis",
@@ -36,7 +37,9 @@ orderBy:{createdAt:"desc"},
 take:30
 })
 
-}catch(e){}
+}catch(e){
+console.log("Articles error",e)
+}
 
 try{
 
@@ -50,7 +53,9 @@ orderBy:{views:"desc"},
 take:5
 })
 
-}catch(e){}
+}catch(e){
+console.log("Most read error",e)
+}
 
 try{
 
@@ -64,7 +69,9 @@ orderBy:{createdAt:"desc"},
 take:6
 })
 
-}catch(e){}
+}catch(e){
+console.log("Editorial error",e)
+}
 
 try{
 
@@ -77,11 +84,13 @@ isAstrology:true
 take:12
 })
 
-}catch(e){}
+}catch(e){
+console.log("Horoscope error",e)
+}
 
 function cleanText(html:string){
 if(!html) return ""
-return html.replace(/<\/?[^>]+(>|$)/g,"")
+return html.replace(/<\/?[^>]+(>|$)/g,"").trim()
 }
 
 function articleUrl(article:any){
@@ -101,11 +110,15 @@ return(
 
 <main className="max-w-7xl mx-auto px-4 lg:px-6 pt-8">
 
+<ChatWidget/>
+
 {/* TOP AD */}
 
+<div className="flex justify-center mb-6">
 <AdRenderer placement="homepage_top"/>
+</div>
 
-{/* FLASH BAR */}
+{/* FLASH NEWS */}
 
 <FlashNewsBar/>
 
@@ -116,33 +129,30 @@ return(
 <section className="border-b pb-12">
 
 <Link href={articleUrl(hero)}>
-
 <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight hover:text-[#0b2a6f]">
-
 {hero.title}
-
 </h1>
-
 </Link>
 
 <p className="mt-5 text-lg text-gray-600 max-w-3xl">
-
 {cleanText(hero.content).slice(0,220)}...
-
 </p>
 
 {hero?.images?.[0] &&(
 
-<div className="relative h-[420px] mt-8 rounded-xl overflow-hidden">
+<Link href={articleUrl(hero)}>
+<div className="relative aspect-[16/9] mt-8 rounded-xl overflow-hidden">
 
 <Image
 src={hero.images[0]}
 alt={hero.title}
 fill
+priority
 className="object-cover"
 />
 
 </div>
+</Link>
 
 )}
 
@@ -152,7 +162,9 @@ className="object-cover"
 
 {/* AFTER HERO AD */}
 
+<div className="flex justify-center my-10">
 <AdRenderer placement="homepage_after_hero"/>
+</div>
 
 {/* FEATURE GRID */}
 
@@ -162,7 +174,7 @@ className="object-cover"
 
 <Link key={article.id} href={articleUrl(article)}>
 
-<div className="relative h-[180px] rounded-lg overflow-hidden mb-3">
+<div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-3">
 
 {article?.images?.[0] &&(
 
@@ -178,9 +190,7 @@ className="object-cover"
 </div>
 
 <h3 className="font-serif text-lg hover:text-[#0b2a6f]">
-
 {article.title}
-
 </h3>
 
 </Link>
@@ -191,7 +201,9 @@ className="object-cover"
 
 {/* MID AD */}
 
+<div className="flex justify-center my-10">
 <AdRenderer placement="homepage_mid"/>
+</div>
 
 {/* LATEST + MOST READ */}
 
@@ -206,19 +218,13 @@ className="object-cover"
 <div key={article.id} className="border-b pb-6">
 
 <Link href={articleUrl(article)}>
-
 <h3 className="font-serif text-2xl hover:text-[#0b2a6f]">
-
 {article.title}
-
 </h3>
-
 </Link>
 
 <p className="text-gray-600 mt-2">
-
 {cleanText(article.content).slice(0,150)}...
-
 </p>
 
 </div>
@@ -240,22 +246,20 @@ className="flex gap-4 border-b pb-5 mb-5"
 >
 
 <span className="text-3xl font-bold text-gray-200">
-
 {String(index+1).padStart(2,"0")}
-
 </span>
 
 <h4 className="font-serif text-base">
-
 {article.title}
-
 </h4>
 
 </Link>
 
 ))}
 
+<div className="mt-6">
 <AdRenderer placement="homepage_sidebar_top"/>
+</div>
 
 </div>
 
@@ -276,13 +280,9 @@ className="flex gap-4 border-b pb-5 mb-5"
 {editorials.map(article=>(
 
 <Link key={article.id} href={`/editorial/${article.slug}`}>
-
 <h3 className="font-serif text-lg hover:text-[#0b2a6f]">
-
 {article.title}
-
 </h3>
-
 </Link>
 
 ))}
@@ -307,10 +307,10 @@ href={`/astrology/${item.slug}`}
 className="bg-gray-50 rounded-xl p-5 text-center hover:shadow"
 >
 
-<p className="text-sm font-medium capitalize">
+<ZodiacIcon sign={item.zodiacSign}/>
 
+<p className="text-sm font-medium capitalize mt-2">
 {item.zodiacSign}
-
 </p>
 
 </Link>
@@ -323,7 +323,9 @@ className="bg-gray-50 rounded-xl p-5 text-center hover:shadow"
 
 {/* BOTTOM AD */}
 
+<div className="flex justify-center my-10">
 <AdRenderer placement="homepage_bottom"/>
+</div>
 
 </main>
 
@@ -338,9 +340,7 @@ return(
 <div className="flex items-center mb-8">
 
 <h2 className="text-sm tracking-[0.35em] font-bold uppercase">
-
 {title}
-
 </h2>
 
 <div className="flex-1 h-px bg-gray-300 ml-6"></div>
@@ -371,9 +371,7 @@ href={`/${article.category?.slug}/${article.slug}`}
 >
 
 <h3 className="font-serif text-lg hover:text-[#0b2a6f]">
-
 {article.title}
-
 </h3>
 
 </Link>

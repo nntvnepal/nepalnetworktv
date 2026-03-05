@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 

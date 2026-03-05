@@ -1,16 +1,15 @@
 import { prisma } from "@/lib/prisma"
-import { PostStatus } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
-export default async function Home() {
+export default async function Home(){
 
-let articles:any[] = []
-let editorial:any[] = []
-let horoscope:any[] = []
-let flash:any[] = []
+let articles:any[]=[]
+let flash:any[]=[]
+let editorial:any[]=[]
+let horoscope:any[]=[]
 
 try{
 
@@ -26,43 +25,6 @@ orderBy:{createdAt:"desc"},
 take:20
 })
 
-}catch(e){
-console.log("articles error",e)
-}
-
-try{
-
-editorial = await prisma.article.findMany({
-where:{
-status:"approved",
-isEditorial:true,
-isDeleted:false
-},
-orderBy:{createdAt:"desc"},
-take:4
-})
-
-}catch(e){
-console.log("editorial error",e)
-}
-
-try{
-
-horoscope = await prisma.article.findMany({
-where:{
-status:"approved",
-isAstrology:true,
-isDeleted:false
-},
-take:12
-})
-
-}catch(e){
-console.log("horoscope error",e)
-}
-
-try{
-
 flash = await prisma.article.findMany({
 where:{
 flash:true,
@@ -73,19 +35,40 @@ orderBy:{flashPriority:"desc"},
 take:5
 })
 
+editorial = await prisma.article.findMany({
+where:{
+isEditorial:true,
+status:"approved",
+isDeleted:false
+},
+orderBy:{createdAt:"desc"},
+take:4
+})
+
+horoscope = await prisma.article.findMany({
+where:{
+isAstrology:true,
+status:"approved",
+isDeleted:false
+},
+take:12
+})
+
 }catch(e){
-console.log("flash error",e)
+console.log(e)
 }
 
 const hero = articles[0]
+const featured = articles.slice(1,5)
+const latest = articles.slice(5,15)
 
 return(
 
-<main className="max-w-6xl mx-auto p-6">
+<main className="max-w-7xl mx-auto px-4 pt-8">
 
 {/* FLASH NEWS */}
 
-{flash.length>0 && (
+{flash.length>0 &&(
 
 <div className="bg-red-600 text-white p-2 mb-6">
 
@@ -109,7 +92,7 @@ return(
 
 {hero &&(
 
-<div className="mb-10">
+<section className="mb-10">
 
 <Link href={`/${hero.slug}`}>
 
@@ -124,57 +107,100 @@ return(
 <Image
 src={hero.images[0]}
 alt={hero.title}
-width={900}
-height={500}
+width={1200}
+height={600}
 />
 
 )}
 
-</div>
+</section>
 
 )}
 
+{/* FEATURE GRID */}
+
+<section className="grid md:grid-cols-4 gap-6 mb-12">
+
+{featured.map((a)=>(
+<div key={a.id}>
+
+<Link href={`/${a.slug}`}>
+
+{a.images?.[0] &&(
+
+<Image
+src={a.images[0]}
+alt={a.title}
+width={400}
+height={250}
+/>
+
+)}
+
+<h3 className="font-semibold mt-2">
+{a.title}
+</h3>
+
+</Link>
+
+</div>
+))}
+
+</section>
+
 {/* LATEST NEWS */}
+
+<section className="mb-12">
 
 <h2 className="text-2xl font-bold mb-6">
 Latest News
 </h2>
 
-<div className="grid md:grid-cols-2 gap-6 mb-12">
+<div className="grid md:grid-cols-2 gap-6">
 
-{articles.slice(1,10).map((a)=>(
+{latest.map((a)=>(
 <div key={a.id}>
 
 <Link href={`/${a.slug}`}>
-<h3 className="font-semibold text-lg">
+
+<h3 className="text-lg font-semibold">
 {a.title}
 </h3>
+
 </Link>
 
 </div>
 ))}
 
 </div>
+
+</section>
 
 {/* EDITORIAL */}
 
 {editorial.length>0 &&(
 
-<div className="mb-12">
+<section className="mb-12">
 
-<h2 className="text-2xl font-bold mb-4">
+<h2 className="text-2xl font-bold mb-6">
 Editorial
 </h2>
 
+<div className="grid md:grid-cols-2 gap-6">
+
 {editorial.map((e)=>(
 <div key={e.id}>
+
 <Link href={`/editorial/${e.slug}`}>
 {e.title}
 </Link>
+
 </div>
 ))}
 
 </div>
+
+</section>
 
 )}
 
@@ -182,9 +208,9 @@ Editorial
 
 {horoscope.length>0 &&(
 
-<div>
+<section className="mb-20">
 
-<h2 className="text-2xl font-bold mb-4">
+<h2 className="text-2xl font-bold mb-6">
 Daily Horoscope
 </h2>
 
@@ -202,7 +228,7 @@ Daily Horoscope
 
 </div>
 
-</div>
+</section>
 
 )}
 

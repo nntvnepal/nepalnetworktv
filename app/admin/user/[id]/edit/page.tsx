@@ -1,23 +1,38 @@
 import { redirect } from "next/navigation";
-import User from "@/app/models/User";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/getCurrentUser";
 import EditUserForm from "@/components/admin/EditUserForm";
 
-export default async function EditUserPage({ params }: any) {
+type Params = {
+  params: {
+    id: string;
+  };
+};
+
+export default async function EditUserPage({ params }: Params) {
   const currentUser = await getCurrentUser();
-  if (!currentUser) redirect("/login");
 
-  await dbConnect();
-  const user = await User.findById(params.id).lean();
+  if (!currentUser) {
+    redirect("/login");
+  }
 
-  if (!user) redirect("/admin/user");
+  const user = await prisma.user.findUnique({
+    where: {
+      id: params.id,
+    },
+  });
+
+  if (!user) {
+    redirect("/admin/user");
+  }
 
   return (
     <div className="p-10 text-white">
       <h1 className="text-2xl font-bold mb-6">Edit User</h1>
+
       <EditUserForm
         currentUser={currentUser}
-        user={JSON.parse(JSON.stringify(user))}
+        user={user}
       />
     </div>
   );

@@ -14,7 +14,7 @@ in:[
 "metro",
 "sub_metro",
 "RURAL_MUNICIPALITY",
-"RURAL_RURAL_MUNICIPALITY"
+"MUNICIPALITY"
 ]
 }
 },

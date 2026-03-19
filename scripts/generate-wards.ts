@@ -9,7 +9,7 @@ async function run(){
       type:{
         in:[
           "RURAL_MUNICIPALITY",
-          "RURAL_RURAL_MUNICIPALITY"
+          "MUNICIPALITY"
         ]
       }
     }
@@ -23,7 +23,7 @@ async function run(){
 
     let wardCount = 9
 
-    if(m.type === "RURAL_RURAL_MUNICIPALITY") wardCount = 7
+    if(m.type === "MUNICIPALITY") wardCount = 7
     if(m.type === "RURAL_MUNICIPALITY") wardCount = 11
 
     for(let i=1;i<=wardCount;i++){

@@ -31,7 +31,7 @@ async function run(){
   const regions = await prisma.region.findMany({
     where:{
       type:{
-        in:["RURAL_MUNICIPALITY","MUNICIPALITY","SUB_METROPOLITAN","METROPOLITAN"]
+        in:["RURAL_MUNICIPALITY","MUNICIPALITY","SUB_METRO","METRO"]
       }
     }
   })

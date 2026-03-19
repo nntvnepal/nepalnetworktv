@@ -1,72 +1,163 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Role } from "@prisma/client"
 
-export default function EditUserForm({ user, currentUser }: any) {
-  const router = useRouter();
+type UserType = {
+  id: string
+  name: string
+  email: string
+  role: Role
+  isActive: boolean
+  avatar?: string | null
+}
 
-  const [form, setForm] = useState({
-    name: user.name,
-    role: user.role,
-    status: user.status,
-  });
+type Props = {
+  currentUser: UserType
+  user: UserType
+}
 
-  const allowedRoles =
-    currentUser.role === "admin"
-      ? ["editor", "reporter", "advertiser"]
-      : [];
+export default function EditUserForm({ currentUser, user }: Props) {
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const router = useRouter()
 
-    const res = await fetch(`/api/users/${user._id}`, {
-      method: "PUT",
-      body: JSON.stringify(form),
-    });
+  //////////////////////////////////////////////////////
+  // STATE
+  //////////////////////////////////////////////////////
 
-    if (res.ok) {
-      router.push("/admin/user");
-    } else {
-      alert("Error updating user");
+  const [name, setName] = useState<string>(user.name || "")
+  const [email, setEmail] = useState<string>(user.email || "")
+  const [role, setRole] = useState<Role>(user.role)
+  const [isActive, setIsActive] = useState<boolean>(user.isActive)
+  const [loading, setLoading] = useState(false)
+
+  //////////////////////////////////////////////////////
+  // SUBMIT
+  //////////////////////////////////////////////////////
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    try {
+      setLoading(true)
+
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          role,
+          isActive,
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to update user")
+      }
+
+      alert("User updated successfully")
+
+      router.push("/admin/user")
+      router.refresh()
+
+    } catch (err) {
+      console.error(err)
+      alert("Update failed")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
+
+  //////////////////////////////////////////////////////
+  // UI
+  //////////////////////////////////////////////////////
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-      <input
-        type="text"
-        value={form.name}
-        className="w-full p-2 bg-gray-800 rounded"
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-      />
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 max-w-xl bg-purple-900/30 p-6 rounded"
+    >
 
-      {currentUser.role === "admin" && (
+      {/* NAME */}
+      <div>
+        <label className="block text-sm mb-1">Name</label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full px-4 py-2 bg-purple-900 border border-purple-700 rounded text-white"
+        />
+      </div>
+
+      {/* EMAIL */}
+      <div>
+        <label className="block text-sm mb-1">Email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full px-4 py-2 bg-purple-900 border border-purple-700 rounded text-white"
+        />
+      </div>
+
+      {/* ROLE */}
+      <div>
+        <label className="block text-sm mb-1">Role</label>
         <select
-          value={form.role}
-          className="w-full p-2 bg-gray-800 rounded"
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
+          value={role}
+          onChange={(e) => setRole(e.target.value as Role)}
+          className="w-full px-4 py-2 bg-purple-900 border border-purple-700 rounded text-white"
         >
-          {allowedRoles.map((role) => (
-            <option key={role} value={role}>
-              {role}
+          {Object.values(Role).map((r) => (
+            <option key={r} value={r}>
+              {r}
             </option>
           ))}
         </select>
-      )}
+      </div>
 
-      <select
-        value={form.status}
-        className="w-full p-2 bg-gray-800 rounded"
-        onChange={(e) => setForm({ ...form, status: e.target.value })}
-      >
-        <option value="active">Active</option>
-        <option value="blocked">Blocked</option>
-      </select>
+      {/* STATUS */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={isActive}
+          disabled={currentUser.id === user.id} // 🔥 self-disable protection
+          onChange={(e) => setIsActive(e.target.checked)}
+        />
+        <label>Active</label>
+      </div>
 
-      <button className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
-        Update User
-      </button>
+      {/* ACTIONS */}
+      <div className="flex gap-4">
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white"
+        >
+          {loading ? "Saving..." : "Update User"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="bg-gray-600 px-4 py-2 rounded text-white"
+        >
+          Cancel
+        </button>
+
+      </div>
+
+      {/* FOOTER INFO */}
+      <div className="text-xs text-purple-300">
+        Logged in as: {currentUser.name}
+      </div>
+
     </form>
-  );
+  )
 }

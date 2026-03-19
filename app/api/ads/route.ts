@@ -1,111 +1,155 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server"
 
-export const dynamic = "force-dynamic";
+//////////////////////////////////////////////////////
+// CREATE AD
+//////////////////////////////////////////////////////
 
-export async function POST(req: Request) {
+export async function POST(req:Request){
 
-  try {
+try{
 
-    const body = await req.json();
+const body = await req.json()
 
-    const {
-      title,
-      placement,
-      type,
-      imageUrl,
-      link,
-      adsenseCode,
-      priority,
-      status,
-      totalBudget,
-      cpc,
-      maxClicks,
-      startDate,
-      endDate
-    } = body;
+const {
+title,
+placement,
+type,
+imageUrl,
+link,
+adsenseCode,
+priority,
+startDate,
+endDate
+} = body
 
-    /* ===============================
-       VALIDATION
-    =============================== */
+//////////////////////////////////////////////////////
+// VALIDATION
+//////////////////////////////////////////////////////
 
-    if (!title || !placement || !type) {
-      return NextResponse.json(
-        { success: false, message: "Required fields missing" },
-        { status: 400 }
-      );
-    }
+if(!title || !placement || !type){
 
-    if (type === "image" && !imageUrl) {
-      return NextResponse.json(
-        { success: false, message: "Image required for image ads" },
-        { status: 400 }
-      );
-    }
+return NextResponse.json(
+{success:false,error:"Missing required fields"},
+{status:400}
+)
 
-    /* ===============================
-       DATE HANDLING
-    =============================== */
+}
 
-    let start: Date | null = null;
-    let end: Date | null = null;
+if(type==="image" && !imageUrl){
 
-    if (startDate) {
-      start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-    }
+return NextResponse.json(
+{success:false,error:"Image URL required for image ads"},
+{status:400}
+)
 
-    if (endDate) {
-      end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-    }
+}
 
-    /* ===============================
-       CREATE AD
-    =============================== */
+if(type==="adsense" && !adsenseCode){
 
-    const ad = await prisma.ad.create({
+return NextResponse.json(
+{success:false,error:"Adsense code required"},
+{status:400}
+)
 
-      data: {
+}
 
-        title,
+//////////////////////////////////////////////////////
+// CREATE AD
+//////////////////////////////////////////////////////
 
-        placement: placement as any,
-        type: type as any,
+const ad = await prisma.ad.create({
 
-        imageUrl: imageUrl || null,
-        link: link || null,
-        adsenseCode: adsenseCode || null,
+data:{
 
-        priority: priority ? Number(priority) : 1,
+title,
+placement,
+type,
 
-        status: status || "active",
+imageUrl: imageUrl || null,
+link: link || null,
+adsenseCode: adsenseCode || null,
 
-        startDate: start,
-        endDate: end,
+priority: priority ?? 1,
 
-        totalBudget: totalBudget ? Number(totalBudget) : null,
-        cpc: cpc ? Number(cpc) : null,
-        maxClicks: maxClicks ? Number(maxClicks) : null
+status:"active",
 
-      }
+startDate: startDate ? new Date(startDate) : null,
+endDate: endDate ? new Date(endDate) : null
 
-    });
+}
 
-    return NextResponse.json({
-      success: true,
-      ad
-    });
+})
 
-  } catch (error) {
+return NextResponse.json({
+success:true,
+ad
+})
 
-    console.error("Ad creation error:", error);
+}catch(err){
 
-    return NextResponse.json(
-      { success: false, message: "Ad creation failed" },
-      { status: 500 }
-    );
+console.error("Ad create error:",err)
 
-  }
+return NextResponse.json(
+{success:false,error:"Ad creation failed"},
+{status:500}
+)
+
+}
+
+}
+
+//////////////////////////////////////////////////////
+// GET ADS
+//////////////////////////////////////////////////////
+
+export async function GET(){
+
+try{
+
+const now = new Date()
+
+const ads = await prisma.ad.findMany({
+
+where:{
+status:"active",
+
+OR:[
+{startDate:null},
+{startDate:{lte:now}}
+],
+
+AND:[
+{
+OR:[
+{endDate:null},
+{endDate:{gte:now}}
+]
+}
+]
+
+},
+
+orderBy:{
+priority:"asc"
+}
+
+})
+
+return NextResponse.json({
+success:true,
+ads
+})
+
+}catch(err){
+
+console.error("Ad fetch error:",err)
+
+return NextResponse.json(
+{success:false,error:"Failed to fetch ads"},
+{status:500}
+)
+
+}
 
 }

@@ -1,0 +1,207 @@
+import { prisma } from "@/lib/prisma"
+import dynamic from "next/dynamic"
+
+import PartyCards from "@/components/election/PartyCards"
+import ResultSummary from "@/components/election/ResultSummary"
+import PartyStandings from "@/components/election/PartyStandings"
+import SeatResultsTable from "@/components/election/SeatResultsTable"
+import PartySeatBar from "@/components/election/PartySeatBar"
+import ProvinceResults from "@/components/election/ProvinceResults"
+import HotSeats from "@/components/election/HotSeats"
+import DistrictResults from "@/components/election/DistrictResults"
+
+import "@/styles/election.css"
+
+const NepalElectionMap = dynamic(
+  () => import("@/components/election/NepalElectionMap"),
+  { ssr: false }
+)
+
+interface Props {
+  params: { slug: string }
+}
+
+export default async function ElectionPage({ params }: Props) {
+
+  //////////////////////////////////////////////////////
+  // FETCH ELECTION
+  //////////////////////////////////////////////////////
+
+  const election = await prisma.election.findUnique({
+    where: { slug: params.slug }
+  })
+
+  if (!election) {
+    return (
+      <div className="container">
+        <h1>Election not found</h1>
+      </div>
+    )
+  }
+
+  //////////////////////////////////////////////////////
+  // FETCH RESULTS
+  //////////////////////////////////////////////////////
+
+  const results = await prisma.electionResult.findMany({
+    where: {
+      electionId: election.id
+    },
+    include: {
+      candidate: {
+        include: {
+          party: true
+        }
+      },
+      seat: {
+        include: {
+          region: true
+        }
+      }
+    }
+  })
+
+  //////////////////////////////////////////////////////
+  // CALCULATIONS (OPTIMIZED)
+  //////////////////////////////////////////////////////
+
+  const seatWinners: Record<string, any> = {}
+  const partySeats: Record<string, number> = {}
+
+  for (const r of results) {
+
+    const seatId = r.seatId
+
+    // WINNER LOGIC
+    if (!seatWinners[seatId] || r.votes > seatWinners[seatId].votes) {
+      seatWinners[seatId] = r
+    }
+
+  }
+
+  // PARTY COUNT
+  Object.values(seatWinners).forEach((r: any) => {
+    const party = r?.candidate?.party?.name || "Independent"
+
+    partySeats[party] = (partySeats[party] || 0) + 1
+  })
+
+  const totalSeats = Object.keys(seatWinners).length
+
+  //////////////////////////////////////////////////////
+  // UI
+  //////////////////////////////////////////////////////
+
+  return (
+
+    <div className="election-page">
+
+      <div className="container">
+
+        {/* HEADER */}
+
+        <div className="election-header">
+          <h1>{election.name}</h1>
+
+          <p className="election-subtitle">
+            Election Year {election.year}
+          </p>
+        </div>
+
+
+        {/* FILTER BAR */}
+
+        <div className="search-bar">
+
+          <select>
+            <option>प्रदेश</option>
+            <option>कोशी</option>
+            <option>मधेश</option>
+            <option>बागमती</option>
+            <option>गण्डकी</option>
+            <option>लुम्बिनी</option>
+            <option>कर्णाली</option>
+            <option>सुदूरपश्चिम</option>
+          </select>
+
+          <select>
+            <option>जिल्ला</option>
+          </select>
+
+          <select>
+            <option>निर्वाचन क्षेत्र</option>
+          </select>
+
+          <button>खोज्नुहोस्</button>
+
+        </div>
+
+
+        {/* SUMMARY */}
+
+        {/* ✅ FIX: props hata diye */}
+        <ResultSummary />
+
+
+        {/* PARTY CARDS */}
+        <PartyCards results={results} />
+
+
+        {/* PARTY SEAT BAR */}
+        <PartySeatBar results={results} />
+
+
+        {/* MAP + PARTY STANDINGS */}
+
+        <div className="map-grid">
+
+          <div className="card">
+
+            <h3 className="card-title">Election Map</h3>
+
+            <div className="map-box">
+              <NepalElectionMap />
+            </div>
+
+          </div>
+
+          <div className="card">
+
+            <h3 className="card-title">Party Standings</h3>
+
+            <PartyStandings results={results} />
+
+          </div>
+
+        </div>
+
+
+        {/* PROVINCE RESULTS */}
+
+        <h2 className="section-title">Province Results</h2>
+        <ProvinceResults results={results} />
+
+
+        {/* HOT SEATS */}
+
+        <h2 className="section-title">Hot Seats</h2>
+        <HotSeats results={results} />
+
+
+        {/* DISTRICT RESULTS */}
+
+        <h2 className="section-title">District Results</h2>
+        <DistrictResults results={results} />
+
+
+        {/* LATEST SEAT RESULTS */}
+
+        <h2 className="section-title">Latest Seat Results</h2>
+        <SeatResultsTable results={results} />
+
+      </div>
+
+    </div>
+
+  )
+}

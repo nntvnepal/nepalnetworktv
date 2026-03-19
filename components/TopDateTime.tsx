@@ -1,30 +1,44 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 
-export default function TopDateTime() {
-  const [time, setTime] = useState("");
+export default function TopDateTime(){
 
-  useEffect(() => {
-    const update = () => {
-      const now = new Date();
-      setTime(
-        now.toLocaleString("en-IN", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        })
-      );
-    };
+const [time,setTime] = useState("")
 
-    update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
-  }, []);
+useEffect(()=>{
 
-  return <span>{time}</span>;
+const update = ()=>{
+
+const now = new Date()
+
+setTime(
+now.toLocaleString("en-IN",{
+weekday:"long",
+year:"numeric",
+month:"long",
+day:"numeric",
+hour:"2-digit",
+minute:"2-digit"
+})
+)
+
+}
+
+update()
+
+const interval = setInterval(update,1000)
+
+return ()=>clearInterval(interval)
+
+},[])
+
+return(
+
+<div className="text-sm text-white">
+{time}
+</div>
+
+)
+
 }

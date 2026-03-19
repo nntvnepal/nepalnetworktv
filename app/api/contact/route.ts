@@ -3,11 +3,12 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
+
     const { name, email, subject, message } = await req.json();
 
     if (!name || !email || !message) {
       return NextResponse.json(
-        { success: false, message: "Missing fields" },
+        { success: false, message: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -15,34 +16,49 @@ export async function POST(req: Request) {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "editor@nationpathindia.com",
+        user: "info@nntvnepal.com",
         pass: process.env.EMAIL_PASSWORD,
       },
     });
 
     await transporter.sendMail({
-      from: `"Nation Path Contact" <editor@nationpathindia.com>`,
-      to: "editor@nationpathindia.com",
-      subject: `Contact Form: ${subject || "New Message"}`,
+
+      from: `"NNTV Contact Form" <info@nntvnepal.com>`,
+
+      to: "info@nntvnepal.com",
+
+      replyTo: email,
+
+      subject: `NNTV Contact: ${subject || "New Message"}`,
+
       html: `
-        <h3>New Contact Message</h3>
+        <h2>NNTV Website Contact Message</h2>
 
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Subject:</strong> ${subject || "Not provided"}</p>
+
+        <hr/>
 
         <p><strong>Message:</strong></p>
         <p>${message}</p>
+
+        <hr/>
+
+        <p style="font-size:12px;color:#777">
+        This message was sent from the NNTV website contact form.
+        </p>
       `,
     });
 
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error("Contact error:", error);
+
+    console.error("Contact API Error:", error);
 
     return NextResponse.json(
-      { success: false },
+      { success: false, message: "Email sending failed" },
       { status: 500 }
     );
   }

@@ -1,0 +1,312 @@
+/* =====================================
+NNTV BREAKING BANNER (FINAL LOCK)
+===================================== */
+
+.wrap{
+  position:absolute;
+  bottom:120px;
+  left:0;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  pointer-events:none;
+  z-index:20;
+  animation:breakingEnter .8s ease;
+}
+
+.banner{
+  --purple1:#3b0035;
+  --purple2:#520047;
+  --purple3:#6a0b5f;
+
+  position:relative;
+  width:1000px;
+  max-width:94vw;
+
+  display:flex;
+  flex-direction:column;
+
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+/* =====================================
+TOP LABEL
+===================================== */
+
+.topLabel{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+
+  width:fit-content;
+
+  background:linear-gradient(
+    90deg,
+    var(--purple1),
+    var(--purple2),
+    var(--purple3)
+  );
+
+  color:white;
+  font-size:18px;
+  font-weight:800;
+
+  padding:10px 26px;
+
+  clip-path:polygon(
+    0 0,
+    85% 0,
+    100% 50%,
+    85% 100%,
+    0 100%
+  );
+
+  z-index:3;
+  transform:translateY(4px);
+
+  box-shadow:0 4px 12px rgba(0,0,0,.35);
+
+  animation:breakingPulse 2.5s infinite;
+}
+
+/* SHINE */
+.topLabel::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-140px;
+
+  width:120px;
+  height:100%;
+
+  background:linear-gradient(
+    110deg,
+    transparent,
+    rgba(255,255,255,.4),
+    transparent
+  );
+
+  animation:shineMove 5s infinite linear;
+}
+
+/* =====================================
+HEADLINE BAR
+===================================== */
+
+.mainBar{
+  position:relative;
+
+  background:linear-gradient(
+    180deg,
+    #ffffff,
+    #ececec
+  );
+
+  height:64px;
+
+  display:flex;
+  align-items:center;
+
+  padding:0 32px;
+
+  font-size:26px;
+  font-weight:700;
+
+  color:#111;
+
+  margin-top:-6px;
+
+  border-top:2px solid rgba(0,0,0,.15);
+  border-bottom:2px solid rgba(0,0,0,.15);
+
+  box-shadow:0 6px 14px rgba(0,0,0,.25);
+
+  overflow:hidden;
+}
+
+/* GLASS */
+.mainBar::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-200px;
+
+  width:200px;
+  height:100%;
+
+  background:linear-gradient(
+    110deg,
+    transparent,
+    rgba(255,255,255,.6),
+    transparent
+  );
+
+  animation:glassMove 4s linear infinite;
+}
+
+/* GOLD LINE */
+.mainBar::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:-2px;
+
+  width:100%;
+  height:3px;
+
+  background:linear-gradient(
+    90deg,
+    #caa23a,
+    #ffd866,
+    #fff1b0,
+    #ffd866,
+    #caa23a
+  );
+
+  background-size:200% 100%;
+  animation:goldFlow 3s linear infinite;
+}
+
+.mainBar span{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* =====================================
+BOTTOM STRIP
+===================================== */
+
+.bottomBar{
+  margin-top:6px;
+  height:30px;
+
+  display:flex;
+  align-items:center;
+
+  color:white;
+  font-size:14px;
+  font-weight:700;
+
+  overflow:hidden;
+  position:relative;
+
+  border-top:1px solid rgba(255,255,255,.25);
+}
+
+/* BACKGROUND LAYERS */
+
+.bottomBar::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+
+  height:100%;
+  width:70%;
+
+  background:linear-gradient(#3b0035,#520047);
+}
+
+.bottomBar::after{
+  content:"";
+  position:absolute;
+  left:70%;
+  top:0;
+
+  height:100%;
+  width:15%;
+
+  background:linear-gradient(#520047,#6a0b5f);
+}
+
+.endPart{
+  position:absolute;
+  right:0;
+  top:0;
+
+  height:100%;
+  width:15%;
+
+  background:#7c1270;
+}
+
+/* TEXT LOOP */
+
+.bottomBar span{
+  position:relative;
+  z-index:2;
+
+  white-space:nowrap;
+
+  padding-left:20px;
+  padding-right:100px;
+
+  display:inline-block;
+
+  animation:tickerMove 22s linear infinite;
+
+  letter-spacing:.4px;
+}
+
+/* =====================================
+ANIMATIONS
+===================================== */
+
+@keyframes tickerMove{
+  0%{ transform:translateX(0); }
+  100%{ transform:translateX(-50%); }
+}
+
+@keyframes shineMove{
+  0%{ left:-140px; }
+  100%{ left:120%; }
+}
+
+@keyframes glassMove{
+  0%{ left:-200px; }
+  100%{ left:120%; }
+}
+
+@keyframes goldFlow{
+  0%{ background-position:0% 0; }
+  100%{ background-position:200% 0; }
+}
+
+@keyframes breakingPulse{
+  0%{ transform:scale(1); }
+  50%{ transform:scale(1.05); }
+  100%{ transform:scale(1); }
+}
+
+@keyframes breakingEnter{
+  0%{
+    transform:translateY(120px);
+    opacity:0;
+  }
+  100%{
+    transform:translateY(0);
+    opacity:1;
+  }
+}
+
+/* =====================================
+RESPONSIVE
+===================================== */
+
+@media (max-width:900px){
+
+  .mainBar{
+    font-size:20px;
+    height:56px;
+  }
+
+  .topLabel{
+    font-size:16px;
+  }
+
+  .bottomBar{
+    font-size:13px;
+  }
+
+}

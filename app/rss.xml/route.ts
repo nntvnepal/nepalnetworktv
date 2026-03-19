@@ -6,7 +6,7 @@ export async function GET() {
 
   try {
 
-    const baseUrl = "https://www.nationpathindia.com";
+    const baseUrl = "https://www.nntvnepal.com";
 
     const articles = await prisma.article.findMany({
       where: {
@@ -52,12 +52,12 @@ export async function GET() {
 
       <channel>
 
-        <title>Nation Path</title>
+        <title>Nepal Network TV NNTV</title>
 
         <link>${baseUrl}</link>
 
         <description>
-          Latest breaking news, political insights, defence analysis and global affairs from Nation Path.
+          Latest breaking news, political insights, defence analysis and global affairs from Neepal Network TV NNTV.
         </description>
 
         <language>en-IN</language>

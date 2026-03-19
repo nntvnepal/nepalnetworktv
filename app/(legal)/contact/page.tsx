@@ -1,250 +1,310 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Mail, Building2, Megaphone } from "lucide-react";
+import { useState } from "react"
+import { Mail, Building2, Megaphone } from "lucide-react"
+import { useLegalLang } from "../legalLangContext"
 
 export default function ContactPage() {
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
+const { lang } = useLegalLang()
 
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+const content = {
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+en:{
+title:"Contact Nepal Network Television",
+subtitle:"For inquiries, partnerships or advertising opportunities please contact the NNTV team.",
+response:"Our editorial or support team usually responds within 24–48 hours.",
 
-    setLoading(true);
+general:"General Inquiry",
+generalDesc:"Questions, feedback or general communication",
 
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
+ads:"Advertising",
+adsDesc:"Campaigns, brand partnerships and promotions",
 
-    setLoading(false);
+org:"Organization",
 
-    if (res.ok) {
-      setSent(true);
+formTitle:"Send Us a Message",
 
-      setForm({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-      });
+name:"Your Name",
+email:"Email Address",
+subject:"Subject",
+message:"Your Message",
 
-    } else {
-      alert("Failed to send message");
-    }
-  };
+send:"Send Message",
+sending:"Sending...",
+success:"Message sent successfully. Our team will contact you soon."
 
-  return (
-    <main className="max-w-6xl mx-auto px-6 py-20">
+},
 
-      {/* HEADER */}
+np:{
+title:"नेपाल नेटवर्क टेलिभिजन सम्पर्क",
+subtitle:"प्रश्न, सहकार्य वा विज्ञापन सम्बन्धी जानकारीका लागि NNTV टिमसँग सम्पर्क गर्नुहोस्।",
+response:"हाम्रो टोलीले सामान्यतया २४–४८ घण्टाभित्र प्रतिक्रिया दिन्छ।",
 
-      <section className="text-center mb-16">
+general:"सामान्य जानकारी",
+generalDesc:"प्रश्न, प्रतिक्रिया वा सामान्य सम्पर्क",
 
-        <h1 className="text-4xl md:text-5xl font-serif mb-6">
-          Contact Nation Path
-        </h1>
+ads:"विज्ञापन",
+adsDesc:"प्रचार अभियान, ब्रान्ड सहकार्य तथा विज्ञापन",
 
-        <p className="text-gray-600 max-w-3xl mx-auto">
-          For inquiries, partnerships, or advertising opportunities,
-          please reach the Nation Path team through the following channels.
-        </p>
+org:"संस्था",
 
-        <p className="text-sm text-gray-500 mt-2">
-          Our team usually responds within 24–48 hours.
-        </p>
+formTitle:"हामीलाई सन्देश पठाउनुहोस्",
 
-      </section>
+name:"तपाईंको नाम",
+email:"इमेल ठेगाना",
+subject:"विषय",
+message:"सन्देश",
 
+send:"सन्देश पठाउनुहोस्",
+sending:"पठाउँदै...",
+success:"सन्देश सफलतापूर्वक पठाइयो। हाम्रो टोलीले तपाईंलाई सम्पर्क गर्नेछ।"
 
-      {/* CONTACT CARDS */}
+}
 
-      <section className="grid md:grid-cols-3 gap-8 mb-20">
+}
 
-        {/* GENERAL INQUIRY */}
+const t = content[lang]
 
-        <div className="bg-white border rounded-xl p-8 text-center shadow-sm">
+const [form,setForm] = useState({
+name:"",
+email:"",
+subject:"",
+message:""
+})
 
-          <Mail className="mx-auto text-[#0b2a6f] mb-4" size={32} />
+const [loading,setLoading] = useState(false)
+const [sent,setSent] = useState(false)
 
-          <h3 className="font-semibold text-lg mb-2">
-            General Inquiry
-          </h3>
+const handleSubmit = async (e:any) => {
 
-          <p className="text-gray-600 text-sm mb-3">
-            Questions, feedback or general communication
-          </p>
+e.preventDefault()
 
-          <a
-            href="mailto:info@nationpathindia.com"
-            className="text-[#0b2a6f] text-sm break-all hover:underline"
-          >
-            info@nationpathindia.com
-          </a>
+setLoading(true)
 
-        </div>
+const res = await fetch("/api/contact",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(form)
+})
 
+setLoading(false)
 
-        {/* ADVERTISING */}
+if(res.ok){
 
-        <div className="bg-white border rounded-xl p-8 text-center shadow-sm">
+setSent(true)
 
-          <Megaphone className="mx-auto text-[#0b2a6f] mb-4" size={32} />
+setForm({
+name:"",
+email:"",
+subject:"",
+message:""
+})
 
-          <h3 className="font-semibold text-lg mb-2">
-            Advertising
-          </h3>
+}else{
+alert("Failed to send message")
+}
 
-          <p className="text-gray-600 text-sm mb-3">
-            Campaigns, brand partnerships and promotions
-          </p>
-
-          <a
-            href="mailto:advertise@nationpathindia.com"
-            className="text-[#0b2a6f] text-sm break-all hover:underline"
-          >
-            advertise@nationpathindia.com
-          </a>
-
-        </div>
-
-
-        {/* ORGANIZATION */}
-
-        <div className="bg-white border rounded-xl p-8 text-center shadow-sm">
-
-          <Building2 className="mx-auto text-[#0b2a6f] mb-4" size={32} />
+}
 
-          <h3 className="font-semibold text-lg mb-2">
-            Organization
-          </h3>
+return(
 
-          <p className="text-gray-600 text-sm">
-            SuryaPath Media<br />
-            India
-          </p>
-
-        </div>
-
-      </section>
-
-
-      {/* CONTACT FORM */}
+<main className="max-w-6xl mx-auto px-6 py-20">
 
-      <section className="bg-gray-50 rounded-xl p-10">
+{/* HEADER */}
 
-        <h2 className="text-2xl font-serif mb-8 text-center">
-          Send Us a Message
-        </h2>
+<section className="text-center mb-16">
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid md:grid-cols-2 gap-6"
-        >
+<h1 className="text-4xl md:text-5xl font-serif mb-6">
+{t.title}
+</h1>
 
-          <input
-            type="text"
-            placeholder="Your Name"
-            required
-            value={form.name}
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
-            }
-            className="border p-3 rounded-lg"
-          />
+<p className="text-gray-600 max-w-3xl mx-auto">
+{t.subtitle}
+</p>
 
-          <input
-            type="email"
-            placeholder="Email Address"
-            required
-            value={form.email}
-            onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
-            }
-            className="border p-3 rounded-lg"
-          />
+<p className="text-sm text-gray-500 mt-2">
+{t.response}
+</p>
 
-          <input
-            type="text"
-            placeholder="Subject"
-            value={form.subject}
-            onChange={(e) =>
-              setForm({ ...form, subject: e.target.value })
-            }
-            className="border p-3 rounded-lg md:col-span-2"
-          />
+</section>
 
-          <textarea
-            rows={6}
-            placeholder="Your Message"
-            required
-            value={form.message}
-            onChange={(e) =>
-              setForm({ ...form, message: e.target.value })
-            }
-            className="border p-3 rounded-lg md:col-span-2"
-          />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-[#0b2a6f] text-white py-3 rounded-lg md:col-span-2 hover:bg-[#081f4f] transition"
-          >
-            {loading ? "Sending..." : "Send Message"}
-          </button>
+{/* CONTACT CARDS */}
 
-          {sent && (
-            <p className="text-green-600 md:col-span-2 text-center">
-              Message sent successfully. Our team will contact you soon.
-            </p>
-          )}
+<section className="grid md:grid-cols-3 gap-8 mb-20">
 
-        </form>
 
-      </section>
+{/* GENERAL */}
 
+<div className="bg-white border rounded-xl p-8 text-center shadow-sm">
 
-      {/* SOCIAL LINKS */}
+<Mail className="mx-auto text-[#4b0055] mb-4" size={32} />
 
-      <section className="text-center mt-16">
+<h3 className="font-semibold text-lg mb-2">
+{t.general}
+</h3>
 
-        <h3 className="font-semibold mb-4">
-          Follow Nation Path
-        </h3>
+<p className="text-gray-600 text-sm mb-3">
+{t.generalDesc}
+</p>
 
-        <div className="flex justify-center gap-6 text-gray-600 text-sm">
+<a
+href="mailto:info@nntvnepal.com"
+className="text-[#4b0055] text-sm break-all hover:underline"
+>
+info@nntvnepal.com
+</a>
 
-          <a href="#" className="hover:text-[#0b2a6f]">
-            Twitter
-          </a>
+</div>
 
-          <a href="#" className="hover:text-[#0b2a6f]">
-            Facebook
-          </a>
 
-          <a href="#" className="hover:text-[#0b2a6f]">
-            YouTube
-          </a>
+{/* ADVERTISING */}
 
-          <a href="#" className="hover:text-[#0b2a6f]">
-            LinkedIn
-          </a>
+<div className="bg-white border rounded-xl p-8 text-center shadow-sm">
 
-        </div>
+<Megaphone className="mx-auto text-[#4b0055] mb-4" size={32} />
 
-      </section>
+<h3 className="font-semibold text-lg mb-2">
+{t.ads}
+</h3>
 
-    </main>
-  );
+<p className="text-gray-600 text-sm mb-3">
+{t.adsDesc}
+</p>
+
+<a
+href="mailto:ads@nntvnepal.com"
+className="text-[#4b0055] text-sm break-all hover:underline"
+>
+ads@nntvnepal.com
+</a>
+
+</div>
+
+
+{/* ORGANIZATION */}
+
+<div className="bg-white border rounded-xl p-8 text-center shadow-sm">
+
+<Building2 className="mx-auto text-[#4b0055] mb-4" size={32} />
+
+<h3 className="font-semibold text-lg mb-2">
+{t.org}
+</h3>
+
+<p className="text-gray-600 text-sm">
+Nepal Network Television (NNTV)<br/>
+Media Beyond the Nation<br/>
+Kathmandu, Nepal
+</p>
+
+</div>
+
+</section>
+
+
+{/* CONTACT FORM */}
+
+<section className="bg-gray-50 rounded-xl p-10">
+
+<h2 className="text-2xl font-serif mb-8 text-center">
+{t.formTitle}
+</h2>
+
+<form
+onSubmit={handleSubmit}
+className="grid md:grid-cols-2 gap-6"
+>
+
+<input
+type="text"
+placeholder={t.name}
+required
+value={form.name}
+onChange={(e)=>setForm({...form,name:e.target.value})}
+className="border p-3 rounded-lg"
+/>
+
+<input
+type="email"
+placeholder={t.email}
+required
+value={form.email}
+onChange={(e)=>setForm({...form,email:e.target.value})}
+className="border p-3 rounded-lg"
+/>
+
+<input
+type="text"
+placeholder={t.subject}
+value={form.subject}
+onChange={(e)=>setForm({...form,subject:e.target.value})}
+className="border p-3 rounded-lg md:col-span-2"
+/>
+
+<textarea
+rows={6}
+placeholder={t.message}
+required
+value={form.message}
+onChange={(e)=>setForm({...form,message:e.target.value})}
+className="border p-3 rounded-lg md:col-span-2"
+/>
+
+<button
+type="submit"
+disabled={loading}
+className="bg-[#4b0055] text-white py-3 rounded-lg md:col-span-2 hover:bg-[#320038] transition"
+>
+{loading ? t.sending : t.send}
+</button>
+
+{sent && (
+<p className="text-green-600 md:col-span-2 text-center">
+{t.success}
+</p>
+)}
+
+</form>
+
+</section>
+
+
+{/* SOCIAL */}
+
+<section className="text-center mt-16">
+
+<h3 className="font-semibold mb-4">
+Follow NNTV
+</h3>
+
+<div className="flex justify-center gap-6 text-gray-600 text-sm">
+
+<a href="#" className="hover:text-[#4b0055]">
+Twitter
+</a>
+
+<a href="#" className="hover:text-[#4b0055]">
+Facebook
+</a>
+
+<a href="#" className="hover:text-[#4b0055]">
+YouTube
+</a>
+
+<a href="#" className="hover:text-[#4b0055]">
+Instagram
+</a>
+
+</div>
+
+</section>
+
+</main>
+
+)
+
 }

@@ -1,159 +1,205 @@
-import type { Metadata } from "next";
+"use client"
 
-export const metadata: Metadata = {
-  title: "Terms & Conditions | Nation Path",
-  description:
-    "Terms and Conditions governing the use of Nation Path website and its content.",
-};
+import { useLegalLang } from "../legalLangContext"
 
-export default function TermsPage() {
-  return (
-    <main className="max-w-4xl mx-auto px-6 py-20">
+export default function TermsPage(){
 
-      <h1 className="text-4xl font-serif mb-10">
-        Terms & Conditions
-      </h1>
+const { lang } = useLegalLang()
 
-      <p className="text-gray-600 mb-8">
-        Welcome to Nation Path. By accessing or using this website,
-        you agree to comply with and be bound by the following terms
-        and conditions. If you disagree with any part of these terms,
-        please do not use our website.
-      </p>
+const content = {
 
+en:{
+title:"Terms & Conditions",
 
-      {/* USE OF WEBSITE */}
+intro:
+"Welcome to Nepal Network Television (NNTV). By accessing or using our website you agree to comply with and be bound by the following Terms and Conditions. If you do not agree with any part of these terms, please discontinue the use of our website.",
 
-      <section className="mb-10">
+useTitle:"Use of Website",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Use of Website
-        </h2>
+useText:
+"The content published on NNTV is intended for informational, journalistic and editorial purposes. Users may read, share and reference our content for personal use. However reproduction, republication or redistribution of our materials without permission is strictly prohibited.",
 
-        <p className="text-gray-600">
-          The content on Nation Path is provided for informational
-          and editorial purposes only. Users may access, read,
-          and share our articles for personal use, but reproduction
-          or redistribution of our content without permission is
-          strictly prohibited.
-        </p>
+ipTitle:"Intellectual Property",
 
-      </section>
+ipText:
+"All content published on NNTV including articles, graphics, logos, video materials and design elements are the intellectual property of Nepal Network Television unless otherwise stated. Unauthorized use, reproduction or distribution may violate copyright and intellectual property laws.",
 
+conductTitle:"User Conduct",
 
-      {/* INTELLECTUAL PROPERTY */}
+conductText:
+"Users agree not to misuse the website or disrupt its services. Activities including hacking, spreading malware, automated scraping, spamming or attempting unauthorized access to systems are strictly prohibited.",
 
-      <section className="mb-10">
+linksTitle:"External Links",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Intellectual Property
-        </h2>
+linksText:
+"Our website may include links to external websites or services for reference or additional information. NNTV does not control the content or policies of third-party websites and is not responsible for their practices.",
 
-        <p className="text-gray-600">
-          All content published on Nation Path including text,
-          graphics, logos, and design elements are the intellectual
-          property of Nation Path unless otherwise stated.
-          Unauthorized use may violate copyright laws.
-        </p>
+liabilityTitle:"Limitation of Liability",
 
-      </section>
+liabilityText:
+"NNTV strives to ensure the accuracy and reliability of information published on our platform. However we make no guarantees regarding completeness or accuracy and shall not be liable for any loss or damages resulting from the use of this website.",
 
+changesTitle:"Changes to Terms",
 
-      {/* USER CONDUCT */}
+changesText:
+"NNTV reserves the right to modify or update these Terms & Conditions at any time. Continued use of the website after changes indicates acceptance of the updated terms.",
 
-      <section className="mb-10">
+orgTitle:"Contact & Organization",
 
-        <h2 className="text-2xl font-serif mb-4">
-          User Conduct
-        </h2>
+orgText:
+"Nepal Network Television (NNTV) operates as an independent digital media platform. If you have any questions regarding these Terms & Conditions please contact us at"
+},
 
-        <p className="text-gray-600">
-          Users agree not to misuse the website or attempt to
-          interfere with its normal operation. Activities such as
-          hacking, spamming, or distributing malicious software
-          are strictly prohibited.
-        </p>
+np:{
+title:"प्रयोग सर्तहरू",
 
-      </section>
+intro:
+"नेपाल नेटवर्क टेलिभिजन (NNTV) वेबसाइट प्रयोग गर्नुभएकोमा स्वागत छ। यस वेबसाइट प्रयोग गर्दा तपाईं यी सर्त तथा नियमहरू पालन गर्न सहमत हुनुहुन्छ। यदि तपाईं यी सर्तहरूसँग सहमत हुनुहुन्न भने कृपया वेबसाइट प्रयोग नगर्नुहोस्।",
 
+useTitle:"वेबसाइट प्रयोग",
 
-      {/* EXTERNAL LINKS */}
+useText:
+"NNTV मा प्रकाशित सामग्री सूचनामूलक, पत्रकारिता तथा सम्पादकीय उद्देश्यका लागि प्रदान गरिएको हो। प्रयोगकर्ताले व्यक्तिगत प्रयोगका लागि सामग्री पढ्न, साझा गर्न वा सन्दर्भ दिन सक्नुहुन्छ तर अनुमति बिना पुनःप्रकाशन वा वितरण गर्न पाइँदैन।",
 
-      <section className="mb-10">
+ipTitle:"बौद्धिक सम्पत्ति",
 
-        <h2 className="text-2xl font-serif mb-4">
-          External Links
-        </h2>
+ipText:
+"NNTV मा प्रकाशित सबै सामग्री जस्तै लेख, चित्र, लोगो, भिडियो सामग्री तथा डिजाइन तत्वहरू नेपाल नेटवर्क टेलिभिजनको बौद्धिक सम्पत्ति हुन् जबसम्म अन्यथा उल्लेख गरिएको छैन। अनुमति बिना प्रयोग वा वितरण गर्न पाइँदैन।",
 
-        <p className="text-gray-600">
-          Nation Path may include links to external websites.
-          We do not control or guarantee the accuracy of content
-          found on third-party sites and are not responsible for
-          their policies or practices.
-        </p>
+conductTitle:"प्रयोगकर्ता आचरण",
 
-      </section>
+conductText:
+"प्रयोगकर्ताले वेबसाइटको दुरुपयोग नगर्ने सहमति जनाउनुहुन्छ। ह्याकिङ, मालवेयर फैलाउने, स्पाम गर्ने, स्वचालित डेटा सङ्कलन गर्ने वा प्रणालीमा अनधिकृत पहुँच गर्ने गतिविधि निषेध गरिएको छ।",
 
+linksTitle:"बाह्य लिङ्कहरू",
 
-      {/* LIMITATION OF LIABILITY */}
+linksText:
+"हाम्रो वेबसाइटमा अन्य वेबसाइटहरूको लिङ्क समावेश हुन सक्छ। NNTV ले ती वेबसाइटहरूको सामग्री वा नीतिहरू नियन्त्रण गर्दैन र तिनीहरूको अभ्यासको लागि जिम्मेवार हुँदैन।",
 
-      <section className="mb-10">
+liabilityTitle:"दायित्वको सीमा",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Limitation of Liability
-        </h2>
+liabilityText:
+"NNTV ले वेबसाइटमा प्रकाशित जानकारी सही र विश्वसनीय बनाउन प्रयास गर्दछ तर जानकारीको पूर्णता वा शुद्धताका लागि कुनै ग्यारेन्टी प्रदान गर्दैन। वेबसाइट प्रयोगबाट हुने कुनै पनि क्षतिको लागि हामी जिम्मेवार हुने छैनौं।",
 
-        <p className="text-gray-600">
-          Nation Path strives to provide accurate and reliable
-          information, but we make no guarantees regarding the
-          completeness or accuracy of published content. We shall
-          not be held liable for any loss or damages arising from
-          the use of this website.
-        </p>
+changesTitle:"सर्त परिवर्तन",
 
-      </section>
+changesText:
+"NNTV ले कुनै पनि समयमा यी सर्तहरू परिमार्जन वा अद्यावधिक गर्ने अधिकार राख्छ। परिवर्तनपछि वेबसाइट प्रयोग जारी राख्नु भनेको नयाँ सर्तहरू स्वीकार गर्नु हो।",
 
+orgTitle:"सम्पर्क तथा संस्था",
 
-      {/* CHANGES */}
+orgText:
+"नेपाल नेटवर्क टेलिभिजन (NNTV) एक स्वतन्त्र डिजिटल मिडिया प्लेटफर्म हो। यी सर्तहरू सम्बन्धी कुनै प्रश्न भएमा कृपया हामीलाई सम्पर्क गर्नुहोस्"
+}
 
-      <section className="mb-10">
+}
 
-        <h2 className="text-2xl font-serif mb-4">
-          Changes to Terms
-        </h2>
+const t = content[lang]
 
-        <p className="text-gray-600">
-          Nation Path reserves the right to update or modify these
-          Terms and Conditions at any time without prior notice.
-          Continued use of the website after changes indicates
-          acceptance of the updated terms.
-        </p>
+return(
 
-      </section>
+<main className="max-w-4xl mx-auto px-6 py-20">
 
+<h1 className="text-4xl font-serif mb-10">
+{t.title}
+</h1>
 
-      {/* COMPANY */}
+<p className="text-gray-600 mb-8">
+{t.intro}
+</p>
 
-      <section className="border-t pt-8">
+<section className="mb-10">
 
-        <h2 className="text-xl font-serif mb-3">
-          Organization
-        </h2>
+<h2 className="text-2xl font-serif mb-4">
+{t.useTitle}
+</h2>
 
-        <p className="text-gray-600">
-          Nation Path is operated by <strong>SuryaPath Media, India</strong>.
-          If you have any questions regarding these Terms &
-          Conditions, please contact us at{" "}
-          <a
-            href="mailto:info@nationpathindia.com"
-            className="text-[#0b2a6f] hover:underline"
-          >
-            info@nationpathindia.com
-          </a>.
-        </p>
+<p className="text-gray-600">
+{t.useText}
+</p>
 
-      </section>
+</section>
 
-    </main>
-  );
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.ipTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.ipText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.conductTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.conductText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.linksTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.linksText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.liabilityTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.liabilityText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.changesTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.changesText}
+</p>
+
+</section>
+
+<section className="border-t pt-8">
+
+<h2 className="text-xl font-serif mb-3">
+{t.orgTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.orgText}{" "}
+<a
+href="mailto:info@nntvnepal.com"
+className="text-[#4b0055] hover:underline"
+>
+info@nntvnepal.com
+</a>
+</p>
+
+</section>
+
+</main>
+
+)
+
 }

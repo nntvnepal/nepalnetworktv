@@ -11,6 +11,7 @@ function stripHtml(html: string) {
 }
 
 async function generateUniqueSlug(title: string, currentId: string) {
+
   const baseSlug = title
     .toLowerCase()
     .trim()
@@ -21,19 +22,22 @@ async function generateUniqueSlug(title: string, currentId: string) {
   let counter = 1;
 
   while (true) {
+
     const existing = await prisma.article.findFirst({
       where: {
         slug,
-        NOT: { id: currentId },
-      },
+        NOT: { id: currentId }
+      }
     });
 
     if (!existing) break;
 
     slug = `${baseSlug}-${counter++}`;
+
   }
 
   return slug;
+
 }
 
 /* ================= GET ================= */
@@ -42,6 +46,7 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+
   try {
 
     if (!params?.id) {
@@ -50,7 +55,7 @@ export async function GET(
 
     const article = await prisma.article.findUnique({
       where: { id: params.id },
-      include: { category: true },
+      include: { category: true }
     });
 
     if (!article) {
@@ -59,7 +64,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      article,
+      article
     });
 
   } catch (error) {
@@ -72,20 +77,22 @@ export async function GET(
     );
 
   }
+
 }
 
-/* ================= PATCH (STATUS) ================= */
+/* ================= PATCH STATUS ================= */
 
 export async function PATCH(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+
   try {
 
     const body = await req.json();
 
     const existing = await prisma.article.findUnique({
-      where: { id: params.id },
+      where: { id: params.id }
     });
 
     if (!existing) {
@@ -94,10 +101,7 @@ export async function PATCH(
 
     let status: PostStatus = existing.status;
 
-    if (
-      body.status &&
-      Object.values(PostStatus).includes(body.status)
-    ) {
+    if (body.status && Object.values(PostStatus).includes(body.status)) {
       status = body.status;
     }
 
@@ -108,13 +112,13 @@ export async function PATCH(
         publishedAt:
           status === PostStatus.approved
             ? new Date()
-            : existing.publishedAt,
-      },
+            : existing.publishedAt
+      }
     });
 
     return NextResponse.json({
       success: true,
-      article: updated,
+      article: updated
     });
 
   } catch (error) {
@@ -127,25 +131,29 @@ export async function PATCH(
     );
 
   }
+
 }
 
-/* ================= PUT ================= */
+/* ================= UPDATE ARTICLE ================= */
 
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+
   try {
 
     const body = await req.json();
 
     const existing = await prisma.article.findUnique({
-      where: { id: params.id },
+      where: { id: params.id }
     });
 
     if (!existing) {
       return NextResponse.json({ success: false }, { status: 404 });
     }
+
+    /* ---------- CLEAN IMAGES ---------- */
 
     const cleanImages = Array.isArray(body.images)
       ? body.images.filter(
@@ -154,14 +162,20 @@ export async function PUT(
         )
       : existing.images;
 
+    /* ---------- CLEAN CONTENT ---------- */
+
     const cleanContent = stripHtml(
       body.content || existing.content
     );
+
+    /* ---------- SLUG ---------- */
 
     const slug =
       body.title && body.title !== existing.title
         ? await generateUniqueSlug(body.title, params.id)
         : existing.slug;
+
+    /* ---------- HOROSCOPE DATE ---------- */
 
     let horoscopeDate = existing.horoscopeDate;
 
@@ -169,10 +183,22 @@ export async function PUT(
       horoscopeDate = new Date(body.horoscopeDate);
     }
 
+    /* ---------- AUTO STATUS RULE ---------- */
+
+    let status: PostStatus = body.status ?? existing.status;
+
+    if (body.isAstrology) {
+      status = PostStatus.approved;
+    }
+
+    /* ---------- UPDATE ---------- */
+
     const updated = await prisma.article.update({
+
       where: { id: params.id },
 
       data: {
+
         title: body.title || existing.title,
 
         slug,
@@ -189,7 +215,12 @@ export async function PUT(
 
         featured: body.featured ?? existing.featured,
 
-        status: body.status ?? existing.status,
+        status,
+
+        publishedAt:
+          status === PostStatus.approved
+            ? new Date()
+            : existing.publishedAt,
 
         isEditorial: body.isEditorial ?? existing.isEditorial,
 
@@ -219,13 +250,15 @@ export async function PUT(
             .toLowerCase()
             .split(" ")
             .slice(0, 10)
-            .join(", "),
-      },
+            .join(", ")
+
+      }
+
     });
 
     return NextResponse.json({
       success: true,
-      article: updated,
+      article: updated
     });
 
   } catch (error: any) {
@@ -235,12 +268,13 @@ export async function PUT(
     return NextResponse.json(
       {
         success: false,
-        error: error?.message || "Update failed",
+        error: error?.message || "Update failed"
       },
       { status: 500 }
     );
 
   }
+
 }
 
 /* ================= DELETE ================= */
@@ -249,14 +283,15 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+
   try {
 
     await prisma.article.delete({
-      where: { id: params.id },
+      where: { id: params.id }
     });
 
     return NextResponse.json({
-      success: true,
+      success: true
     });
 
   } catch (error) {
@@ -269,4 +304,5 @@ export async function DELETE(
     );
 
   }
+
 }

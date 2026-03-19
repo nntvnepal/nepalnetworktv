@@ -1,19 +1,25 @@
-"use client";
+"use client"
 
-import dynamic from "next/dynamic";
-import "react-quill/dist/quill.snow.css";
+import { useState } from "react"
 
-const ReactQuill = dynamic(() => import("react-quill"), {
-  ssr: false,
-});
+export default function Editor({ value="", onChange }:any){
 
-export default function Editor({ value, onChange }: any) {
-  return (
-    <ReactQuill
-      theme="snow"
-      value={value}
-      onChange={onChange}
-      className="bg-white dark:bg-gray-800"
-    />
-  );
+const [text,setText] = useState(value)
+
+function handleChange(e:any){
+setText(e.target.value)
+onChange && onChange(e.target.value)
+}
+
+return(
+
+<textarea
+value={text}
+onChange={handleChange}
+className="w-full min-h-[250px] border rounded p-3"
+placeholder="Write article content..."
+/>
+
+)
+
 }

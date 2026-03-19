@@ -1,0 +1,263 @@
+/* =========================
+NNTV LOWER THIRD (FINAL CLEAN)
+========================= */
+
+.wrap{
+  position:absolute;
+  bottom:120px;
+  left:60px;
+  z-index:30;
+}
+
+/* =========================
+CONTAINER
+========================= */
+
+.container{
+  position:relative;
+  display:flex;
+  align-items:center;
+  overflow:visible;
+}
+
+/* =========================
+FRAME
+========================= */
+
+.frameTop,
+.frameTopRight,
+.frameBottom{
+  position:absolute;
+  height:2px;
+  background:#d4b24f;
+  opacity:.85;
+}
+
+.frameTop{ top:-6px; left:0; width:110px; }
+.frameTopRight{ top:-6px; right:0; width:55px; }
+.frameBottom{ bottom:-6px; left:0; width:85px; }
+
+.cornerLeft,
+.cornerRight{
+  position:absolute;
+  width:16px;
+  height:16px;
+  opacity:.85;
+}
+
+.cornerLeft{
+  top:-6px;
+  left:-6px;
+  border-top:2px solid #d4b24f;
+  border-left:2px solid #d4b24f;
+}
+
+.cornerRight{
+  bottom:-6px;
+  right:-6px;
+  border-bottom:2px solid #d4b24f;
+  border-right:2px solid #d4b24f;
+}
+
+/* =========================
+LEFT GOLD
+========================= */
+
+.leftBox{
+  width:70px;
+  height:70px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-weight:800;
+  font-size:13px;
+
+  color:#000;
+
+  background:linear-gradient(180deg,#ffd65a,#f2a900);
+
+  position:relative;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+
+/* DOTS */
+.leftBox::after{
+  content:"";
+
+  position:absolute;
+  bottom:-10px;
+  left:100%;
+  margin-left:6px;
+
+  width:28px;
+  height:5px;
+
+  background:
+    linear-gradient(#888,#888) 0 0/5px 5px no-repeat,
+    linear-gradient(#888,#888) 10px 0/5px 5px no-repeat,
+    linear-gradient(#888,#888) 20px 0/5px 5px no-repeat;
+}
+
+/* =========================
+MAIN PANEL
+========================= */
+
+.main{
+  position:relative;
+
+  height:70px;
+  min-width:460px;
+
+  display:flex;
+  align-items:center;
+
+  padding:0 22px;
+
+  background:#2a2a2a;
+
+  overflow:hidden;
+
+  border-left:1px solid rgba(255,255,255,0.06);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.6);
+}
+
+/* inner */
+.main::before{
+  content:"";
+  position:absolute;
+  top:6px;
+  left:6px;
+  right:6px;
+  bottom:12px;
+
+  background:linear-gradient(180deg,#353535,#1c1c1c);
+}
+
+/* top line */
+.main::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:1px;
+  background:rgba(255,255,255,0.15);
+}
+
+/* =========================
+BOTTOM STRIP
+========================= */
+
+.bottomStrip{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:10px;
+
+  background:#111;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+
+/* =========================
+TEXT
+========================= */
+
+.text{
+  position:relative;
+  z-index:2;
+
+  padding-left:14px;
+  display:flex;
+  flex-direction:column;
+}
+
+.text::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:20%;
+  height:60%;
+  width:2px;
+  background:rgba(255,255,255,0.2);
+}
+
+.text::after{
+  content:"";
+  position:absolute;
+  bottom:6px;
+  left:0;
+  width:18px;
+  height:3px;
+  background:#aaa;
+}
+
+.name{
+  font-size:22px;
+  font-weight:900;
+  color:#fff;
+  letter-spacing:.3px;
+  text-shadow:0 1px 0 #000;
+}
+
+.role{
+  font-size:14px;
+  color:#bdbdbd;
+}
+
+/* =========================
+RIGHT BOX
+========================= */
+
+.rightBox{
+  height:70px;
+  min-width:110px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:0 18px;
+
+  background:linear-gradient(180deg,#ff003c,#a00022);
+
+  position:relative;
+  margin-left:-4px;
+
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+.rightBox::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:2px;
+  height:100%;
+  background:rgba(255,255,255,0.2);
+}
+
+.rightBox::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:2px;
+  background:rgba(255,255,255,0.2);
+}
+
+.rightBox span{
+  font-size:12px;
+  font-weight:700;
+  color:#fff;
+  letter-spacing:.5px;
+}

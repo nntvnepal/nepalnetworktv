@@ -1,244 +1,319 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
 import Link from "next/link";
-import ZodiacIcon from "@/components/ZodiacIcon";
+import AdRenderer from "@/components/ads/AdRenderer";
+
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-interface Props {
-  params: { slug: string };
+
+/* ================= ZODIAC DATA ================= */
+
+const zodiac = [
+["Aries","मेष","aries"],
+["Taurus","वृष","taurus"],
+["Gemini","मिथुन","gemini"],
+["Cancer","कर्क","cancer"],
+["Leo","सिंह","leo"],
+["Virgo","कन्या","virgo"],
+["Libra","तुला","libra"],
+["Scorpio","वृश्चिक","scorpio"],
+["Sagittarius","धनु","sagittarius"],
+["Capricorn","मकर","capricorn"],
+["Aquarius","कुम्भ","aquarius"],
+["Pisces","मीन","pisces"]
+];
+
+const zodiacNames:any = {
+aries:"मेष",
+taurus:"वृष",
+gemini:"मिथुन",
+cancer:"कर्क",
+leo:"सिंह",
+virgo:"कन्या",
+libra:"तुला",
+scorpio:"वृश्चिक",
+sagittarius:"धनु",
+capricorn:"मकर",
+aquarius:"कुम्भ",
+pisces:"मीन"
+};
+
+export default async function Page({params}:{params:{slug:string}}){
+
+/* ================= FETCH ARTICLE ================= */
+
+const article = await prisma.article.findFirst({
+
+where:{
+slug: params.slug,
+isAstrology:true,
+isDeleted:false
+},
+
+orderBy:{
+publishedAt:"desc"
 }
 
-/* ================= SEO METADATA ================= */
+})
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
-  });
+if(!article) notFound()
 
-  if (!article || !article.isAstrology) {
-    return {
-      title: "Horoscope | Nation Path",
-    };
-  }
+/* ================= HEADER DATA ================= */
 
-  const formattedDate = new Date(article.horoscopeDate).toLocaleDateString(
-    "en-IN",
-    { day: "numeric", month: "long", year: "numeric" }
-  );
+const zodiacName = zodiacNames[article.zodiacSign] || ""
 
-  const title = `${article.zodiacSign} Horoscope Today – ${formattedDate} | Nation Path`;
+const date = article.horoscopeDate
+? new Date(article.horoscopeDate).toLocaleDateString("ne-NP",{
+year:"numeric",
+month:"long",
+day:"numeric"
+})
+: ""
 
-  return {
-    title,
-    description: `Read today's ${article.zodiacSign} horoscope for ${formattedDate}. Career, love, health, lucky number and daily guidance updated by Nation Path.`,
-    alternates: {
-      canonical: `https://nationpath.in/astrology/${article.slug}`,
-    },
-    openGraph: {
-      title,
-      description: `Today's ${article.zodiacSign} horoscope predictions including love, career, finance and health insights.`,
-      url: `https://nationpath.in/astrology/${article.slug}`,
-      siteName: "Nation Path",
-      type: "article",
-    },
-  };
+/* ================= CONTENT PARSER ================= */
+
+const lines = (article.content || "").split("\n").filter(Boolean)
+
+let luckyColor=""
+let luckyNumber=""
+let luckyDirection=""
+let luckyTime=""
+
+const sections:any=[]
+let current:any=null
+
+lines.forEach(line=>{
+
+if(line.includes("शुभ रंग")){
+luckyColor=line.replace(/⭐?\s*शुभ रंग\s*:/,"").trim()
+return
 }
+
+if(line.includes("शुभ अंक")){
+luckyNumber=line.replace(/🍀?\s*शुभ अंक\s*:/,"").trim()
+return
+}
+
+if(line.includes("शुभ दिशा")){
+luckyDirection=line.replace(/🧭?\s*शुभ दिशा\s*:/,"").trim()
+return
+}
+
+if(line.includes("शुभ समय")){
+luckyTime=line.replace(/⏰?\s*शुभ समय\s*:/,"").trim()
+return
+}
+
+if(
+line.startsWith("⭐")||
+line.startsWith("💼")||
+line.startsWith("💰")||
+line.startsWith("❤️")||
+line.startsWith("🩺")
+){
+
+if(current) sections.push(current)
+
+current={
+title:line,
+content:""
+}
+
+}else{
+
+if(current){
+current.content+=line+" "
+}
+
+}
+
+})
+
+if(current) sections.push(current)
+
+const hasSections=sections.length>0
 
 /* ================= PAGE ================= */
 
-export default async function Page({ params }: Props) {
+return(
 
-  const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
-  });
+<div className="max-w-6xl mx-auto px-6 pt-12 pb-24 grid md:grid-cols-3 gap-12">
 
-  if (!article || !article.isAstrology) {
-    notFound();
-  }
+{/* ================= LEFT CONTENT ================= */}
 
-  const formattedDate = new Date(article.horoscopeDate).toLocaleDateString(
-    "en-IN",
-    { day: "numeric", month: "long", year: "numeric" }
-  );
+<div className="md:col-span-2">
 
-  const isoDate = article.horoscopeDate
-    ? new Date(article.horoscopeDate).toISOString().split("T")[0]
-    : "";
+<div className="text-center mb-12">
 
-  const zodiacSigns = [
-    "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
-    "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
-  ];
+<div className="w-28 h-28 mx-auto rounded-full
+bg-gradient-to-br from-[#6b1d7c] to-[#3a0a44]
+flex items-center justify-center shadow-xl">
 
-  const yesterday = new Date(article.horoscopeDate);
-  yesterday.setDate(yesterday.getDate() - 1);
+<img
+src={`/zodiac/${article.zodiacSign}.png`}
+className="w-14 brightness-0 invert"
+/>
 
-  const tomorrow = new Date(article.horoscopeDate);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+</div>
 
-  const prevSlug = `${article.zodiacSign.toLowerCase()}-${yesterday.toISOString().split("T")[0]}`;
-  const nextSlug = `${article.zodiacSign.toLowerCase()}-${tomorrow.toISOString().split("T")[0]}`;
+<h1 className="text-4xl font-serif text-[#0b2a6f] mt-6">
+{zodiacName} राशिफल
+</h1>
 
-  /* ================= STRUCTURED DATA ================= */
+<p className="text-gray-500 mt-2">
+{date}
+</p>
 
-  const articleSchema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: `${article.zodiacSign} Horoscope – ${formattedDate}`,
-    description: article.title,
-    datePublished: article.horoscopeDate,
-    dateModified: article.horoscopeDate,
-    author: {
-      "@type": "Organization",
-      name: "Nation Path Editorial Desk"
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Nation Path",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://nationpath.in/logo.png"
-      }
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `https://nationpath.in/astrology/${article.slug}`
-    }
-  };
+</div>
 
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://nationpath.in"
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Daily Horoscope",
-        item: "https://nationpath.in/astrology"
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: `${article.zodiacSign} Horoscope`,
-        item: `https://nationpath.in/astrology/${article.slug}`
-      }
-    ]
-  };
+{/* ===== AD AFTER TITLE ===== */}
 
-  return (
-    <div className="max-w-3xl mx-auto px-6 pt-6 pb-24">
+<div className="flex justify-center mb-10">
+<AdRenderer placement="article_after_hero"/>
+</div>
 
-      {/* JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
+<div className="space-y-6">
 
-      {/* HEADER */}
-      <div className="text-center mt-6 mb-10">
+{hasSections && sections.map((s:any,i:number)=>(
 
-        <div className="flex justify-center mb-4">
-          <ZodiacIcon sign={article.zodiacSign} />
-        </div>
+<div
+key={i}
+className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
+>
 
-        <h1 className="text-4xl md:text-5xl font-serif capitalize text-[#0b2a6f]">
-          {article.zodiacSign} Horoscope
-        </h1>
+<h3 className="font-semibold text-lg mb-3">
+{s.title}
+</h3>
 
-        <p className="mt-2 text-sm text-gray-500">
-          {formattedDate}
-        </p>
+<p className="text-gray-700 leading-relaxed">
+{s.content}
+</p>
 
-        <p className="mt-2 text-xs text-gray-400 tracking-wide">
-          Daily Horoscope by Nation Path Editorial Desk
-        </p>
+{/* ===== MID CONTENT AD ===== */}
 
-        <div className="mt-4 w-12 h-[2px] bg-[#0b2a6f] mx-auto opacity-30"></div>
+{i===1 && (
+<div className="flex justify-center my-6">
+<AdRenderer placement="article_mid"/>
+</div>
+)}
 
-      </div>
+</div>
 
-      {/* CONTENT */}
-      <div
-        className="
-          prose prose-lg
-          prose-h3:text-[#0b2a6f]
-          prose-h3:font-serif
-          prose-h3:mt-10
-          prose-h3:mb-3
-          prose-p:leading-8
-          prose-p:text-gray-800
-          prose-strong:text-[#0b2a6f]
-          max-w-none
-        "
-        dangerouslySetInnerHTML={{ __html: article.content }}
-      />
+))}
 
-      {/* STYLING FOR INSIGHTS BOX */}
-      <style>
-        {`
-          .prose h3 + ul {
-            background: #f8f9fc;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e6e9f2;
-            list-style: none;
-          }
-          .prose h3 + ul li {
-            margin-bottom: 6px;
-          }
-        `}
-      </style>
+{!hasSections && (
 
-      {/* PREVIOUS / NEXT */}
-      <div className="mt-14 flex justify-between text-sm text-[#0b2a6f] font-medium">
+<div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
 
-        <Link href={`/astrology/${prevSlug}`}>
-          ← Previous Day
-        </Link>
+<p className="text-gray-700 whitespace-pre-line">
+{article.content}
+</p>
 
-        <Link href={`/astrology/${nextSlug}`}>
-          Next Day →
-        </Link>
+</div>
 
-      </div>
+)}
 
-      {/* EXPLORE OTHER SIGNS */}
-      <div className="mt-20 border-t pt-12">
+</div>
 
-        <h3 className="text-center text-2xl font-serif mb-8 text-[#0b2a6f]">
-          Explore Other Signs
-        </h3>
+{/* ===== BOTTOM AD ===== */}
 
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-6">
-          {zodiacSigns.map((sign) => (
-            <Link
-              key={sign}
-              href={`/astrology/${sign.toLowerCase()}-${isoDate}`}
-              className="group text-center p-4 rounded-xl border border-gray-100 hover:shadow-md hover:-translate-y-1 transition"
-            >
-              <div className="flex justify-center mb-3">
-                <ZodiacIcon sign={sign} />
-              </div>
-              <p className="text-sm capitalize text-gray-700 group-hover:text-[#0b2a6f]">
-                {sign}
-              </p>
-            </Link>
-          ))}
-        </div>
+<div className="flex justify-center mt-10">
+<AdRenderer placement="article_bottom"/>
+</div>
 
-      </div>
+</div>
 
-    </div>
-  );
+{/* ================= SIDEBAR ================= */}
+
+<div>
+
+{/* ===== SIDEBAR AD ===== */}
+
+<div className="mb-8 flex justify-center">
+<AdRenderer placement="article_sidebar_top"/>
+</div>
+
+{/* ZODIAC NAVIGATION */}
+
+<div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-8">
+
+<h3 className="font-semibold text-lg mb-6 text-center">
+आजका राशिहरू
+</h3>
+
+<div className="grid grid-cols-3 gap-4">
+
+{zodiac.map(([eng,nep,icon]:any,i)=>(
+
+<Link
+key={i}
+href={`/astrology/${icon}`}
+className="text-center group"
+>
+
+<div className="w-12 h-12 mx-auto rounded-full
+bg-purple-200 flex items-center justify-center
+group-hover:scale-110 transition">
+
+<img
+src={`/zodiac/${icon}.png`}
+className="w-6 opacity-80"
+/>
+
+</div>
+
+<p className="text-xs mt-1 text-gray-600">
+{nep}
+</p>
+
+</Link>
+
+))}
+
+</div>
+
+</div>
+
+{/* ================= LUCKY SECTION ================= */}
+
+<div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+
+<h3 className="font-semibold text-lg mb-4">
+🍀 आजको भाग्य संकेत
+</h3>
+
+<div className="grid grid-cols-2 gap-3 text-center text-sm">
+
+<div className="bg-purple-50 p-3 rounded">
+🎨
+<p>शुभ रंग</p>
+<b>{luckyColor || "—"}</b>
+</div>
+
+<div className="bg-purple-50 p-3 rounded">
+🔢
+<p>शुभ अंक</p>
+<b>{luckyNumber || "—"}</b>
+</div>
+
+<div className="bg-purple-50 p-3 rounded">
+🧭
+<p>शुभ दिशा</p>
+<b>{luckyDirection || "—"}</b>
+</div>
+
+<div className="bg-purple-50 p-3 rounded">
+⏰
+<p>शुभ समय</p>
+<b>{luckyTime || "—"}</b>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+)
 }

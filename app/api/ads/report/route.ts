@@ -1,50 +1,51 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma"
 
-export const dynamic = "force-dynamic";
+export async function GET(){
 
-export async function GET(req: Request) {
+try{
 
-  try {
+const ads = await prisma.ad.findMany({
+select:{
+title:true,
+placement:true,
+type:true,
+views:true,
+clicks:true,
+status:true
+}
+})
 
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+const csv = [
+"Title,Placement,Type,Views,Clicks,CTR,Status"
+]
 
-    if (!id) {
-      return new Response("Invalid campaign", { status: 400 });
-    }
+ads.forEach(ad => {
 
-    const ad = await prisma.ad.findUnique({
-      where: { id }
-    });
+const ctr = ad.views > 0
+? ((ad.clicks/ad.views)*100).toFixed(2)
+: "0"
 
-    if (!ad) {
-      return new Response("Campaign not found", { status: 404 });
-    }
+csv.push(
+`"${ad.title}","${ad.placement}","${ad.type}",${ad.views},${ad.clicks},"${ctr}%","${ad.status}"`
+)
 
-    const views = ad.views ?? 0;
-    const clicks = ad.clicks ?? 0;
+})
 
-    const ctr =
-      views > 0 ? ((clicks / views) * 100).toFixed(2) : "0";
+return new Response(csv.join("\n"),{
+headers:{
+"Content-Type":"text/csv",
+"Content-Disposition":"attachment; filename=nntv-ads-report.csv"
+}
+})
 
-    const revenue = clicks * (ad.cpc ?? 0);
+}catch(e){
 
-    const csv = `Campaign,Placement,Views,Clicks,CTR,Revenue
-${ad.title},${ad.placement},${views},${clicks},${ctr}%,₹${revenue}`;
+console.error("Ads report error",e)
 
-    return new Response(csv, {
-      headers: {
-        "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="${ad.title}-report.csv"`
-      }
-    });
+return new Response("Report generation failed",{
+status:500
+})
 
-  } catch (error) {
-
-    console.error("Ad report error:", error);
-
-    return new Response("Report generation failed", { status: 500 });
-
-  }
+}
 
 }

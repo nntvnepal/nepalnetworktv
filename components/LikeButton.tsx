@@ -1,53 +1,22 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState } from "react"
 
-export default function LikeButton({ articleId, initialLikes }: {
-  articleId: string;
-  initialLikes: number;
-}) {
+export default function LikeButton(){
 
-  const [likes, setLikes] = useState(initialLikes);
-  const [loading, setLoading] = useState(false);
-  const [clicked, setClicked] = useState(false);
+const [likes,setLikes] = useState(0)
 
-  async function handleLike() {
-    if (loading || clicked) return;
+return(
 
-    setLoading(true);
+<button
+onClick={()=>setLikes(likes+1)}
+className="bg-purple-600 text-white px-4 py-2 rounded"
+>
 
-    try {
-      const res = await fetch("/api/like", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ articleId }),
-      });
+👍 Like {likes}
 
-      const data = await res.json();
+</button>
 
-      if (data.likes !== undefined) {
-        setLikes(data.likes);
-        setClicked(true);
-      }
+)
 
-    } catch (err) {
-      console.error("Like error", err);
-    }
-
-    setLoading(false);
-  }
-
-  return (
-    <button
-      onClick={handleLike}
-      className={`flex items-center gap-2 px-4 py-2 rounded-full border transition
-        ${clicked ? "bg-blue-900 text-white" : "hover:bg-gray-100"}
-      `}
-    >
-      👍
-      <span className="text-sm font-medium">
-        {likes}
-      </span>
-    </button>
-  );
 }

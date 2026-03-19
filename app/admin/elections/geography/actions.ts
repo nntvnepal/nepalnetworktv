@@ -1,0 +1,50 @@
+"use server"
+
+import { prisma } from "@/lib/prisma"
+import { revalidatePath } from "next/cache"
+
+export async function deleteRegion(id:string){
+
+if(!id){
+throw new Error("Region id missing")
+}
+
+//////////////////////////////////////////////////////
+// CHECK CHILD REGIONS
+//////////////////////////////////////////////////////
+
+const childRegions = await prisma.region.count({
+where:{ parentId:id }
+})
+
+if(childRegions > 0){
+throw new Error("Delete child regions first")
+}
+
+//////////////////////////////////////////////////////
+// CHECK WARDS
+//////////////////////////////////////////////////////
+
+const wards = await prisma.ward.count({
+where:{ municipalityId:id }
+})
+
+if(wards > 0){
+throw new Error("Delete wards first")
+}
+
+//////////////////////////////////////////////////////
+// DELETE REGION
+//////////////////////////////////////////////////////
+
+await prisma.region.delete({
+where:{ id }
+})
+
+//////////////////////////////////////////////////////
+// REFRESH UI
+//////////////////////////////////////////////////////
+
+revalidatePath("/admin/elections/geography")
+
+}

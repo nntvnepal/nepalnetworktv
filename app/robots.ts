@@ -1,32 +1,16 @@
-import { MetadataRoute } from "next";
+import { MetadataRoute } from "next"
 
 export default function robots(): MetadataRoute.Robots {
 
-  const baseUrl = "https://www.nationpathindia.com";
-
   return {
-
-    rules: [
-      {
-        userAgent: "*",
-
-        allow: "/",
-
-        disallow: [
-          "/admin",
-          "/api",
-          "/_next",
-        ],
-      },
-    ],
-
-    sitemap: [
-      `${baseUrl}/sitemap.xml`,
-      `${baseUrl}/news-sitemap.xml`,
-    ],
-
-    host: baseUrl,
-
-  };
+    rules:{
+      userAgent:"*",
+      allow:"/"
+    },
+    sitemap:[
+      "https://www.nntvnepal.com/sitemap.xml",
+      "https://www.nntvnepal.com/news-sitemap.xml"
+    ]
+  }
 
 }

@@ -1,68 +1,31 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server"
 
-export const dynamic = "force-dynamic";
+export async function POST(req:Request){
 
-export async function POST(req: Request) {
+try{
 
-  try {
+const { id } = await req.json()
 
-    const body = await req.json();
-    const { adId } = body;
+if(!id){
+return NextResponse.json({success:false})
+}
 
-    if (!adId) {
-      return NextResponse.json(
-        { success: false, message: "Ad ID missing" },
-        { status: 400 }
-      );
-    }
+await prisma.ad.update({
+where:{id},
+data:{
+clicks:{increment:1}
+}
+})
 
-    const ad = await prisma.ad.findUnique({
-      where: { id: adId },
-      select: {
-        id: true,
-        status: true,
-        clicks: true,
-        maxClicks: true
-      }
-    });
+return NextResponse.json({success:true})
 
-    if (!ad || ad.status !== "active") {
-      return NextResponse.json({ success: false });
-    }
+}catch(e){
 
-    const updatedAd = await prisma.ad.update({
-      where: { id: adId },
-      data: {
-        clicks: { increment: 1 }
-      }
-    });
+console.error("Ad click tracking error",e)
 
-    /* Auto pause when max clicks reached */
+return NextResponse.json({success:false})
 
-    if (updatedAd.maxClicks && updatedAd.clicks >= updatedAd.maxClicks) {
-
-      await prisma.ad.update({
-        where: { id: adId },
-        data: {
-          completed: true,
-          status: "paused"
-        }
-      });
-
-    }
-
-    return NextResponse.json({ success: true });
-
-  } catch (error) {
-
-    console.error("Ad click error:", error);
-
-    return NextResponse.json(
-      { success: false, message: "Click tracking failed" },
-      { status: 500 }
-    );
-
-  }
+}
 
 }

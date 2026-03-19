@@ -1,35 +1,79 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 
-export default function DarkModeToggle() {
-  const [dark, setDark] = useState(false);
+export default function DarkModeToggle(){
 
-  useEffect(() => {
-    const isDark = localStorage.getItem("theme") === "dark";
-    setDark(isDark);
-    if (isDark) document.documentElement.classList.add("dark");
-  }, []);
+const [mounted,setMounted] = useState(false)
+const [dark,setDark] = useState(false)
 
-  const toggleDarkMode = () => {
-    const newTheme = !dark;
-    setDark(newTheme);
+//////////////////////////////////////////////////////
+// INIT THEME
+//////////////////////////////////////////////////////
 
-    if (newTheme) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
+useEffect(()=>{
 
-  return (
-    <button
-      onClick={toggleDarkMode}
-      className="border px-3 py-2 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-    >
-      {dark ? "☀ Light" : "🌙 Dark"}
-    </button>
-  );
+setMounted(true)
+
+const saved = localStorage.getItem("theme")
+
+if(saved){
+
+const isDark = saved === "dark"
+
+setDark(isDark)
+
+document.documentElement.classList.toggle("dark",isDark)
+
+}else{
+
+const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+
+setDark(systemDark)
+
+document.documentElement.classList.toggle("dark",systemDark)
+
+}
+
+},[])
+
+//////////////////////////////////////////////////////
+// TOGGLE
+//////////////////////////////////////////////////////
+
+function toggleTheme(){
+
+const newTheme = !dark
+
+setDark(newTheme)
+
+document.documentElement.classList.toggle("dark",newTheme)
+
+localStorage.setItem("theme",newTheme ? "dark" : "light")
+
+}
+
+//////////////////////////////////////////////////////
+// PREVENT HYDRATION MISMATCH
+//////////////////////////////////////////////////////
+
+if(!mounted) return null
+
+//////////////////////////////////////////////////////
+// UI
+//////////////////////////////////////////////////////
+
+return(
+
+<button
+onClick={toggleTheme}
+className="px-3 py-1 border rounded text-sm flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-zinc-800 transition"
+>
+
+{dark ? "☀ Light" : "🌙 Dark"}
+
+</button>
+
+)
+
 }

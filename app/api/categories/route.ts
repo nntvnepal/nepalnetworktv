@@ -3,142 +3,115 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-/* =========================
-   SLUG GENERATOR
-========================= */
-
-function generateSlug(name: string) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9 ]/g, "")
-    .replace(/\s+/g, "-");
-}
-
-/* =========================
-   GET ACTIVE CATEGORIES
-========================= */
+//////////////////////////////////////////////////////
+// GET ALL CATEGORIES
+//////////////////////////////////////////////////////
 
 export async function GET() {
   try {
 
     const categories = await prisma.category.findMany({
-      where: {
-        status: "active",
-      },
       orderBy: {
-        name: "asc",
+        priority: "asc",
       },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        status: true,
-        createdAt: true
-      }
     });
 
     return NextResponse.json({
       success: true,
-      categories
+      categories,
     });
 
   } catch (error) {
 
-    console.error("CATEGORY GET ERROR:", error);
+    console.error("Category fetch error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch categories"
+        error: "Failed to fetch categories",
       },
       { status: 500 }
     );
-
   }
 }
 
-/* =========================
-   CREATE CATEGORY
-========================= */
+//////////////////////////////////////////////////////
+// CREATE CATEGORY
+//////////////////////////////////////////////////////
 
 export async function POST(req: Request) {
 
   try {
 
-    let body;
+    const body = await req.json();
 
-    try {
-      body = await req.json();
-    } catch {
+    const name = body.name?.trim();
+    const slug = body.slug?.toLowerCase().trim();
+    const description = body.description || "";
+
+    //////////////////////////////////////////////////////
+    // VALIDATION
+    //////////////////////////////////////////////////////
+
+    if (!name || !slug) {
       return NextResponse.json(
-        { success: false, error: "Invalid request body" },
+        {
+          success: false,
+          error: "Name and slug are required",
+        },
         { status: 400 }
       );
     }
 
-    const name = body?.name?.trim();
-
-    if (!name) {
-      return NextResponse.json(
-        { success: false, error: "Category name required" },
-        { status: 400 }
-      );
-    }
-
-    const slug = generateSlug(name);
-
-    /* =========================
-       CHECK EXISTING CATEGORY
-    ========================= */
+    //////////////////////////////////////////////////////
+    // CHECK EXISTING SLUG
+    //////////////////////////////////////////////////////
 
     const existing = await prisma.category.findUnique({
-      where: { slug },
+      where: {
+        slug,
+      },
     });
 
     if (existing) {
       return NextResponse.json(
-        { success: false, error: "Category already exists" },
-        { status: 409 }
+        {
+          success: false,
+          error: "Slug already exists",
+        },
+        { status: 400 }
       );
     }
 
-    /* =========================
-       CREATE CATEGORY
-    ========================= */
+    //////////////////////////////////////////////////////
+    // CREATE CATEGORY
+    //////////////////////////////////////////////////////
 
-    const newCategory = await prisma.category.create({
+    const category = await prisma.category.create({
       data: {
         name,
         slug,
+        description,
         status: "active",
+        priority: 0,
       },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        status: true,
-        createdAt: true
-      }
     });
 
     return NextResponse.json({
       success: true,
-      category: newCategory
+      category,
     });
 
   } catch (error) {
 
-    console.error("CATEGORY CREATE ERROR:", error);
+    console.error("Category creation error:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to create category"
+        error: "Category creation failed",
       },
       { status: 500 }
     );
-
   }
-
 }

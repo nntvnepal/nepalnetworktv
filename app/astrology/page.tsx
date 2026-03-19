@@ -1,160 +1,205 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import ZodiacIcon from "@/components/ZodiacIcon";
 import type { Metadata } from "next";
+import AdRenderer from "@/components/ads/AdRenderer";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
 export const metadata: Metadata = {
-  title: "Daily Horoscope Today – All Zodiac Signs | Nation Path",
-  description:
-    "Read today's horoscope predictions for all zodiac signs. Get daily insights into career, love, health, lucky number and compatibility updated every morning in India.",
-  alternates: {
-    canonical: "https://nationpath.in/astrology",
-  },
-  openGraph: {
-    title: "Daily Horoscope Today – Nation Path",
-    description:
-      "Today's horoscope predictions for all zodiac signs including career, love, health and finance insights.",
-    url: "https://nationpath.in/astrology",
-    siteName: "Nation Path",
-    type: "website",
-  },
+title: "आजको राशिफल | सबै १२ राशिको भविष्यफल",
+description:
+"आजको दैनिक राशिफल पढ्नुहोस्। प्रेम, करियर, स्वास्थ्य, आर्थिक अवस्था र भाग्य सम्बन्धी भविष्यफल सबै १२ राशिका लागि।",
 };
 
-export default async function AstrologyPage() {
+/* ================= ZODIAC LIST ================= */
 
-  // 🇮🇳 IST SAFE DATE
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+const zodiac = [
 
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
+["Aries","मेष","aries"],
+["Taurus","वृष","taurus"],
+["Gemini","मिथुन","gemini"],
+["Cancer","कर्क","cancer"],
+["Leo","सिंह","leo"],
+["Virgo","कन्या","virgo"],
+["Libra","तुला","libra"],
+["Scorpio","वृश्चिक","scorpio"],
+["Sagittarius","धनु","sagittarius"],
+["Capricorn","मकर","capricorn"],
+["Aquarius","कुम्भ","aquarius"],
+["Pisces","मीन","pisces"]
 
-  const horoscopes = await prisma.article.findMany({
-    where: {
-      isAstrology: true,
-      status: "approved",
-      horoscopeDate: {
-        gte: today,
-        lt: tomorrow,
-      },
-    },
-  });
+];
 
-  const zodiacOrder = [
-    "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
-    "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
-  ];
+/* ================= PAGE ================= */
 
-  horoscopes.sort(
-    (a, b) =>
-      zodiacOrder.indexOf(a.zodiacSign ?? "") -
-      zodiacOrder.indexOf(b.zodiacSign ?? "")
-  );
+export default async function AstrologyPage(){
 
-  // 🔥 STRUCTURED DATA
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Daily Horoscope Today",
-    "description":
-      "Read today's horoscope predictions for all zodiac signs including career, love, health and finance guidance.",
-    "url": "https://nationpath.in/astrology",
-    "datePublished": today.toISOString(),
-    "dateModified": today.toISOString(),
-    "publisher": {
-      "@type": "Organization",
-      "name": "Nation Path",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://nationpath.in/logo.png"
-      }
-    }
-  };
+/* ---------- TODAY DATE ---------- */
 
-  return (
-    <div className="max-w-6xl mx-auto px-6 pt-12 pb-24">
+const today = new Date();
+today.setHours(0,0,0,0);
 
-      {/* JSON-LD SCHEMA */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+const tomorrow = new Date(today);
+tomorrow.setDate(today.getDate()+1);
 
-      {/* HEADER */}
-      <div className="text-center mb-14">
+/* ---------- FETCH HOROSCOPE ---------- */
 
-        <h1 className="text-4xl md:text-5xl font-serif text-[#0b2a6f]">
-          Daily Horoscope Today
-        </h1>
+const horoscopes = await prisma.article.findMany({
 
-        <p className="mt-4 text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Explore today’s horoscope predictions for all 12 zodiac signs.
-          Discover insights into career, love, relationships, health,
-          finances and daily lucky guidance updated every morning in India.
-        </p>
+where:{
+isAstrology:true,
+status:"approved",
+horoscopeDate:{
+gte:today,
+lt:tomorrow
+}
+},
 
-        <p className="mt-3 text-sm text-gray-500">
-          {today.toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-          })}
-        </p>
+select:{
+slug:true,
+zodiacSign:true
+}
 
-        <div className="mt-6 w-16 h-[2px] bg-[#0b2a6f] mx-auto opacity-30"></div>
+});
 
-      </div>
+/* ---------- MAP ZODIAC ---------- */
 
-      {/* ZODIAC GRID */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+const map:any={};
 
-        {horoscopes.map((item) => (
-          <Link
-            key={item.id}
-            href={`/astrology/${item.slug}`}
-            className="group text-center p-6 rounded-xl border border-gray-100 hover:shadow-md hover:-translate-y-1 transition duration-300"
-          >
-            <div className="flex justify-center mb-4">
-              <ZodiacIcon sign={item.zodiacSign} />
-            </div>
+horoscopes.forEach(h=>{
 
-            <h3 className="text-lg font-medium text-gray-800 group-hover:text-[#0b2a6f] capitalize">
-              {item.zodiacSign}
-            </h3>
+if(h.zodiacSign){
+map[h.zodiacSign.toLowerCase()] = h.slug;
+}
 
-            <p className="text-sm text-gray-500 mt-1">
-              Read Today →
-            </p>
+});
 
-          </Link>
-        ))}
 
-      </div>
+return(
 
-      {/* SEO CONTENT BLOCK */}
-      <div className="mt-24 max-w-3xl mx-auto text-gray-700 leading-relaxed">
+<div className="max-w-6xl mx-auto px-6 pt-12 pb-24">
 
-        <h2 className="text-2xl font-serif text-[#0b2a6f] mb-4">
-          About Daily Horoscope
-        </h2>
+{/* ================= TOP AD ================= */}
 
-        <p>
-          Daily horoscope predictions offer guidance for each zodiac sign
-          based on planetary movements and astrological interpretations.
-          Whether you are checking your career outlook, love compatibility,
-          financial prospects or health energy, today’s horoscope helps
-          you plan your day with greater clarity.
-        </p>
+<div className="flex justify-center mb-10">
+<AdRenderer placement="category_top"/>
+</div>
 
-        <p className="mt-4">
-          Nation Path publishes fresh horoscope updates every morning for
-          readers across India. Stay connected to receive accurate daily
-          zodiac forecasts and spiritual insights tailored to your sign.
-        </p>
 
-      </div>
+{/* ================= HEADER ================= */}
 
-    </div>
-  );
+<div className="text-center mb-14">
+
+<h1 className="text-4xl md:text-5xl font-serif text-[#0b2a6f]">
+आजको राशिफल
+</h1>
+
+<p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+आजको दिनका लागि सबै १२ राशिको दैनिक भविष्यफल पढ्नुहोस्।
+प्रेम, करियर, स्वास्थ्य र आर्थिक अवस्थाबारे ज्योतिषीय मार्गदर्शन।
+</p>
+
+<p className="mt-3 text-sm text-gray-500">
+
+{today.toLocaleDateString("ne-NP",{
+year:"numeric",
+month:"long",
+day:"numeric"
+})}
+
+</p>
+
+<div className="mt-6 w-16 h-[2px] bg-[#0b2a6f] mx-auto opacity-30"></div>
+
+</div>
+
+
+{/* ================= ZODIAC GRID ================= */}
+
+<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-10 mb-16">
+
+{zodiac.map(([eng,nep,icon]:any,i)=>{
+
+const slug = map[eng.toLowerCase()];
+
+const card=(
+
+<div className="text-center group">
+
+<div
+className="
+w-24 h-24
+mx-auto
+rounded-full
+bg-gradient-to-br from-[#6b1d7c] to-[#3a0a44]
+flex items-center justify-center
+shadow-xl
+group-hover:scale-105
+transition
+"
+>
+
+<img
+src={`/zodiac/${icon}.png`}
+alt={nep}
+className="w-12 h-12 object-contain brightness-0 invert"
+/>
+
+</div>
+
+<p className="mt-3 text-lg font-medium text-gray-800">
+{nep}
+</p>
+
+</div>
+
+);
+
+if(slug){
+
+return(
+
+<Link
+key={i}
+href={`/astrology/${slug}`}
+>
+{card}
+</Link>
+
+);
+
+}
+
+return(
+
+<div key={i} className="opacity-40">
+{card}
+</div>
+
+);
+
+})}
+
+</div>
+
+
+{/* ================= MIDDLE AD ================= */}
+
+<div className="flex justify-center mb-16">
+<AdRenderer placement="category_after_6_posts"/>
+</div>
+
+
+{/* ================= BOTTOM AD ================= */}
+
+<div className="flex justify-center">
+<AdRenderer placement="category_bottom"/>
+</div>
+
+
+</div>
+
+);
+
 }

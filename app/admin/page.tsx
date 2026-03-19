@@ -1,8 +1,7 @@
 "use client"
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-import VisitorMessages from "@/components/admin/VisitorMessages"
+
 import { useEffect, useState } from "react"
+
 import {
 LineChart,
 Line,
@@ -29,33 +28,107 @@ categories:any[]
 export default function AdminDashboard(){
 
 const [data,setData] = useState<DashboardData | null>(null)
+const [loading,setLoading] = useState(true)
+
+//////////////////////////////////////////////////////
+// FETCH DASHBOARD
+//////////////////////////////////////////////////////
 
 useEffect(()=>{
 
-fetch("/api/admin/dashboard")
-.then(res=>res.json())
-.then(res=>setData(res))
+const controller = new AbortController()
+
+async function load(){
+
+try{
+
+const res = await fetch("/api/admin/dashboard",{
+cache:"no-store",
+signal:controller.signal
+})
+
+if(!res.ok) throw new Error("Dashboard fetch failed")
+
+const json = await res.json()
+
+setData(json)
+
+}catch(err){
+
+console.error("Dashboard load error",err)
+
+}finally{
+
+setLoading(false)
+
+}
+
+}
+
+load()
+
+return ()=>controller.abort()
 
 },[])
 
-if(!data){
+//////////////////////////////////////////////////////
+// LOADING
+//////////////////////////////////////////////////////
+
+if(loading){
+
 return(
-<div className="p-10 text-white">
-Loading dashboard...
+
+<div className="p-10 text-white space-y-6">
+
+<div className="h-6 w-60 bg-gray-800 animate-pulse rounded"/>
+
+<div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
+
+{Array.from({length:6}).map((_,i)=>(
+<div key={i} className="h-24 bg-gray-800 animate-pulse rounded-xl"/>
+))}
+
 </div>
+
+</div>
+
 )
+
 }
 
+//////////////////////////////////////////////////////
+// ERROR
+//////////////////////////////////////////////////////
+
+if(!data){
+
+return(
+<div className="p-10 text-red-400">
+Dashboard failed to load
+</div>
+)
+
+}
+
+//////////////////////////////////////////////////////
+// DATA
+//////////////////////////////////////////////////////
+
 const {
-stats,
-latest,
-top,
-trending,
-viral,
-activity,
-chart,
-categories
+stats = {},
+latest = [],
+top = [],
+trending = [],
+viral = [],
+activity = [],
+chart = [],
+categories = []
 } = data
+
+//////////////////////////////////////////////////////
+// PAGE
+//////////////////////////////////////////////////////
 
 return(
 
@@ -64,12 +137,15 @@ return(
 {/* HEADER */}
 
 <div>
+
 <h1 className="text-2xl font-bold">
-Nation Path Admin
+NNTV Admin Dashboard
 </h1>
+
 <p className="text-gray-400">
-Newsroom control dashboard
+Newsroom control panel
 </p>
+
 </div>
 
 {/* MAIN STATS */}
@@ -125,6 +201,7 @@ type="monotone"
 dataKey="views"
 stroke="#ff7a18"
 strokeWidth={3}
+dot={false}
 />
 
 </LineChart>
@@ -153,10 +230,7 @@ Content Distribution
 
 <Tooltip/>
 
-<Bar
-dataKey="count"
-fill="#f97316"
-/>
+<Bar dataKey="count" fill="#f97316"/>
 
 </BarChart>
 
@@ -170,34 +244,27 @@ fill="#f97316"
 
 <div className="grid lg:grid-cols-2 gap-8">
 
-{/* LATEST */}
-
 <Panel title="Latest Articles">
 
-{latest?.map((a:any)=>(
-
-<Row
-key={a.id}
-title={a.title}
-/>
-
-))}
+{latest.length===0 ? (
+<Empty message="No articles yet"/>
+) : (
+latest.map((a:any)=>(
+<Row key={a.id} title={a.title}/>
+))
+)}
 
 </Panel>
 
-{/* MOST VIEWED */}
-
 <Panel title="Most Viewed">
 
-{top?.map((a:any)=>(
-
-<Row
-key={a.id}
-title={a.title}
-value={`${a.views} views`}
-/>
-
-))}
+{top.length===0 ? (
+<Empty message="No popular articles"/>
+) : (
+top.map((a:any)=>(
+<Row key={a.id} title={a.title} value={`${a.views} views`}/>
+))
+)}
 
 </Panel>
 
@@ -209,39 +276,31 @@ value={`${a.views} views`}
 
 <Panel title="Trending News">
 
-{trending?.map((a:any)=>(
-
-<Row
-key={a.id}
-title={a.title}
-value={`score ${a.trendingScore}`}
-/>
-
-))}
+{trending.length===0 ? (
+<Empty message="No trending news"/>
+) : (
+trending.map((a:any)=>(
+<Row key={a.id} title={a.title} value={`score ${a.trendingScore || 0}`}/>
+))
+)}
 
 </Panel>
 
 <Panel title="Viral Articles">
 
-{viral?.map((a:any)=>(
-
-<Row
-key={a.id}
-title={a.title}
-value={`${a.views} views`}
-/>
-
-))}
+{viral.length===0 ? (
+<Empty message="No viral articles"/>
+) : (
+viral.map((a:any)=>(
+<Row key={a.id} title={a.title} value={`${a.views} views`}/>
+))
+)}
 
 </Panel>
 
 </div>
 
-{/* VISITOR CHAT SECTION */}
-
-<div className="grid lg:grid-cols-2 gap-8">
-
-<VisitorMessages />
+{/* ACTIVITY */}
 
 <div className="bg-[#0e1726] border border-gray-800 rounded-xl p-8">
 
@@ -251,24 +310,19 @@ Recent Activity
 
 <div className="space-y-3">
 
-{activity?.map((a:any)=>(
-
+{activity.length===0 ? (
+<Empty message="No activity yet"/>
+) : (
+activity.map((a:any)=>(
 <div
 key={a.id}
 className="flex justify-between border-b border-gray-800 pb-2"
 >
-
 <span>{a.title}</span>
-
-<span className="text-gray-400 text-sm">
-{a.time}
-</span>
-
+<span className="text-gray-400 text-sm">{a.time}</span>
 </div>
-
-))}
-
-</div>
+))
+)}
 
 </div>
 
@@ -279,6 +333,10 @@ className="flex justify-between border-b border-gray-800 pb-2"
 )
 
 }
+
+//////////////////////////////////////////////////////
+// CARD
+//////////////////////////////////////////////////////
 
 function Card({title,value}:{title:string,value:number}){
 
@@ -286,12 +344,10 @@ return(
 
 <div className="bg-[#0e1726] border border-gray-800 rounded-xl p-5 hover:border-orange-400 transition">
 
-<p className="text-gray-400 text-sm">
-{title}
-</p>
+<p className="text-gray-400 text-sm">{title}</p>
 
 <h3 className="text-2xl font-bold mt-2">
-{value?.toLocaleString()}
+{value?.toLocaleString?.() || 0}
 </h3>
 
 </div>
@@ -299,6 +355,10 @@ return(
 )
 
 }
+
+//////////////////////////////////////////////////////
+// PANEL
+//////////////////////////////////////////////////////
 
 function Panel({title,children}:{title:string,children:any}){
 
@@ -311,9 +371,7 @@ return(
 </h2>
 
 <div className="space-y-3">
-
 {children}
-
 </div>
 
 </div>
@@ -321,6 +379,10 @@ return(
 )
 
 }
+
+//////////////////////////////////////////////////////
+// ROW
+//////////////////////////////////////////////////////
 
 function Row({title,value}:{title:string,value?:string}){
 
@@ -337,6 +399,22 @@ return(
 </span>
 
 </div>
+
+)
+
+}
+
+//////////////////////////////////////////////////////
+// EMPTY
+//////////////////////////////////////////////////////
+
+function Empty({message}:{message:string}){
+
+return(
+
+<p className="text-gray-500 text-sm">
+{message}
+</p>
 
 )
 

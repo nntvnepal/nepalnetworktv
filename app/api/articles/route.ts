@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { PostStatus } from "@prisma/client";
+import slugify from "slugify";
 
 export const dynamic = "force-dynamic";
 
@@ -10,137 +10,78 @@ function stripHtml(html: string) {
   return html?.replace(/<[^>]*>?/gm, "") || "";
 }
 
-async function generateUniqueSlug(title: string, currentId?: string) {
+/* ================= SLUG ================= */
 
-  const baseSlug = title
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w-]+/g, "");
+function createBaseSlug(title: string) {
+
+  const base = slugify(title, {
+    lower: true,
+    strict: true,
+    trim: true
+  });
+
+  return base || `news-${Date.now()}`;
+}
+
+async function generateUniqueSlug(title: string) {
+
+  const baseSlug = createBaseSlug(title);
 
   let slug = baseSlug;
   let counter = 1;
 
   while (true) {
 
-    const existing = await prisma.article.findFirst({
-      where: {
-        slug,
-        NOT: currentId ? { id: currentId } : undefined,
-      },
+    const exists = await prisma.article.findFirst({
+      where: { slug }
     });
 
-    if (!existing) break;
+    if (!exists) break;
 
-    slug = `${baseSlug}-${counter++}`;
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+
   }
 
   return slug;
+
 }
 
-/* ================= GET ARTICLES ================= */
+/* ================= GET NEWS ARTICLES ================= */
 
-export async function GET(req: Request) {
+export async function GET() {
 
   try {
 
-    const { searchParams } = new URL(req.url);
+    const articles = await prisma.article.findMany({
 
-    const page = Math.max(Number(searchParams.get("page")) || 1, 1);
-    const limit = Math.min(Number(searchParams.get("limit")) || 6, 20);
+      where: {
+        isDeleted: false,
 
-    const statusParam = searchParams.get("status");
-    const search = searchParams.get("search") || "";
-    const editorial = searchParams.get("editorial");
-    const astrology = searchParams.get("astrology");
-    const lightweight = searchParams.get("lightweight") === "true";
+        /* 🚨 VERY IMPORTANT */
+        isAstrology: false
+      },
 
-    const skip = (page - 1) * limit;
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
+      },
 
-    const where: any = { isDeleted: false };
-
-    if (statusParam) {
-
-      const formatted = statusParam.toLowerCase() as PostStatus;
-
-      if (Object.values(PostStatus).includes(formatted)) {
-        where.status = formatted;
+      orderBy: {
+        createdAt: "desc"
       }
 
-    }
-
-    if (search) {
-      where.title = { contains: search, mode: "insensitive" };
-    }
-
-    if (editorial === "true") where.isEditorial = true;
-    if (editorial === "false") where.isEditorial = false;
-
-    if (astrology === "true") where.isAstrology = true;
-    if (astrology === "false") where.isAstrology = false;
-
-    const [articles, total] = await Promise.all([
-
-      prisma.article.findMany({
-
-        where,
-
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          excerpt: true,
-          images: true,
-          createdAt: true,
-          views: true,
-
-          breaking: true,
-          flash: true,
-          featured: true,
-
-          breakingPriority: true,
-          flashPriority: true,
-          homepagePriority: true,
-
-          status: true,
-          isEditorial: true,
-          isAstrology: true,
-
-          category: lightweight
-            ? undefined
-            : {
-                select: {
-                  id: true,
-                  name: true,
-                  slug: true,
-                },
-              },
-
-          author: lightweight
-            ? undefined
-            : {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
-        },
-
-        orderBy: { createdAt: "desc" },
-
-        skip,
-        take: limit,
-      }),
-
-      prisma.article.count({ where }),
-
-    ]);
+    });
 
     return NextResponse.json({
       success: true,
-      articles,
-      totalPages: Math.ceil(total / limit),
-      totalArticles: total,
+      count: articles.length,
+      articles
     });
 
   } catch (error) {
@@ -148,7 +89,10 @@ export async function GET(req: Request) {
     console.error("GET ARTICLES ERROR:", error);
 
     return NextResponse.json(
-      { success: false, error: "Failed to fetch articles" },
+      {
+        success: false,
+        error: "Failed to fetch articles"
+      },
       { status: 500 }
     );
 
@@ -156,7 +100,7 @@ export async function GET(req: Request) {
 
 }
 
-/* ================= CREATE ARTICLE ================= */
+/* ================= CREATE NEWS ARTICLE ================= */
 
 export async function POST(req: Request) {
 
@@ -164,112 +108,105 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    const isEditorial = Boolean(body.isEditorial);
-    const isAstrology = Boolean(body.isAstrology);
+    const title = body.title?.trim();
+    const content = body.content?.trim();
+    const categoryId = body.categoryId;
 
-    if (!body.title?.trim())
+    /* VALIDATION */
+
+    if (!title) {
+
       return NextResponse.json(
         { success: false, error: "Title required" },
         { status: 400 }
       );
 
-    if (!body.content?.trim())
+    }
+
+    if (!content) {
+
       return NextResponse.json(
         { success: false, error: "Content required" },
         { status: 400 }
       );
 
-    if (!isEditorial && !isAstrology && !body.categoryId)
+    }
+
+    if (!categoryId) {
+
       return NextResponse.json(
         { success: false, error: "Category required" },
         { status: 400 }
       );
 
-    if (body.categoryId && !isEditorial && !isAstrology) {
+    }
 
-      const categoryExists = await prisma.category.findUnique({
-        where: { id: body.categoryId },
-      });
+    /* VERIFY CATEGORY */
 
-      if (!categoryExists)
-        return NextResponse.json(
-          { success: false, error: "Invalid category" },
-          { status: 400 }
-        );
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId }
+    });
+
+    if (!category) {
+
+      return NextResponse.json(
+        { success: false, error: "Invalid category" },
+        { status: 400 }
+      );
 
     }
 
-    const slug = await generateUniqueSlug(body.title);
+    /* SLUG */
 
-    const cleanContent = stripHtml(body.content);
+    const slug = await generateUniqueSlug(title);
 
-    const cleanImages = Array.isArray(body.images)
-      ? body.images
-          .filter((img: any) => typeof img === "string" && img.trim())
-          .map((img: string) => img.trim())
+    const cleanContent = stripHtml(content);
+
+    /* SAFE IMAGES */
+
+    const images = Array.isArray(body.images)
+      ? body.images.filter((img: any) => typeof img === "string")
       : [];
-
-    let validStatus: PostStatus = PostStatus.pending;
-
-    if (body.status) {
-
-      const formatted = body.status.toLowerCase() as PostStatus;
-
-      if (Object.values(PostStatus).includes(formatted)) {
-        validStatus = formatted;
-      }
-
-    }
 
     const article = await prisma.article.create({
 
       data: {
 
-        title: body.title.trim(),
+        title,
+
         slug,
 
-        content: body.content,
+        content,
 
-        excerpt: body.excerpt || cleanContent.substring(0, 200),
+        excerpt:
+          body.excerpt ||
+          cleanContent.substring(0, 200),
 
-        images: cleanImages,
+        images,
 
         videoUrl: body.videoUrl || null,
 
-        breaking: Boolean(body.breaking),
-        flash: Boolean(body.flash),
-        featured: Boolean(body.featured),
+        categoryId,
 
-        breakingPriority: Number(body.breakingPriority) || 0,
-        flashPriority: Number(body.flashPriority) || 0,
-        homepagePriority: Number(body.homepagePriority) || 0,
+        /* NEWS AUTO APPROVED */
 
-        isEditorial,
-        isAstrology,
+        status: "approved",
 
-        status: validStatus,
+        /* ASTROLOGY FLAG OFF */
 
-        metaTitle: body.metaTitle || body.title,
+        isAstrology: false,
+
+        metaTitle: body.metaTitle || title,
 
         metaDescription:
-          body.metaDescription || cleanContent.substring(0, 160),
-
-        metaKeywords:
-          body.metaKeywords ||
-          body.title
-            .toLowerCase()
-            .split(" ")
-            .slice(0, 10)
-            .join(", "),
-
-        categoryId:
-          isEditorial || isAstrology ? null : body.categoryId,
+          body.metaDescription ||
+          cleanContent.substring(0, 160)
 
       },
 
       include: {
-        category: true,
-      },
+        category: true
+      }
 
     });
 
@@ -277,19 +214,18 @@ export async function POST(req: Request) {
 
       success: true,
       id: article.id,
-      slug: article.slug,
-      category: article.category,
+      slug: article.slug
 
     });
 
   } catch (error: any) {
 
-    console.error("CREATE ERROR:", error);
+    console.error("CREATE ARTICLE ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: error?.message || "Server error",
+        error: error?.message || "Server error"
       },
       { status: 500 }
     );
@@ -298,7 +234,7 @@ export async function POST(req: Request) {
 
 }
 
-/* ================= DELETE ================= */
+/* ================= DELETE ARTICLE ================= */
 
 export async function DELETE(req: Request) {
 
@@ -306,26 +242,39 @@ export async function DELETE(req: Request) {
 
     const body = await req.json();
 
-    if (!body.id)
+    if (!body.id) {
+
       return NextResponse.json(
         { success: false, error: "ID required" },
         { status: 400 }
       );
 
-    await prisma.article.delete({
+    }
+
+    /* SOFT DELETE BETTER */
+
+    await prisma.article.update({
+
       where: { id: body.id },
+
+      data: {
+        isDeleted: true
+      }
+
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true
+    });
 
   } catch (error: any) {
 
-    console.error("DELETE ERROR:", error);
+    console.error("DELETE ARTICLE ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: error?.message || "Delete failed",
+        error: error?.message || "Delete failed"
       },
       { status: 500 }
     );

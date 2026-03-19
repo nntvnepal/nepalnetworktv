@@ -28,209 +28,165 @@ enum PostStatus {
 }
 
 //////////////////////////////////////////////////////
-// AD SYSTEM ENUMS
-//////////////////////////////////////////////////////
-
-enum AdPlacement {
-  homepage_top
-  homepage_after_hero
-  homepage_mid
-  homepage_after_list
-  homepage_sidebar_top
-  homepage_sidebar_bottom
-  homepage_bottom
-
-  article_top
-  article_after_hero
-  article_after_paragraph
-  article_mid
-  article_bottom
-
-  category_top
-  category_after_3_posts
-  category_sidebar
-  category_bottom
-}
-
-enum AdType {
-  image
-  adsense
-}
-
-//////////////////////////////////////////////////////
 // CATEGORY
 //////////////////////////////////////////////////////
-
 model Category {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  //////////////////////////////////////////////////////
+  // BASIC
+  //////////////////////////////////////////////////////
+
   name        String
   slug        String   @unique
   description String?
 
+  //////////////////////////////////////////////////////
+  // UI / DISPLAY
+  //////////////////////////////////////////////////////
+
+  color       String?  
+  icon        String?  
+
+  //////////////////////////////////////////////////////
+  // STATUS & ORDER
+  //////////////////////////////////////////////////////
+
   status      String   @default("active")
   priority    Int      @default(0)
 
-  seoTitle       String?
-  seoDescription String?
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime? @updatedAt
-
-  articles    Article[]
-
-  @@index([status])
-  @@index([priority])
-
-  @@map("Category")
-}
-
-//////////////////////////////////////////////////////
-// ARTICLE
-//////////////////////////////////////////////////////
-
-model Article {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-
-  title     String
-  slug      String @unique
-
-  content   String
-  excerpt   String?
-
-  images    String[]
-  videoUrl  String?
-
-  //////////////////////////////////////////////////////
-  // FLAGS
-  //////////////////////////////////////////////////////
-
-  breaking         Boolean @default(false)
-  flash            Boolean @default(false)
-  featured         Boolean @default(false)
-  isEditorial      Boolean @default(false)
-  isAstrology      Boolean @default(false)
-  isDeleted        Boolean @default(false)
-  isEditorsPick    Boolean @default(false)
-  isLive           Boolean @default(false)
-
-  homepagePriority Int @default(0)
-
-  breakingPriority Int @default(0)
-  flashPriority    Int @default(0)
-
-  //////////////////////////////////////////////////////
-  // HOROSCOPE
-  //////////////////////////////////////////////////////
-
-  zodiacSign     String?
-  horoscopeDate  DateTime?
-
-  //////////////////////////////////////////////////////
-  // STATUS
-  //////////////////////////////////////////////////////
-
-  status       PostStatus @default(pending)
-  publishedAt  DateTime?
-
-  //////////////////////////////////////////////////////
-  // ENGAGEMENT
-  //////////////////////////////////////////////////////
-
-  views      Int @default(0)
-  likes      Int @default(0)
-  shares     Int @default(0)
-
-  insightful Int @default(0)
-  important  Int @default(0)
-  surprising Int @default(0)
-  concerning Int @default(0)
-
-  //////////////////////////////////////////////////////
-  // TRENDING
-  //////////////////////////////////////////////////////
-
-  trendingScore Int      @default(0)
-  lastViewAt    DateTime?
-
-  //////////////////////////////////////////////////////
-  // TAGS
-  //////////////////////////////////////////////////////
-
-  tags String[]
+  isFeatured  Boolean  @default(false)
+  isBreaking  Boolean  @default(false)
 
   //////////////////////////////////////////////////////
   // SEO
   //////////////////////////////////////////////////////
 
-  readingTime       Int?
-  metaTitle         String?
-  metaDescription   String?
-  metaKeywords      String?
-  canonicalUrl      String?
-  ogImage           String?
-  structuredData    String?
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+
+  //////////////////////////////////////////////////////
+  // ANALYTICS
+  //////////////////////////////////////////////////////
+
+  totalArticles  Int      @default(0)
+  totalViews     Int      @default(0)
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
+
+  articles Article[]
 
   //////////////////////////////////////////////////////
   // TIMESTAMPS
   //////////////////////////////////////////////////////
 
   createdAt DateTime @default(now())
-  updatedAt DateTime? @updatedAt
-
-  //////////////////////////////////////////////////////
-  // RELATIONS
-  //////////////////////////////////////////////////////
-
-  categoryId String?   @db.ObjectId
-  category   Category? @relation(fields: [categoryId], references: [id])
-
-  authorId String? @db.ObjectId
-  author   User?   @relation(fields: [authorId], references: [id])
-
-  comments Comment[]
+  updatedAt DateTime @updatedAt
 
   //////////////////////////////////////////////////////
   // INDEXES
   //////////////////////////////////////////////////////
 
   @@index([status])
-  @@index([createdAt])
-  @@index([publishedAt])
-  @@index([views])
-  @@index([likes])
-  @@index([trendingScore])
-  @@index([breaking])
-  @@index([flash])
-  @@index([featured])
-  @@index([homepagePriority])
-  @@index([isEditorial])
-  @@index([isAstrology])
-  @@index([isDeleted])
+  @@index([priority])
+  @@index([isFeatured])
+  // ❌ slug index removed (already @unique)
+}
+//////////////////////////////////////////////////////
+// ARTICLE
+//////////////////////////////////////////////////////
+model Article {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  @@map("Article")
+  title    String
+  slug     String  @unique
+  subtitle String?
+
+  content String
+  excerpt String?
+
+  images    String[]
+  thumbnail String?
+  videoUrl  String?
+
+  location String?
+
+  breaking      Boolean @default(false)
+  flash         Boolean @default(false)
+  featured      Boolean @default(false)
+  isEditorial   Boolean @default(false)
+  isAstrology   Boolean @default(false)
+  isDeleted     Boolean @default(false)
+  isEditorsPick Boolean @default(false)
+  isLive        Boolean @default(false)
+
+  isSponsored Boolean @default(false)
+  isFactCheck Boolean @default(false)
+  isOpinion   Boolean @default(false)
+
+  homepagePriority Int @default(0)
+  breakingPriority Int @default(0)
+  flashPriority    Int @default(0)
+
+  breakingExpiresAt DateTime?
+
+  zodiacSign    String?
+  horoscopeDate DateTime?
+
+  status      PostStatus @default(pending)
+  publishedAt DateTime?
+
+  views  Int @default(0)
+  likes  Int @default(0)
+  shares Int @default(0)
+
+  trendingScore Int       @default(0)
+  lastViewAt    DateTime?
+
+  tags String[]
+
+  readingTime Int?
+
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  canonicalUrl    String?
+
+  ogTitle       String?
+  ogDescription String?
+  ogImage       String?
+
+  twitterTitle       String?
+  twitterDescription String?
+
+  showAuthor Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+
+  categoryId String?   @db.ObjectId
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  authorId String? @db.ObjectId
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 //////////////////////////////////////////////////////
-// COMMENT
+// BREAKING NEWS
 //////////////////////////////////////////////////////
 
-model Comment {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  content   String
-
-  userId    String? @db.ObjectId
-  user      User?   @relation(fields: [userId], references: [id])
-
-  articleId String  @db.ObjectId
-  article   Article @relation(fields: [articleId], references: [id])
-
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-
-  @@index([articleId])
-  @@index([createdAt])
-
-  @@map("Comment")
+model BreakingNews {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  headline  String?
+  priority  Int       @default(1)
+  isActive  Boolean   @default(true)
+  expireAt  DateTime?
+  createdBy String?   @db.ObjectId
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
 }
 
 //////////////////////////////////////////////////////
@@ -238,30 +194,26 @@ model Comment {
 //////////////////////////////////////////////////////
 
 model User {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name      String?
-  email     String @unique
-  password  String
+  name     String?
+  email    String  @unique
+  password String
 
-  role      Role @default(user)
-  isActive  Boolean @default(true)
-  avatar    String?
+  role Role @default(user)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime? @updatedAt
+  isActive Boolean @default(true)
 
-  articles  Article[]
-  comments  Comment[]
-  activity  ActivityLog[]
+  avatar String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+
+  articles Article[]
+  activity ActivityLog[]
 
   sentMessages     ChatMessage[] @relation("MessageSender")
   receivedMessages ChatMessage[] @relation("MessageReceiver")
-
-  @@index([role])
-  @@index([isActive])
-
-  @@map("User")
 }
 
 //////////////////////////////////////////////////////
@@ -269,77 +221,123 @@ model User {
 //////////////////////////////////////////////////////
 
 model ChatMessage {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  senderId   String? @db.ObjectId
-  sender     User?   @relation("MessageSender", fields:[senderId], references:[id])
+  senderId String? @db.ObjectId
+  sender   User?   @relation("MessageSender", fields: [senderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   receiverId String? @db.ObjectId
-  receiver   User?   @relation("MessageReceiver", fields:[receiverId], references:[id])
+  receiver   User?   @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  message    String
-  isRead     Boolean  @default(false)
+  message String
+  isRead  Boolean @default(false)
 
-  createdAt  DateTime @default(now())
-
-  @@index([senderId])
-  @@index([receiverId])
-  @@index([createdAt])
-
-  @@map("ChatMessage")
+  createdAt DateTime @default(now())
 }
 
 //////////////////////////////////////////////////////
-// AD SYSTEM
+// ADS
 //////////////////////////////////////////////////////
 
 model Ad {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  title       String
-  placement   AdPlacement
-  type        AdType
+  title     String
+  placement AdPlacement
+  type      AdType
 
-  imageUrl    String?
-  link        String?
+  imageUrl String?
+  link     String?
+
   adsenseCode String?
 
-  priority    Int     @default(1)
-  status      String  @default("active")
+  priority Int    @default(1)
+  status   String @default("active")
 
-  startDate   DateTime?
-  endDate     DateTime?
+  startDate DateTime?
+  endDate   DateTime?
 
   totalBudget Float?
   cpc         Float?
   maxClicks   Int?
 
-  views       Int @default(0)
-  clicks      Int @default(0)
-  completed   Boolean @default(false)
+  views  Int @default(0)
+  clicks Int @default(0)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime? @updatedAt
+  completed Boolean @default(false)
 
-  @@index([placement])
-  @@index([status])
-  @@index([priority])
-
-  @@map("Ad")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
 }
 
 //////////////////////////////////////////////////////
-// NEWSLETTER
+// AD ENUMS
 //////////////////////////////////////////////////////
 
-model NewsletterSubscriber {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  createdAt DateTime @default(now())
+enum AdPlacement {
+  //////////////////////////////////////////////////////
+  // HOMEPAGE
+  //////////////////////////////////////////////////////
 
-  @@index([createdAt])
+  homepage_top
+  homepage_after_hero
 
-  @@map("NewsletterSubscriber")
+  homepage_block_1
+  homepage_block_2
+  homepage_block_3
+  homepage_block_4
+
+  homepage_mid
+  homepage_after_list
+
+  homepage_sidebar_top
+  homepage_sidebar_bottom
+
+  homepage_bottom
+
+  //////////////////////////////////////////////////////
+  // ARTICLE PAGE
+  //////////////////////////////////////////////////////
+
+  article_top
+  article_after_hero
+
+  article_after_paragraph
+  article_mid
+
+  article_sidebar_top
+  article_sidebar_bottom
+
+  article_bottom
+
+  //////////////////////////////////////////////////////
+  // CATEGORY PAGE
+  //////////////////////////////////////////////////////
+
+  category_top
+
+  category_after_3_posts
+  category_after_6_posts
+
+  category_sidebar
+
+  category_bottom
+
+  //////////////////////////////////////////////////////
+  // GLOBAL / SITE WIDE
+  //////////////////////////////////////////////////////
+
+  header_banner
+  footer_banner
+
+  sticky_bottom
+  popup
+}
+
+enum AdType {
+  image
+  adsense
+  video
 }
 
 //////////////////////////////////////////////////////
@@ -347,21 +345,36 @@ model NewsletterSubscriber {
 //////////////////////////////////////////////////////
 
 model ActivityLog {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  action    String
-  entity    String?
-  entityId  String?
+  action   String
+  entity   String?
+  entityId String?
 
-  userId    String?  @db.ObjectId
-  user      User?    @relation(fields: [userId], references: [id])
+  userId String? @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   createdAt DateTime @default(now())
+}
 
-  @@index([createdAt])
-  @@index([userId])
+//////////////////////////////////////////////////////
+// NEWSLETTER
+//////////////////////////////////////////////////////
+model NewsletterSubscriber {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  @@map("ActivityLog")
+  email String @unique
+
+  status String @default("active")
+
+  source String? // footer / popup / article
+
+  ip        String?
+  userAgent String?
+
+  confirmed Boolean @default(false)
+
+  createdAt DateTime @default(now())
 }
 
 //////////////////////////////////////////////////////
@@ -369,23 +382,471 @@ model ActivityLog {
 //////////////////////////////////////////////////////
 
 model VisitorChat {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
   name      String?
   email     String?
   message   String
-
   ip        String?
   userAgent String?
 
-  isRead    Boolean  @default(false)
-  status    String   @default("open")
+  isRead Boolean @default(false)
+  status String  @default("open")
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// TV CONTROL
+//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+// TICKER MODES
+//////////////////////////////////////////////////////
+
+enum TickerMode {
+  scroll
+  flash
+  breaking
+}
+
+//////////////////////////////////////////////////////
+// TELEPROMPTER STATUS
+//////////////////////////////////////////////////////
+
+enum ScriptStatus {
+  draft
+  approved
+  live
+}
+
+//////////////////////////////////////////////////////
+// TV TICKER SYSTEM
+//////////////////////////////////////////////////////
+
+model Ticker {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  text String
+
+  mode TickerMode @default(scroll)
+
+  priority Int @default(1)
+
+  isActive Boolean @default(true)
+
+  duration Int? // seconds for flash / breaking
 
   createdAt DateTime @default(now())
 
-  @@index([createdAt])
-  @@index([isRead])
-  @@index([status])
+  updatedAt DateTime @updatedAt
 
-  @@map("VisitorChat")
+  @@index([mode])
+  @@index([isActive])
+  @@index([priority])
+}
+
+//////////////////////////////////////////////////////
+// LOWER THIRD GRAPHIC
+//////////////////////////////////////////////////////
+
+model LowerThird {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title String
+
+  subtitle String?
+
+  position String? // left | center | right
+
+  isActive Boolean @default(false)
+
+  priority Int @default(1)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+//////////////////////////////////////////////////////
+// TELEPROMPTER SCRIPT
+//////////////////////////////////////////////////////
+
+model TeleprompterScript {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title String
+
+  content String
+
+  status ScriptStatus @default(draft)
+
+  order Int? // script order for rundown
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+//////////////////////////////////////////////////////
+// LIVE SCORE
+//////////////////////////////////////////////////////
+
+model LiveScore {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  teamA String
+  teamB String
+
+  scoreA Int @default(0)
+  scoreB Int @default(0)
+
+  status String @default("live")
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// LIVE TV
+//////////////////////////////////////////////////////
+
+model LiveTV {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title     String
+  streamUrl String
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+}
+
+//////////////////////////////////////////////////////
+// POLL SPECIAL 
+//////////////////////////////////////////////////////
+model Poll {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  question String
+  isActive Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  options PollOption[]
+}
+
+model PollOption {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  text  String
+  votes Int    @default(0)
+
+  pollId String @db.ObjectId
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+}
+
+model PollVote {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  pollId   String @db.ObjectId
+  optionId String @db.ObjectId
+
+  ip String?
+
+  createdAt DateTime @default(now())
+}
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
+enum ElectionType {
+  LOCAL
+  PROVINCIAL
+  FEDERAL
+}
+
+enum ElectionStatus {
+  DRAFT
+  LIVE
+  COMPLETED
+}
+
+enum SeatPosition {
+  MAYOR
+  DEPUTY_MAYOR
+  CHAIRPERSON
+  VICE_CHAIRPERSON
+  WARD_CHAIR
+  WARD_MEMBER
+  MLA
+  MP
+  MLA_PR
+  MP_PR
+}
+
+enum RegionType {
+  PROVINCE
+  DISTRICT
+  METRO
+  SUB_METRO
+  MUNICIPALITY
+  RURAL_MUNICIPALITY
+}
+
+enum ConstituencyType {
+  MLA_FPTP
+  MP_FPTP
+}
+
+//////////////////////////////////////////////////////
+// ELECTION
+//////////////////////////////////////////////////////
+
+model Election {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name String
+  slug String @unique
+
+  type ElectionType
+  year Int
+
+  phase  Int?
+  status ElectionStatus @default(DRAFT)
+
+  isActive Boolean @default(false)
+
+  voters  Int?
+  turnout Float?
+
+  totalSeats Int?
+  majority   Int?
+
+  meta Json?
+
+  seats      Seat[]
+  candidates Candidate[]
+  results    ElectionResult[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([year])
+  @@index([status])
+  @@index([isActive])
+}
+
+//////////////////////////////////////////////////////
+// REGION
+//////////////////////////////////////////////////////
+
+model Region {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name String
+  type RegionType
+  code String?
+
+  parentId String? @db.ObjectId
+
+  parent   Region?  @relation("RegionHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Region[] @relation("RegionHierarchy")
+
+  wards          Ward[]
+  seats          Seat[]
+  constituencies Constituency[]
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([parentId])
+  @@index([code])
+}
+
+//////////////////////////////////////////////////////
+// WARD
+//////////////////////////////////////////////////////
+
+model Ward {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  number Int
+
+  municipalityId String @db.ObjectId
+  municipality   Region @relation(fields: [municipalityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  seats Seat[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([municipalityId, number])
+  @@index([municipalityId])
+}
+
+//////////////////////////////////////////////////////
+// CONSTITUENCY
+//////////////////////////////////////////////////////
+
+model Constituency {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name String
+  code String @unique
+
+  type ConstituencyType
+
+  provinceId String? @db.ObjectId
+  province   Region? @relation(fields: [provinceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  seats Seat[]
+
+  createdAt DateTime @default(now())
+
+  @@index([type])
+  @@index([provinceId])
+}
+
+//////////////////////////////////////////////////////
+// SEAT
+//////////////////////////////////////////////////////
+
+model Seat {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name String
+  code String?
+
+  position SeatPosition
+  number   Int?
+
+  electionId String   @db.ObjectId
+  election   Election @relation(fields: [electionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  regionId String? @db.ObjectId
+  region   Region? @relation(fields: [regionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  wardId String? @db.ObjectId
+  ward   Ward?   @relation(fields: [wardId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  constituencyId String?       @db.ObjectId
+  constituency   Constituency? @relation(fields: [constituencyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  candidates Candidate[]
+  results    ElectionResult[]
+
+  totalVotes     Int    @default(0)
+  turnoutPercent Float?
+
+  winnerCandidateId String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([electionId])
+  @@index([position])
+  @@index([regionId])
+  @@index([wardId])
+  @@index([constituencyId])
+}
+
+//////////////////////////////////////////////////////
+// CANDIDATE
+//////////////////////////////////////////////////////
+
+model Candidate {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name   String
+  gender String?
+  dob    DateTime?
+
+  photo String?
+
+  electionId String   @db.ObjectId
+  election   Election @relation(fields: [electionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  seatId String @db.ObjectId
+  seat   Seat   @relation(fields: [seatId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  partyId String? @db.ObjectId
+  party   Party?  @relation(fields: [partyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  results ElectionResult[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([electionId, seatId, name])
+  @@index([seatId])
+  @@index([partyId])
+  @@index([electionId])
+  @@index([electionId, seatId])
+}
+
+//////////////////////////////////////////////////////
+// RESULT
+//////////////////////////////////////////////////////
+
+model ElectionResult {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  electionId  String  @db.ObjectId
+  seatId      String  @db.ObjectId
+  candidateId String  @db.ObjectId
+  partyId     String? @db.ObjectId
+
+  election  Election  @relation(fields: [electionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  seat      Seat      @relation(fields: [seatId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  party     Party?    @relation(fields: [partyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  votes Int @default(0)
+
+  rank        Int?
+  votePercent Float?
+
+  isLeader Boolean @default(false)
+  isWinner Boolean @default(false)
+
+  isPublished Boolean @default(false)
+  isVerified  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([electionId, seatId, candidateId])
+  @@index([electionId])
+  @@index([seatId])
+  @@index([candidateId])
+  @@index([partyId])
+  @@index([electionId, seatId])
+  @@index([electionId, seatId, votes])
+  @@index([electionId, rank])
+  @@index([isWinner])
+}
+
+//////////////////////////////////////////////////////
+// PARTY
+//////////////////////////////////////////////////////
+
+model Party {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name String
+  code String @unique
+
+  color String
+  logo  String?
+
+  priority Int     @default(0)
+  isActive Boolean @default(true)
+
+  candidates Candidate[]
+  results    ElectionResult[]
+
+  createdAt DateTime @default(now())
+
+  @@index([priority])
 }

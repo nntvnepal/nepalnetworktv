@@ -1,134 +1,241 @@
-import type { Metadata } from "next";
-import { Globe, ShieldCheck, Lightbulb, Newspaper } from "lucide-react";
+"use client"
 
-export const metadata: Metadata = {
-  title: "About Nation Path | Independent Journalism Platform",
-  description:
-    "Nation Path is an independent digital news platform delivering credible journalism, strategic analysis and fact-driven reporting on national and global developments.",
-};
+import { Globe, ShieldCheck, Lightbulb, Newspaper } from "lucide-react"
+import { useLegalLang } from "../legalLangContext"
 
-export default function AboutPage() {
-  return (
-    <main className="max-w-5xl mx-auto px-6 py-20">
+export default function AboutPage(){
 
-      {/* HERO */}
+const { lang } = useLegalLang()
 
-      <section className="mb-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-serif mb-6">
-          About Nation Path
-        </h1>
+const content = {
 
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          <strong>Nation Path</strong> is an independent digital news platform
-          committed to delivering credible journalism, in-depth analysis and
-          responsible reporting on national and global developments.
-        </p>
+en:{
+title:"About Nepal Network Television",
 
-        <p className="text-gray-500 mt-4">
-          Operated by <strong>SuryaPath Media, India</strong>
-        </p>
-      </section>
+intro:
+"Nepal Network Television (NNTV) is a modern digital media platform delivering credible journalism, engaging storytelling and diverse content across news, entertainment and culture.",
 
-      {/* VISION + MISSION */}
+tagline:"Media Beyond the Nation",
 
-      <section className="grid md:grid-cols-3 gap-8 mb-20">
+visionTitle:"Our Vision",
+visionText:
+"To become a trusted digital media network that informs, educates and inspires audiences through reliable journalism and creative storytelling.",
 
-        <div className="bg-gray-50 p-8 rounded-xl text-center">
-          <Globe className="mx-auto mb-4 text-[#0b2a6f]" size={34} />
-          <h3 className="font-semibold text-lg mb-2">Our Vision</h3>
-          <p className="text-gray-600 text-sm">
-            To build a trusted digital news platform that informs, educates
-            and empowers citizens through reliable journalism.
-          </p>
-        </div>
+integrityTitle:"Editorial Integrity",
+integrityText:
+"Our newsroom follows strong editorial principles ensuring accuracy, fairness and responsible journalism in every story we publish.",
 
-        <div className="bg-gray-50 p-8 rounded-xl text-center">
-          <ShieldCheck className="mx-auto mb-4 text-[#0b2a6f]" size={34} />
-          <h3 className="font-semibold text-lg mb-2">Editorial Integrity</h3>
-          <p className="text-gray-600 text-sm">
-            Our newsroom follows strict editorial standards ensuring accuracy,
-            fairness and responsible journalism in every article we publish.
-          </p>
-        </div>
+missionTitle:"Our Mission",
+missionText:
+"To provide fact-based reporting, meaningful analysis and engaging content that helps audiences understand society, culture and global developments.",
 
-        <div className="bg-gray-50 p-8 rounded-xl text-center">
-          <Lightbulb className="mx-auto mb-4 text-[#0b2a6f]" size={34} />
-          <h3 className="font-semibold text-lg mb-2">Our Mission</h3>
-          <p className="text-gray-600 text-sm">
-            To provide fact-based reporting and insightful analysis that helps
-            readers understand complex issues shaping our world.
-          </p>
-        </div>
+coverageTitle:"What We Cover",
 
-      </section>
+c1:"Politics & Governance",
+c2:"Economy & Business",
+c3:"Technology & Innovation",
+c4:"Entertainment & Culture",
 
-      {/* COVERAGE */}
+journalismTitle:"Responsible Journalism",
 
-      <section className="mb-20">
+journalismText1:
+"NNTV believes journalism plays a vital role in strengthening democratic dialogue and public awareness. Our platform focuses on context-driven reporting, verified information and balanced perspectives.",
 
-        <h2 className="text-2xl font-serif mb-8 text-center">
-          What We Cover
-        </h2>
+journalismText2:
+"Alongside news and analysis, NNTV also delivers engaging content covering entertainment, lifestyle, arts, digital culture and human-interest stories that reflect the evolving voice of modern Nepal.",
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+orgTitle:"Our Platform",
 
-          <CoverageCard title="Politics & Governance" />
-          <CoverageCard title="Defence & Strategic Affairs" />
-          <CoverageCard title="Technology & Innovation" />
-          <CoverageCard title="Global Affairs" />
+orgText:
+"Nepal Network Television (NNTV) operates as an independent digital media initiative committed to credible journalism, creative media production and responsible storytelling for a global Nepali audience."
+},
 
-        </div>
+np:{
+title:"नेपाल नेटवर्क टेलिभिजनको बारेमा",
 
-      </section>
+intro:
+"नेपाल नेटवर्क टेलिभिजन (NNTV) आधुनिक डिजिटल मिडिया प्लेटफर्म हो जसले समाचार, मनोरञ्जन, संस्कृति र समाजसँग सम्बन्धित विविध सामग्री प्रस्तुत गर्दछ।",
 
-      {/* JOURNALISM VALUES */}
+tagline:"राष्ट्रभन्दा परको सञ्चार",
 
-      <section className="mb-20">
+visionTitle:"हाम्रो दृष्टि",
+visionText:
+"विश्वसनीय पत्रकारिता र सिर्जनात्मक कथनमार्फत दर्शक तथा पाठकलाई जानकारी, शिक्षा र प्रेरणा प्रदान गर्ने भरोसायोग्य डिजिटल मिडिया नेटवर्क बन्नु।",
 
-        <h2 className="text-2xl font-serif mb-6">
-          Responsible Journalism
-        </h2>
+integrityTitle:"सम्पादकीय निष्ठा",
+integrityText:
+"हाम्रो समाचार कक्षले प्रत्येक समाचारमा सत्यता, निष्पक्षता र जिम्मेवार पत्रकारितालाई प्राथमिकता दिँदै कडा सम्पादकीय मापदण्ड पालना गर्दछ।",
 
-        <p className="text-gray-600 leading-relaxed mb-6">
-          Nation Path believes that journalism plays a crucial role in
-          strengthening democratic discourse. Our platform focuses on
-          providing context, analysis and verified information that helps
-          readers understand developments beyond headlines.
-        </p>
+missionTitle:"हाम्रो लक्ष्य",
+missionText:
+"तथ्यमा आधारित समाचार, गहिरो विश्लेषण र आकर्षक सामग्री प्रस्तुत गर्दै समाज, संस्कृति र विश्वका घटनाक्रमलाई बुझ्न सहयोग गर्नु।",
 
-        <p className="text-gray-600 leading-relaxed">
-          Every article published on Nation Path undergoes editorial review
-          and fact-checking before publication. We remain committed to
-          transparency and correcting factual errors whenever necessary.
-        </p>
+coverageTitle:"हामीले कभर गर्ने विषयहरू",
 
-      </section>
+c1:"राजनीति तथा शासन",
+c2:"अर्थतन्त्र तथा व्यापार",
+c3:"प्रविधि तथा नवप्रवर्तन",
+c4:"मनोरञ्जन तथा संस्कृति",
 
-      {/* ORGANIZATION */}
+journalismTitle:"जिम्मेवार पत्रकारिता",
 
-      <section className="border-t pt-10">
+journalismText1:
+"NNTV ले पत्रकारितालाई लोकतान्त्रिक संवादलाई सुदृढ बनाउने महत्वपूर्ण माध्यमका रूपमा हेर्छ। हाम्रो प्लेटफर्मले प्रमाणित सूचना, सन्तुलित दृष्टिकोण र सन्दर्भसहित समाचार प्रस्तुत गर्दछ।",
 
-        <h2 className="text-xl font-serif mb-4">
-          Organization
-        </h2>
+journalismText2:
+"समाचार र विश्लेषणका साथै NNTV ले मनोरञ्जन, जीवनशैली, कला, डिजिटल संस्कृति तथा मानव कथासँग सम्बन्धित सामग्री पनि प्रस्तुत गर्दछ जसले आधुनिक नेपालको विविध आवाजलाई प्रतिबिम्बित गर्दछ।",
 
-        <p className="text-gray-600">
-          Nation Path is operated by <strong>SuryaPath Media</strong>, an
-          independent media initiative based in India focused on building
-          credible digital journalism platforms.
-        </p>
+orgTitle:"हाम्रो प्लेटफर्म",
 
-      </section>
-
-    </main>
-  );
+orgText:
+"नेपाल नेटवर्क टेलिभिजन (NNTV) विश्वभरका नेपाली दर्शक तथा पाठकका लागि विश्वसनीय पत्रकारिता, सिर्जनात्मक मिडिया सामग्री र जिम्मेवार कथन प्रस्तुत गर्ने स्वतन्त्र डिजिटल मिडिया प्लेटफर्म हो।"
 }
 
-function CoverageCard({ title }: { title: string }) {
-  return (
-    <div className="bg-white border p-6 rounded-lg text-center hover:shadow-md transition">
-      <Newspaper className="mx-auto mb-3 text-[#0b2a6f]" size={28} />
-      <p className="font-medium">{title}</p>
-    </div>
-  );
+}
+
+const t = content[lang]
+
+return(
+
+<main className="max-w-5xl mx-auto px-6 py-20">
+
+{/* HERO */}
+
+<section className="mb-16 text-center">
+
+<h1 className="text-4xl md:text-5xl font-serif mb-6">
+{t.title}
+</h1>
+
+<p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+{t.intro}
+</p>
+
+<p className="text-gray-500 mt-4">
+<strong>NNTV</strong> — {t.tagline}
+</p>
+
+</section>
+
+{/* VISION + MISSION */}
+
+<section className="grid md:grid-cols-3 gap-8 mb-20">
+
+<div className="bg-gray-50 p-8 rounded-xl text-center">
+
+<Globe className="mx-auto mb-4 text-[#4b0055]" size={34}/>
+
+<h3 className="font-semibold text-lg mb-2">
+{t.visionTitle}
+</h3>
+
+<p className="text-gray-600 text-sm">
+{t.visionText}
+</p>
+
+</div>
+
+<div className="bg-gray-50 p-8 rounded-xl text-center">
+
+<ShieldCheck className="mx-auto mb-4 text-[#4b0055]" size={34}/>
+
+<h3 className="font-semibold text-lg mb-2">
+{t.integrityTitle}
+</h3>
+
+<p className="text-gray-600 text-sm">
+{t.integrityText}
+</p>
+
+</div>
+
+<div className="bg-gray-50 p-8 rounded-xl text-center">
+
+<Lightbulb className="mx-auto mb-4 text-[#4b0055]" size={34}/>
+
+<h3 className="font-semibold text-lg mb-2">
+{t.missionTitle}
+</h3>
+
+<p className="text-gray-600 text-sm">
+{t.missionText}
+</p>
+
+</div>
+
+</section>
+
+{/* COVERAGE */}
+
+<section className="mb-20">
+
+<h2 className="text-2xl font-serif mb-8 text-center">
+{t.coverageTitle}
+</h2>
+
+<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+<CoverageCard title={t.c1}/>
+<CoverageCard title={t.c2}/>
+<CoverageCard title={t.c3}/>
+<CoverageCard title={t.c4}/>
+
+</div>
+
+</section>
+
+{/* JOURNALISM */}
+
+<section className="mb-20">
+
+<h2 className="text-2xl font-serif mb-6">
+{t.journalismTitle}
+</h2>
+
+<p className="text-gray-600 leading-relaxed mb-6">
+{t.journalismText1}
+</p>
+
+<p className="text-gray-600 leading-relaxed">
+{t.journalismText2}
+</p>
+
+</section>
+
+{/* ORGANIZATION */}
+
+<section className="border-t pt-10">
+
+<h2 className="text-xl font-serif mb-4">
+{t.orgTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.orgText}
+</p>
+
+</section>
+
+</main>
+
+)
+
+}
+
+function CoverageCard({ title }:{ title:string }){
+
+return(
+
+<div className="bg-white border p-6 rounded-lg text-center hover:shadow-md transition">
+
+<Newspaper className="mx-auto mb-3 text-[#4b0055]" size={28}/>
+
+<p className="font-medium">
+{title}
+</p>
+
+</div>
+
+)
+
 }

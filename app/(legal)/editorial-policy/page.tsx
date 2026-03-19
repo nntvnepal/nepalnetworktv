@@ -1,120 +1,159 @@
-import type { Metadata } from "next";
-import { ShieldCheck, CheckCircle, Scale, FileCheck } from "lucide-react";
+"use client"
 
-export const metadata: Metadata = {
-  title: "Editorial Policy | Nation Path",
-  description:
-    "Nation Path editorial policy outlining journalistic standards, fact-checking principles and editorial independence.",
-};
+import { ShieldCheck, CheckCircle, Scale, FileCheck } from "lucide-react"
+import { useLegalLang } from "../legalLangContext"
 
-export default function EditorialPolicyPage() {
-  return (
-    <main className="max-w-5xl mx-auto px-6 py-20">
+export default function EditorialPolicyPage(){
 
-      {/* HEADER */}
+const { lang } = useLegalLang()
 
-      <section className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-serif mb-6">
-          Editorial Policy
-        </h1>
+const content = {
 
-        <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          Nation Path follows strict editorial standards to ensure accuracy,
-          independence and responsible journalism. Our newsroom is committed
-          to reporting facts, providing balanced perspectives and maintaining
-          transparency with our readers.
-        </p>
-      </section>
+en:{
+title:"Editorial Policy",
 
-      {/* POLICY GRID */}
+intro:"Nepal Network Television (NNTV) follows strict editorial standards to ensure accuracy, independence and responsible journalism.",
 
-      <section className="grid md:grid-cols-2 gap-10 mb-20">
+accuracyTitle:"Accuracy & Fact-Checking",
+accuracyText:"All stories published on NNTV undergo editorial verification before publication.",
 
-        <PolicyCard
-          icon={<CheckCircle size={32} />}
-          title="Accuracy & Fact-Checking"
-          text="All articles published on Nation Path undergo editorial review and verification before publication. Our journalists rely on credible sources, official data and expert analysis to ensure accuracy."
-        />
+independenceTitle:"Editorial Independence",
+independenceText:"NNTV operates independently from political or commercial influence.",
 
-        <PolicyCard
-          icon={<ShieldCheck size={32} />}
-          title="Editorial Independence"
-          text="Nation Path operates independently of political or commercial influence. Editorial decisions are made by our newsroom based solely on journalistic merit and public interest."
-        />
+balanceTitle:"Fairness & Balance",
+balanceText:"We aim to present news with balance and context.",
 
-        <PolicyCard
-          icon={<Scale size={32} />}
-          title="Fairness & Balance"
-          text="We strive to present issues with balance and context. When covering debates or controversies, multiple perspectives are considered to provide readers with a comprehensive understanding."
-        />
+correctionTitle:"Corrections Policy",
+correctionText:"If factual errors occur, NNTV corrects them transparently and promptly.",
 
-        <PolicyCard
-          icon={<FileCheck size={32} />}
-          title="Corrections Policy"
-          text="If factual errors occur, Nation Path is committed to correcting them transparently and promptly. Corrections are clearly updated within the article to maintain accountability."
-        />
+principlesTitle:"Our Journalism Principles",
 
-      </section>
+p1:"Accuracy and verification of information",
+p2:"Independence from political and corporate influence",
+p3:"Transparency in reporting",
+p4:"Respect for ethical journalism",
+p5:"Accountability and corrections",
 
-      {/* JOURNALISM PRINCIPLES */}
+responsibilityTitle:"Editorial Responsibility",
 
-      <section className="mb-20">
+responsibilityText:"NNTV maintains responsible journalism and transparency in reporting."
+},
 
-        <h2 className="text-2xl font-serif mb-6">
-          Our Journalism Principles
-        </h2>
+np:{
+title:"सम्पादकीय नीति",
 
-        <ul className="space-y-3 text-gray-600">
-          <li>• Accuracy and verification of information</li>
-          <li>• Independence from political and corporate influence</li>
-          <li>• Transparency in sourcing and reporting</li>
-          <li>• Respect for ethical journalism standards</li>
-          <li>• Accountability and correction of errors</li>
-        </ul>
+intro:"नेपाल नेटवर्क टेलिभिजन (NNTV) ले सत्य, निष्पक्षता र जिम्मेवार पत्रकारितालाई प्राथमिकता दिन्छ।",
 
-      </section>
+accuracyTitle:"सत्यता र तथ्य जाँच",
+accuracyText:"NNTV मा प्रकाशित सबै समाचारहरू सम्पादकीय जाँचपछि मात्र प्रकाशित गरिन्छन्।",
 
-      {/* ORGANIZATION */}
+independenceTitle:"सम्पादकीय स्वतन्त्रता",
+independenceText:"NNTV कुनै पनि राजनीतिक वा व्यावसायिक दबाबबाट स्वतन्त्र रूपमा सञ्चालन हुन्छ।",
 
-      <section className="border-t pt-10">
+balanceTitle:"निष्पक्षता र सन्तुलन",
+balanceText:"हामी समाचारलाई सन्तुलित रूपमा प्रस्तुत गर्न प्रयास गर्छौं।",
 
-        <h2 className="text-xl font-serif mb-4">
-          Editorial Responsibility
-        </h2>
+correctionTitle:"सुधार नीति",
+correctionText:"यदि त्रुटि भेटिएमा NNTV ले तुरुन्त सुधार गर्दछ।",
 
-        <p className="text-gray-600 leading-relaxed">
-          Nation Path is operated by <strong>SuryaPath Media, India</strong>.
-          The editorial team follows established journalism practices and
-          strives to maintain credibility, transparency and integrity in
-          every report published on the platform.
-        </p>
+principlesTitle:"हाम्रो पत्रकारिता सिद्धान्त",
 
-      </section>
+p1:"सूचनाको सत्यता",
+p2:"राजनीतिक प्रभावबाट स्वतन्त्रता",
+p3:"पारदर्शिता",
+p4:"नैतिक पत्रकारिता",
+p5:"त्रुटि सुधार",
 
-    </main>
-  );
+responsibilityTitle:"सम्पादकीय जिम्मेवारी",
+
+responsibilityText:"नेपाल नेटवर्क टेलिभिजन जिम्मेवार पत्रकारिताप्रति प्रतिबद्ध छ।"
 }
 
-function PolicyCard({
-  icon,
-  title,
-  text,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  text: string;
-}) {
-  return (
-    <div className="bg-gray-50 p-8 rounded-xl">
+}
 
-      <div className="text-[#0b2a6f] mb-4">{icon}</div>
+const t = content[lang]
 
-      <h3 className="font-semibold text-lg mb-2">{title}</h3>
+return(
 
-      <p className="text-gray-600 text-sm leading-relaxed">
-        {text}
-      </p>
+<main className="max-w-5xl mx-auto px-6 py-20">
 
-    </div>
-  );
+<section className="text-center mb-16">
+
+<h1 className="text-4xl md:text-5xl font-serif mb-6">
+{t.title}
+</h1>
+
+<p className="text-gray-600 max-w-3xl mx-auto">
+{t.intro}
+</p>
+
+</section>
+
+<section className="grid md:grid-cols-2 gap-10 mb-20">
+
+<PolicyCard icon={<CheckCircle size={32}/> } title={t.accuracyTitle} text={t.accuracyText}/>
+<PolicyCard icon={<ShieldCheck size={32}/> } title={t.independenceTitle} text={t.independenceText}/>
+<PolicyCard icon={<Scale size={32}/> } title={t.balanceTitle} text={t.balanceText}/>
+<PolicyCard icon={<FileCheck size={32}/> } title={t.correctionTitle} text={t.correctionText}/>
+
+</section>
+
+<section className="mb-20">
+
+<h2 className="text-2xl font-serif mb-6">
+{t.principlesTitle}
+</h2>
+
+<ul className="space-y-3 text-gray-600">
+
+<li>• {t.p1}</li>
+<li>• {t.p2}</li>
+<li>• {t.p3}</li>
+<li>• {t.p4}</li>
+<li>• {t.p5}</li>
+
+</ul>
+
+</section>
+
+<section className="border-t pt-10">
+
+<h2 className="text-xl font-serif mb-4">
+{t.responsibilityTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.responsibilityText}
+</p>
+
+</section>
+
+</main>
+
+)
+
+}
+
+function PolicyCard({icon,title,text}:{icon:React.ReactNode,title:string,text:string}){
+
+return(
+
+<div className="bg-gray-50 p-8 rounded-xl">
+
+<div className="text-[#4b0055] mb-4">
+{icon}
+</div>
+
+<h3 className="font-semibold text-lg mb-2">
+{title}
+</h3>
+
+<p className="text-gray-600 text-sm">
+{text}
+</p>
+
+</div>
+
+)
+
 }

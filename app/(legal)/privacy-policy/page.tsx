@@ -1,161 +1,234 @@
-import type { Metadata } from "next";
+"use client"
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Nation Path",
-  description:
-    "Privacy Policy explaining how Nation Path collects, uses and protects user information.",
-};
+import { useLegalLang } from "../legalLangContext"
 
-export default function PrivacyPolicyPage() {
-  return (
-    <main className="max-w-4xl mx-auto px-6 py-20">
+export default function PrivacyPolicyPage(){
 
-      <h1 className="text-4xl font-serif mb-10">
-        Privacy Policy
-      </h1>
+const { lang } = useLegalLang()
 
-      <p className="text-gray-600 mb-8">
-        At Nation Path, accessible from nationpathindia.com, the privacy of our
-        visitors is one of our main priorities. This Privacy Policy document
-        outlines the types of information that are collected and recorded by
-        Nation Path and how we use it.
-      </p>
+const content = {
 
-      {/* INFORMATION COLLECTION */}
+en:{
+title:"Privacy Policy",
 
-      <section className="mb-10">
+intro:
+"Nepal Network Television (NNTV) respects the privacy of its visitors and is committed to protecting personal information. This Privacy Policy explains what information we collect, how we use it and how we safeguard your data when you use our platform.",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Information We Collect
-        </h2>
+collectTitle:"Information We Collect",
 
-        <p className="text-gray-600">
-          We may collect personal information such as your name, email address,
-          and any information you voluntarily provide through forms such as
-          contact inquiries or newsletter subscriptions.
-        </p>
+collectText:
+"We may collect limited personal information such as your name, email address or other information you voluntarily provide through forms such as contact inquiries, newsletter subscriptions or feedback submissions.",
 
-      </section>
+useTitle:"How We Use Your Information",
 
-      {/* HOW WE USE INFORMATION */}
+u1:"To respond to inquiries or messages",
+u2:"To improve website functionality and content",
+u3:"To analyze website traffic and audience engagement",
+u4:"To send updates or newsletters if users subscribe",
 
-      <section className="mb-10">
+cookiesTitle:"Cookies and Web Technologies",
 
-        <h2 className="text-2xl font-serif mb-4">
-          How We Use Your Information
-        </h2>
+cookiesText:
+"NNTV may use cookies and similar technologies to enhance user experience, remember preferences and analyze website usage. These tools help us improve site performance and deliver more relevant content.",
 
-        <ul className="text-gray-600 space-y-2">
-          <li>• To respond to inquiries and feedback</li>
-          <li>• To improve website content and user experience</li>
-          <li>• To analyze site traffic and usage patterns</li>
-          <li>• To communicate updates or newsletters if subscribed</li>
-        </ul>
+adsTitle:"Advertising Partners",
 
-      </section>
+adsText:
+"Our website may display advertisements from third-party networks. These partners may use technologies such as cookies or tracking scripts to measure advertising performance and deliver relevant advertisements.",
 
-      {/* COOKIES */}
+thirdTitle:"Third-Party Privacy Policies",
 
-      <section className="mb-10">
+thirdText:
+"NNTV’s Privacy Policy does not apply to other websites or services linked from our platform. We encourage users to review the privacy policies of third-party websites for more information.",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Cookies and Web Beacons
-        </h2>
+childrenTitle:"Children's Information",
 
-        <p className="text-gray-600">
-          Nation Path uses cookies to store information about visitors'
-          preferences and to optimize user experience by customizing our web
-          page content based on visitors’ browser type or other information.
-        </p>
+childrenText:
+"NNTV does not knowingly collect personal identifiable information from children under the age of 13. If you believe a child has provided such information on our platform, please contact us so we can remove it promptly.",
 
-      </section>
+consentTitle:"Consent",
 
-      {/* ADVERTISING */}
+consentText:
+"By using the NNTV website, you agree to this Privacy Policy and consent to the collection and use of information in accordance with this policy.",
 
-      <section className="mb-10">
+orgTitle:"Contact & Organization",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Advertising Partners
-        </h2>
+orgText:
+"Nepal Network Television (NNTV) is an independent digital media platform. For any privacy-related questions or concerns please contact us at"
+},
 
-        <p className="text-gray-600">
-          Third-party ad servers or networks may use technologies like cookies,
-          JavaScript, or Web Beacons in their advertisements and links that
-          appear on Nation Path. These technologies help measure advertising
-          effectiveness and personalize advertising content.
-        </p>
+np:{
+title:"गोपनीयता नीति",
 
-      </section>
+intro:
+"नेपाल नेटवर्क टेलिभिजन (NNTV) आफ्ना प्रयोगकर्ताहरूको गोपनीयतालाई सम्मान गर्दछ र व्यक्तिगत जानकारीको सुरक्षा गर्न प्रतिबद्ध छ। यस गोपनीयता नीतिले हामीले कस्तो जानकारी सङ्कलन गर्छौं, त्यसलाई कसरी प्रयोग गर्छौं र कसरी सुरक्षित राख्छौं भन्ने स्पष्ट गर्दछ।",
 
-      {/* THIRD PARTY */}
+collectTitle:"हामीले सङ्कलन गर्ने जानकारी",
 
-      <section className="mb-10">
+collectText:
+"हामीले सीमित व्यक्तिगत जानकारी जस्तै तपाईंको नाम, इमेल ठेगाना वा सम्पर्क फारम, न्यूजलेटर सदस्यता वा प्रतिक्रिया मार्फत तपाईंले स्वेच्छाले प्रदान गर्नुभएको जानकारी सङ्कलन गर्न सक्छौं।",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Third-Party Privacy Policies
-        </h2>
+useTitle:"हामी जानकारी कसरी प्रयोग गर्छौं",
 
-        <p className="text-gray-600">
-          Nation Path’s Privacy Policy does not apply to other advertisers or
-          websites. We advise you to consult the respective Privacy Policies of
-          third-party services for more detailed information.
-        </p>
+u1:"प्रश्न वा सन्देशको जवाफ दिन",
+u2:"वेबसाइट सामग्री र प्रयोगकर्ता अनुभव सुधार गर्न",
+u3:"वेबसाइट ट्राफिक र प्रयोग ढाँचा विश्लेषण गर्न",
+u4:"सदस्यता लिएका प्रयोगकर्तालाई अपडेट वा न्यूजलेटर पठाउन",
 
-      </section>
+cookiesTitle:"कुकीहरू र वेब प्रविधि",
 
-      {/* CHILDREN */}
+cookiesText:
+"NNTV ले प्रयोगकर्ता अनुभव सुधार गर्न, प्राथमिकताहरू सम्झन र वेबसाइट प्रयोग विश्लेषण गर्न कुकीहरू तथा समान प्रविधिहरू प्रयोग गर्न सक्छ।",
 
-      <section className="mb-10">
+adsTitle:"विज्ञापन साझेदार",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Children's Information
-        </h2>
+adsText:
+"हाम्रो वेबसाइटमा तेस्रो पक्षका विज्ञापन नेटवर्कहरूको विज्ञापन देखिन सक्छ। यी साझेदारहरूले विज्ञापनको प्रभावकारिता मापन गर्न कुकी वा ट्र्याकिङ प्रविधि प्रयोग गर्न सक्छन्।",
 
-        <p className="text-gray-600">
-          Protecting children while using the internet is important to us.
-          Nation Path does not knowingly collect any personal identifiable
-          information from children under the age of 13.
-        </p>
+thirdTitle:"तेस्रो पक्ष गोपनीयता नीति",
 
-      </section>
+thirdText:
+"NNTV को गोपनीयता नीति अन्य वेबसाइट वा सेवाहरूमा लागू हुँदैन। त्यसैले प्रयोगकर्तालाई ती वेबसाइटहरूको गोपनीयता नीति अध्ययन गर्न सल्लाह दिइन्छ।",
 
-      {/* CONSENT */}
+childrenTitle:"बालबालिकाको जानकारी",
 
-      <section className="mb-10">
+childrenText:
+"NNTV ले १३ वर्ष मुनिका बालबालिकाबाट जानाजानी व्यक्तिगत जानकारी सङ्कलन गर्दैन। यदि त्यस्तो जानकारी प्रदान गरिएको छ भने कृपया हामीलाई जानकारी दिनुहोस्।",
 
-        <h2 className="text-2xl font-serif mb-4">
-          Consent
-        </h2>
+consentTitle:"स्वीकृति",
 
-        <p className="text-gray-600">
-          By using our website, you hereby consent to our Privacy Policy and
-          agree to its terms.
-        </p>
+consentText:
+"NNTV वेबसाइट प्रयोग गरेर तपाईं यस गोपनीयता नीतिसँग सहमत हुनुहुन्छ र यसमा उल्लिखित सर्तहरू स्वीकार गर्नुहुन्छ।",
 
-      </section>
+orgTitle:"सम्पर्क तथा संस्था",
 
-      {/* COMPANY */}
+orgText:
+"नेपाल नेटवर्क टेलिभिजन (NNTV) एक स्वतन्त्र डिजिटल मिडिया प्लेटफर्म हो। गोपनीयतासम्बन्धी कुनै प्रश्न भएमा कृपया हामीलाई सम्पर्क गर्नुहोस्"
+}
 
-      <section className="border-t pt-8">
+}
 
-        <h2 className="text-xl font-serif mb-3">
-          Organization
-        </h2>
+const t = content[lang]
 
-        <p className="text-gray-600">
-          Nation Path is operated by <strong>SuryaPath Media, India</strong>.
-          For any privacy-related questions, please contact us at{" "}
-          <a
-            href="mailto:info@nationpathindia.com"
-            className="text-[#0b2a6f] hover:underline"
-          >
-            info@nationpathindia.com
-          </a>
-          .
-        </p>
+return(
 
-      </section>
+<main className="max-w-4xl mx-auto px-6 py-20">
 
-    </main>
-  );
+<h1 className="text-4xl font-serif mb-10">
+{t.title}
+</h1>
+
+<p className="text-gray-600 mb-8">
+{t.intro}
+</p>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.collectTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.collectText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.useTitle}
+</h2>
+
+<ul className="text-gray-600 space-y-2">
+<li>• {t.u1}</li>
+<li>• {t.u2}</li>
+<li>• {t.u3}</li>
+<li>• {t.u4}</li>
+</ul>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.cookiesTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.cookiesText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.adsTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.adsText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.thirdTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.thirdText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.childrenTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.childrenText}
+</p>
+
+</section>
+
+<section className="mb-10">
+
+<h2 className="text-2xl font-serif mb-4">
+{t.consentTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.consentText}
+</p>
+
+</section>
+
+<section className="border-t pt-8">
+
+<h2 className="text-xl font-serif mb-3">
+{t.orgTitle}
+</h2>
+
+<p className="text-gray-600">
+{t.orgText}{" "}
+<a
+href="mailto:info@nntvnepal.com"
+className="text-[#4b0055] hover:underline"
+>
+info@nntvnepal.com
+</a>
+</p>
+
+</section>
+
+</main>
+
+)
+
 }

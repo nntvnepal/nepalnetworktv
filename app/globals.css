@@ -2,84 +2,1273 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  scroll-behavior: smooth;
+/* =================================
+GLOBAL BODY
+================================= */
+
+body{
+background:#f5f6fa;
+color:#111;
+font-family:var(--font-body);
+line-height:1.75;
+font-size:16px;
+-webkit-font-smoothing:antialiased;
 }
 
-body {
-  margin: 0;
-  padding: 0;
+/* =================================
+TYPOGRAPHY
+================================= */
+
+h1,h2,h3,h4{
+font-family:var(--font-heading);
+letter-spacing:.2px;
 }
 
-/* Serif headlines */
-h1, h2, h3 {
-  font-family: var(--font-heading);
+nav{
+font-family:var(--font-menu);
 }
 
-/* Thin professional borders */
-.section-border {
-  border-top: 1px solid #e5e7eb;
-}
-@keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+/* =================================
+SECTION TITLE
+================================= */
+
+.section-title{
+font-size:22px;
+font-weight:700;
+border-left:4px solid #ffd700;
+padding-left:12px;
+margin-bottom:22px;
 }
 
-.animate-marquee {
-  display: inline-block;
-  animation: marquee 25s linear infinite;
-}
-:root {
-  --brand-navy: #0f172a;        /* deep navy */
-  --brand-navy-light: #1e3a8a;  /* hover navy */
-}
-footer ul li a {
-  transition: 0.2s ease;
+/* =================================
+HEADER / FOOTER
+================================= */
+
+.nntv-bg{
+
+background:linear-gradient(
+90deg,
+#4b0055 0%,
+#5e0a6e 40%,
+#3a0045 100%
+);
+
+box-shadow:
+inset 0 1px 0 rgba(255,255,255,.08),
+0 2px 6px rgba(0,0,0,.15);
+
 }
 
-footer ul li a:hover {
-  color: white;
-}
-body {
-  background-color: #ffffff;
-  background-image: url('/texture.png'); /* your uploaded texture */
-  background-size: cover;
-  background-repeat: repeat;
-  background-blend-mode: multiply;
+/* =================================
+LOGO
+================================= */
+
+.logo-shadow{
+filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+transition:.3s;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(255,255,255,0.96);
-  pointer-events: none;
-  z-index: -1;
-}
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.logo-shadow:hover{
+transform:scale(1.05);
+filter:drop-shadow(0 10px 20px rgba(0,0,0,.5));
 }
 
-.fade-in {
-  animation: fadeInUp 0.8s ease-out both;
+/* =================================
+NAVIGATION
+================================= */
+
+.nav-link{
+
+position:relative;
+
+font-weight:700;
+
+font-size:15px;
+
+letter-spacing:.3px;
+
+color:#222;
+
+transition:.25s;
+
+white-space:nowrap;
+
 }
-.ticker{
+
+.nav-link:hover
+
+.nav-link::after{
+
+content:"";
+
+position:absolute;
+
+left:0;
+
+bottom:-6px;
+
+width:0;
+
+height:2px;
+
+background:linear-gradient(
+90deg,
+#ffd700,
+#caa54b
+);
+
+transition:.25s;
+
+}
+
+.nav-link:hover::after{
+width:100%;
+}
+
+.nav-link.active{
+color:#4b0055;
+}
+
+/* =================================
+MENU DROPDOWN (अन्य)
+================================= */
+
+.menu-dropdown{
+position:relative;
+cursor:pointer;
+}
+
+.menu-dropdown-content{
+
+position:absolute;
+
+top:34px;
+
+left:0;
+
+background:white;
+
+min-width:210px;
+
+border-radius:8px;
+
+box-shadow:0 14px 35px rgba(0,0,0,.15);
+
+padding:8px 0;
+
+opacity:0;
+
+transform:translateY(6px);
+
+transition:.25s;
+
+pointer-events:none;
+
+z-index:100;
+
+}
+
+.menu-dropdown:hover .menu-dropdown-content{
+
+opacity:1;
+
+transform:translateY(0);
+
+pointer-events:auto;
+
+}
+
+.menu-dropdown-content a{
+
+display:block;
+
+padding:9px 16px;
+
+font-size:14px;
+
+}
+
+.menu-dropdown-content a:hover{
+
+background:#f5f5f5;
+
+color:#4b0055;
+
+}
+
+/* =================================
+BREAKING NEWS
+================================= */
+
+.breaking-wrapper{
+
 display:flex;
-animation:tickerMove 30s linear infinite;
+
+align-items:center;
+
+background:white;
+
+border-radius:8px;
+
+overflow:hidden;
+
+border:1px solid #eee;
+
+margin-bottom:28px;
+
 }
 
-.ticker:hover{
+.breaking-title{
+
+background:#4b0055;
+
+color:white;
+
+padding:9px 16px;
+
+font-weight:600;
+
+font-size:14px;
+
+}
+
+.breaking-scroll{
+
+flex:1;
+
+padding-left:12px;
+
+font-size:14px;
+
+}
+
+/* =================================
+HERO NEWS
+================================= */
+
+.hero-news{
+
+position:relative;
+
+height:370px;
+
+border-radius:10px;
+
+overflow:hidden;
+
+}
+
+.hero-news img{
+transition:transform .4s ease;
+}
+
+.hero-news:hover img{
+transform:scale(1.05);
+}
+
+.hero-overlay{
+
+position:absolute;
+
+bottom:0;
+
+left:0;
+
+right:0;
+
+padding:24px;
+
+background:linear-gradient(
+transparent,
+rgba(0,0,0,.8)
+);
+
+color:white;
+
+}
+
+.hero-overlay h2{
+
+font-size:26px;
+
+font-weight:700;
+
+line-height:1.3;
+
+}
+
+/* =================================
+TRENDING
+================================= */
+
+.trending-box{
+
+background:white;
+
+border:1px solid #eee;
+
+padding:18px;
+
+border-radius:10px;
+
+box-shadow:0 6px 16px rgba(0,0,0,.04);
+
+}
+
+.trending-box li{
+
+font-size:14px;
+
+padding:10px 0;
+
+border-bottom:1px solid #eee;
+
+cursor:pointer;
+
+display:flex;
+
+align-items:center;
+
+gap:8px;
+
+}
+
+.trending-box li:hover
+
+/* =================================
+NEWS GRID
+================================= */
+
+.news-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+gap:22px;
+
+}
+
+.news-card{
+
+background:white;
+
+border:1px solid #eee;
+
+border-radius:10px;
+
+overflow:hidden;
+
+transition:.3s;
+
+}
+
+.news-card img{
+transition:transform .4s ease;
+}
+
+.news-card:hover img{
+transform:scale(1.05);
+}
+
+.news-card:hover{
+
+box-shadow:0 12px 26px rgba(0,0,0,.08);
+
+transform:translateY(-4px);
+
+}
+
+.news-content{
+padding:16px;
+}
+
+.news-content h3{
+
+font-size:16px;
+
+font-weight:600;
+
+line-height:1.4;
+
+}
+
+.news-content p{
+
+font-size:13px;
+
+color:#666;
+
+margin-top:6px;
+
+}
+
+/* =================================
+EDITORIAL
+================================= */
+
+.editorial-grid{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:20px;
+
+}
+
+.editorial-card{
+
+display:flex;
+
+gap:14px;
+
+background:white;
+
+border:1px solid #eee;
+
+padding:14px;
+
+border-radius:8px;
+
+transition:.3s;
+
+}
+
+.editorial-card:hover{
+
+box-shadow:0 8px 18px rgba(0,0,0,.08);
+
+transform:translateY(-2px);
+
+}
+
+/* =================================
+VIDEO
+================================= */
+
+.video-grid{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+
+gap:20px;
+
+}
+
+.video-card{
+
+background:white;
+
+border:1px solid #eee;
+
+border-radius:10px;
+
+overflow:hidden;
+
+transition:.3s;
+
+}
+
+.video-card:hover{
+box-shadow:0 10px 20px rgba(0,0,0,.08);
+}
+
+.video-thumb{
+
+position:relative;
+
+height:180px;
+
+}
+
+.play-btn{
+
+position:absolute;
+
+top:50%;
+
+left:50%;
+
+transform:translate(-50%,-50%);
+
+background:#4b0055;
+
+color:white;
+
+width:50px;
+
+height:50px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+border-radius:50%;
+
+}
+
+/* =================================
+CATEGORY BLOCK
+================================= */
+
+.category-section{
+margin-top:40px;
+}
+
+.category-grid{
+
+display:grid;
+
+grid-template-columns:2fr 1fr;
+
+gap:24px;
+
+}
+
+/* =================================
+ADVERTISEMENT
+================================= */
+
+.ad-box{
+
+background:#f1f1f1;
+
+text-align:center;
+
+padding:36px;
+
+border-radius:6px;
+
+font-size:14px;
+
+color:#666;
+
+border:1px dashed #ddd;
+
+}
+
+/* =================================
+SCROLL INDICATOR
+================================= */
+
+.scroll-indicator{
+
+position:fixed;
+
+top:0;
+
+left:0;
+
+height:3px;
+
+width:100%;
+
+background:linear-gradient(
+90deg,
+#7a1b7f,
+#caa54b,
+#ffd700,
+#caa54b,
+#7a1b7f
+);
+
+z-index:9999;
+
+}
+
+/* =================================
+TICKER
+================================= */
+
+@keyframes tickerMove{
+
+0%{transform:translateX(100%)}
+
+100%{transform:translateX(-100%)}
+
+}
+
+.ticker-move{
+animation:tickerMove 25s linear infinite;
+}
+
+/* =================================
+GLASS CARD
+================================= */
+
+.glass-card{
+
+background:linear-gradient(
+145deg,
+rgba(255,255,255,0.07),
+rgba(255,255,255,0.02)
+);
+
+backdrop-filter:blur(18px);
+
+border:1px solid rgba(255,255,255,0.08);
+
+border-radius:18px;
+
+box-shadow:
+0 10px 40px rgba(0,0,0,0.45),
+inset 0 1px 0 rgba(255,255,255,0.05);
+
+transition:.3s;
+
+}
+
+.glass-card:hover{
+transform:translateY(-3px);
+}
+
+/* =================================
+SMOOTH UI
+================================= */
+
+a,button{
+transition:.25s;
+}
+
+html{
+scroll-behavior:smooth;
+}
+/* ===============================
+NNTV RASHIFAL
+=============================== */
+
+.rashi-round-card{
+
+text-align:center;
+
+cursor:pointer;
+
+transition:.35s;
+
+}
+
+/* circle */
+
+.rashi-round-circle{
+
+width:90px;
+height:90px;
+
+margin:auto;
+
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+position:relative;
+
+background:linear-gradient(
+135deg,
+#6a1b6f,
+#3b0845
+);
+
+box-shadow:
+0 10px 25px rgba(0,0,0,.25);
+
+transition:.35s;
+
+}
+
+/* zodiac icon */
+
+.rashi-round-icon{
+
+width:46px;
+height:46px;
+
+filter:brightness(0) invert(1);
+
+transition:.3s;
+
+}
+
+/* hover lift */
+
+.rashi-round-card:hover .rashi-round-circle{
+
+transform:translateY(-6px) scale(1.05);
+
+box-shadow:
+0 18px 40px rgba(0,0,0,.35);
+
+}
+
+/* gold ring when active */
+
+.rashi-active .rashi-round-circle{
+
+border:2px solid #ffd700;
+
+box-shadow:
+0 0 10px #ffd700,
+0 0 25px rgba(255,215,0,.6);
+
+}
+
+/* inactive / no horoscope */
+
+.rashi-disabled{
+
+opacity:.35;
+
+filter:grayscale(1);
+
+}
+
+/* rashi name */
+
+.rashi-round-name{
+
+margin-top:10px;
+
+font-size:15px;
+
+font-weight:600;
+
+color:#2b2b2b;
+
+}
+
+/* hover name color */
+
+.rashi-round-card:hover .rashi-round-name{
+
+color:#3b0845;
+
+}
+
+/* ===== NNTV ALIGNMENT FIX ===== */
+
+.category-grid{
+grid-template-columns:1.3fr 1fr;
+align-items:start;
+}
+
+.category-list{
+display:flex;
+flex-direction:column;
+gap:16px;
+}
+
+.category-item{
+display:flex;
+gap:12px;
+align-items:flex-start;
+}
+
+.category-item img{
+width:90px;
+height:65px;
+object-fit:cover;
+}
+/* ===== FIX: LATEST NEWS GRID ===== */
+
+.news-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:24px;
+align-items:start;
+}
+
+@media(max-width:900px){
+
+.news-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+@media(max-width:600px){
+
+.news-grid{
+grid-template-columns:1fr;
+}
+
+}
+.news-card img{
+width:100%;
+height:180px;
+object-fit:cover;
+}
+.ad-box{
+
+background:#f8f8f8;
+
+border:1px dashed #ddd;
+
+padding:40px;
+
+text-align:center;
+
+color:#888;
+
+font-size:14px;
+
+border-radius:8px;
+
+}
+/* MENU ACTIVE */
+
+.menu-active{
+background:#4b0055;
+color:white !important;
+padding:6px 10px;
+border-radius:6px;
+font-weight:600;
+}
+
+/* MOBILE TAP EFFECT */
+
+.menu-active:active{
+transform:scale(.96);
+}
+
+/* SIDEBAR SLIDE */
+
+@keyframes slideMenu{
+from{
+transform:translateX(-100%);
+}
+
+to{
+transform:translateX(0);
+}
+}
+
+.animate-slideMenu{
+animation:slideMenu .25s ease;
+}
+.menu-link{
+padding:10px 12px;
+border-radius:6px;
+transition:all .2s;
+display:block;
+}
+
+.menu-link:hover{
+background:#f2f2f2;
+}
+
+.menu-active{
+background:#4b0055;
+color:white !important;
+}
+/* ================= NNTV PREMIUM SUMMARY ================= */
+
+.nntv-summary{
+position:relative;
+border-radius:16px;
+overflow:hidden;
+border:1px solid #e9d5ff;
+background:#ffffff;
+box-shadow:0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* HEADER */
+
+.nntv-summary-header{
+background:linear-gradient(90deg,#5a007a,#7a0aa3);
+color:white;
+padding:14px 20px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+font-weight:600;
+font-size:18px;
+}
+
+/* LEFT HEADER */
+
+.nntv-summary-title{
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+/* STAR */
+
+.summary-star{
+color:#ffd54a;
+font-size:18px;
+animation:starGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes starGlow{
+0%,100%{transform:scale(1);opacity:.7}
+50%{transform:scale(1.4);opacity:1}
+}
+
+/* MOVING LINES */
+
+.nntv-summary-line{
+height:3px;
+background:linear-gradient(90deg,#4c0068,#ffcc00,#4c0068);
+background-size:200% 100%;
+animation:lineMove 6s linear infinite;
+}
+
+@keyframes lineMove{
+0%{background-position:0%}
+100%{background-position:200%}
+}
+
+/* ===============================
+NNTV JANAAWAJ POLL
+================================ */
+
+.poll-wrapper{
+width:100%;
+animation:fadePoll .5s ease;
+will-change:transform,opacity;
+}
+
+/* CARD */
+
+.poll-card{
+width:100%;
+background:#fff;
+border-radius:14px;
+overflow:hidden;
+box-shadow:0 14px 42px rgba(0,0,0,0.08);
+border-bottom:3px solid #e6a400;
+transition:.25s ease;
+}
+
+.poll-card:hover{
+transform:translateY(-2px);
+}
+
+/* HEADER */
+
+.poll-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:14px 22px;
+background:linear-gradient(135deg,#6b0f63,#3f0a57,#7b1c7d);
+background-size:200% 200%;
+animation:gradientMove 7s ease infinite;
+color:white;
+}
+
+/* BADGE */
+
+.poll-badge{
+display:inline-flex;
+align-items:center;
+gap:10px;
+background:white;
+padding:6px 14px;
+border-radius:6px;
+font-weight:800;
+color:#6b0f63;
+font-size:15px;
+box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* POLL LINES */
+
+.poll-lines{
+width:18px;
+height:12px;
+position:relative;
+}
+
+.poll-lines::before,
+.poll-lines::after{
+content:"";
+position:absolute;
+left:0;
+height:3px;
+background:#6b0f63;
+border-radius:3px;
+}
+
+.poll-lines::before{
+top:0;
+width:18px;
+}
+
+.poll-lines::after{
+bottom:0;
+width:12px;
+}
+
+/* SUBTITLE */
+
+.poll-sub{
+font-size:11px;
+opacity:.85;
+letter-spacing:.3px;
+}
+
+/* BODY */
+
+.poll-body{
+padding:26px 26px 28px;
+}
+
+/* QUESTION */
+
+.poll-question{
+font-size:21px;
+font-weight:700;
+line-height:1.6;
+margin-bottom:24px;
+color:#1a1a1a;
+}
+
+/* OPTIONS */
+
+.poll-options{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+margin-bottom:26px;
+}
+
+/* OPTION */
+
+.poll-option{
+display:flex;
+align-items:center;
+gap:10px;
+padding:14px 16px;
+border:1px solid #e7e7e7;
+border-radius:8px;
+cursor:pointer;
+font-weight:600;
+background:white;
+transition:.22s ease;
+}
+
+.poll-option input{
+accent-color:#6b0f63;
+cursor:pointer;
+}
+
+.poll-option:hover{
+transform:translateY(-2px);
+border-color:#6b0f63;
+background:#faf5fb;
+box-shadow:0 6px 16px rgba(0,0,0,0.06);
+}
+
+.poll-option.active{
+border:2px solid #6b0f63;
+background:#f4e6f7;
+}
+
+/* BUTTON */
+
+.poll-vote{
+display:block;
+margin:auto;
+padding:12px 34px;
+border:none;
+border-radius:8px;
+font-weight:700;
+letter-spacing:.3px;
+color:white;
+background:linear-gradient(135deg,#6b0f63,#3f0a57);
+cursor:pointer;
+transition:.25s ease;
+}
+
+.poll-vote:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 20px rgba(0,0,0,0.15);
+}
+
+.poll-vote:disabled{
+opacity:.5;
+cursor:not-allowed;
+}
+
+/* RESULTS */
+
+.poll-results{
+display:flex;
+flex-direction:column;
+gap:16px;
+margin-top:10px;
+}
+
+/* RESULT ROW */
+
+.result-row{
+display:grid;
+grid-template-columns:170px 1fr 45px;
+align-items:center;
+gap:12px;
+font-size:14px;
+}
+
+/* LABEL */
+
+.result-label{
+font-weight:600;
+}
+
+/* BAR BG */
+
+.result-bar{
+height:8px;
+background:#eee;
+border-radius:6px;
+overflow:hidden;
+}
+
+/* BAR FILL */
+
+.result-fill{
+height:100%;
+background:linear-gradient(135deg,#6b0f63,#a21caf);
+transition:width .9s cubic-bezier(.4,0,.2,1);
+}
+
+/* PERCENT */
+
+.result-num{
+font-weight:700;
+color:#6b0f63;
+}
+
+/* WINNER */
+
+.winner .result-fill{
+background:linear-gradient(135deg,#6b0f63,#d946ef);
+box-shadow:0 0 12px rgba(168,85,247,.6);
+}
+
+.winner .result-label{
+color:#6b0f63;
+font-weight:700;
+}
+
+/* AD */
+
+.poll-ad{
+display:flex;
+align-items:center;
+justify-content:center;
+height:100%;
+}
+
+/* AD BOX */
+
+.poll-ad-box{
+width:100%;
+height:250px;
+border:2px dashed #ddd;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:14px;
+color:#888;
+background:#fafafa;
+}
+
+/* ANIMATIONS */
+
+@keyframes gradientMove{
+
+0%{
+background-position:0% 50%;
+}
+
+50%{
+background-position:100% 50%;
+}
+
+100%{
+background-position:0% 50%;
+}
+
+}
+
+@keyframes fadePoll{
+
+from{
+opacity:0;
+transform:translateY(18px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+.poll-options{
+grid-template-columns:1fr;
+}
+
+.result-row{
+grid-template-columns:1fr;
+gap:8px;
+}
+
+.poll-question{
+font-size:19px;
+}
+
+.poll-card{
+margin-bottom:20px;
+}
+
+}
+
+/* ===============================
+BREAKING NEWS TICKER
+=============================== */
+
+.breaking-wrapper{
+width:100%;
+}
+
+/* TRACK */
+
+.ticker-track{
+display:flex;
+white-space:nowrap;
+animation:tickerScroll 28s linear infinite;
+}
+
+/* ITEM */
+
+.ticker-item{
+margin-right:60px;
+display:inline-block;
+}
+
+/* PAUSE ON HOVER */
+
+.breaking-wrapper:hover .ticker-track{
 animation-play-state:paused;
 }
 
-@keyframes tickerMove{
+/* ANIMATION */
+
+@keyframes tickerScroll{
 
 0%{
 transform:translateX(0);
@@ -90,3 +1279,201 @@ transform:translateX(-50%);
 }
 
 }
+
+/* =====================================================
+   ASTRO WIDGET
+   ===================================================== */
+
+.astro-widget{
+position:fixed;
+left:16px;
+bottom:110px;
+z-index:60;
+width:230px;
+
+backdrop-filter:blur(10px);
+background:rgba(255,255,255,0.45);
+
+border:1px solid rgba(255,255,255,0.35);
+border-radius:18px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,0.18);
+
+padding:18px 16px;
+
+animation:astroWidgetSlide .45s ease;
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.astro-widget-title{
+font-size:14px;
+font-weight:600;
+text-align:center;
+margin-bottom:14px;
+color:#1a1a1a;
+}
+
+/* =====================================================
+   CLOSE BUTTON
+   ===================================================== */
+
+.astro-widget-close{
+position:absolute;
+top:6px;
+right:10px;
+
+font-size:18px;
+color:#555;
+cursor:pointer;
+
+transition:all .2s ease;
+}
+
+.astro-widget-close:hover{
+color:#000;
+}
+
+/* =====================================================
+   GRID
+   ===================================================== */
+
+.astro-widget-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+}
+
+/* =====================================================
+   ITEM
+   ===================================================== */
+
+.astro-widget-item{
+text-align:center;
+font-size:11px;
+color:#333;
+text-decoration:none;
+}
+
+/* =====================================================
+   ICON
+   ===================================================== */
+
+.astro-widget-icon{
+width:46px;
+height:46px;
+
+margin:0 auto;
+
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+background:rgba(180,130,255,.35);
+
+transition:all .25s ease;
+}
+
+.astro-widget-item:hover .astro-widget-icon{
+transform:scale(1.08);
+background:rgba(150,80,255,.45);
+}
+
+/* =====================================================
+   SLIDE ANIMATION
+   ===================================================== */
+
+@keyframes astroWidgetSlide{
+
+from{
+transform:translateX(-50px);
+opacity:0;
+}
+
+to{
+transform:translateX(0);
+opacity:1;
+}
+
+}
+
+/* =====================================================
+   MOBILE SAFETY
+   ===================================================== */
+
+@media(max-width:768px){
+
+.astro-widget{
+left:10px;
+bottom:90px;
+width:210px;
+}
+
+}
+
+@keyframes shareSlide {
+
+0%{
+transform:translateX(60px);
+opacity:0;
+}
+
+100%{
+transform:translateX(0);
+opacity:1;
+}
+
+}
+
+.animate-shareSlide{
+animation:shareSlide .5s ease;
+}
+
+
+/* ===== LEAD PARAGRAPH ===== */
+
+.lead-paragraph p{
+font-size:21px;
+font-weight:600;
+background:#faf5ff;
+border-left:4px solid #7e22ce;
+padding:14px 18px;
+border-radius:6px;
+margin-bottom:20px;
+}
+
+/* ===== DROP CAP ===== */
+
+.article-content p:first-child::first-letter{
+font-size:54px;
+font-weight:700;
+float:left;
+line-height:42px;
+padding-right:10px;
+color:#7e22ce;
+}
+
+.tv-election{
+  position:fixed;
+  top:0;
+  left:0;
+
+  width:100vw;
+  height:100vh;
+
+  background:#000;
+
+  z-index:9999;
+
+  display:flex;
+  align-items:flex-end; /* 🔥 bottom align like TV */
+  justify-content:center;
+
+  padding-bottom:80px; /* ticker ke upar space */
+}
+

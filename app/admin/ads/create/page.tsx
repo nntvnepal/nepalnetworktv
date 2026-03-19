@@ -1,254 +1,474 @@
-"use client";
+"use client"
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { AD_PLACEMENTS } from "@/lib/adPlacements";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export default function CreateAd() {
+import { useState } from "react"
 
-  const router = useRouter();
+//////////////////////////////////////////////////////
+// PLACEMENTS (MATCH PRISMA ENUM)
+//////////////////////////////////////////////////////
 
-  const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
+const placements: Record<string,{label:string,size:string,desc:string}> = {
 
-  const [form, setForm] = useState({
-    title: "",
-    imageUrl: "",
-    link: "",
-    placement: "homepage_top",
-    type: "image",
-    adsenseCode: "",
-    startDate: "",
-    endDate: "",
-    priority: 1,
-    totalBudget: "",
-    cpc: "",
-    maxClicks: "",
-    status: "active",
-  });
+//////////////////// HOMEPAGE ////////////////////
 
-  const selectedPlacement = useMemo(() => {
-    return AD_PLACEMENTS.find((p) => p.value === form.placement);
-  }, [form.placement]);
+homepage_top:{
+label:"Homepage Top",
+size:"970×180",
+desc:"Top banner of homepage"
+},
 
-  const handleImageUpload = async (e: any) => {
+homepage_after_hero:{
+label:"Homepage After Hero",
+size:"970×180",
+desc:"Below main hero section"
+},
 
-    const file = e.target.files?.[0];
-    if (!file) return;
+homepage_block_1:{
+label:"Homepage Block 1",
+size:"728×90",
+desc:"Between homepage sections"
+},
 
-    setUploading(true);
+homepage_block_2:{
+label:"Homepage Block 2",
+size:"728×90",
+desc:"Between homepage sections"
+},
 
-    const formData = new FormData();
-    formData.append("file", file);
+homepage_block_3:{
+label:"Homepage Block 3",
+size:"728×90",
+desc:"Between homepage sections"
+},
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+homepage_block_4:{
+label:"Homepage Block 4",
+size:"728×90",
+desc:"Between homepage sections"
+},
 
-    const data = await res.json();
+homepage_mid:{
+label:"Homepage Middle",
+size:"728×90",
+desc:"Middle leaderboard"
+},
 
-    if (res.ok) {
-      setForm((prev) => ({ ...prev, imageUrl: data.url }));
-    }
+homepage_after_list:{
+label:"Homepage After List",
+size:"728×90",
+desc:"After homepage article list"
+},
 
-    setUploading(false);
-  };
+homepage_sidebar_top:{
+label:"Homepage Sidebar Top",
+size:"300×250",
+desc:"Top sidebar ad"
+},
 
-  const handleSubmit = async (e: any) => {
+homepage_sidebar_bottom:{
+label:"Homepage Sidebar Bottom",
+size:"300×250",
+desc:"Bottom sidebar ad"
+},
 
-    e.preventDefault();
+homepage_bottom:{
+label:"Homepage Bottom",
+size:"970×180",
+desc:"Homepage footer banner"
+},
 
-    if (!form.title) return alert("Ad title required");
+//////////////////// ARTICLE ////////////////////
 
-    if (form.type === "image" && !form.imageUrl)
-      return alert("Upload image");
+article_top:{
+label:"Article Top",
+size:"728×90",
+desc:"Above article headline"
+},
 
-    if (form.type === "adsense" && !form.adsenseCode)
-      return alert("Paste adsense code");
+article_after_hero:{
+label:"Article After Hero",
+size:"728×90",
+desc:"Below article image"
+},
 
-    setLoading(true);
+article_after_paragraph:{
+label:"Article After Paragraph",
+size:"728×90",
+desc:"Inline paragraph ad"
+},
 
-    const res = await fetch("/api/ads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        totalBudget: form.totalBudget ? Number(form.totalBudget) : null,
-        cpc: form.cpc ? Number(form.cpc) : null,
-        maxClicks: form.maxClicks ? Number(form.maxClicks) : null,
-        priority: Number(form.priority),
-      }),
-    });
+article_mid:{
+label:"Article Middle",
+size:"728×90",
+desc:"Middle of article content"
+},
 
-    setLoading(false);
+article_sidebar_top:{
+label:"Article Sidebar Top",
+size:"300×250",
+desc:"Sidebar top advertisement"
+},
 
-    if (res.ok) router.push("/admin/ads");
-    else alert("Ad creation failed");
-  };
+article_sidebar_bottom:{
+label:"Article Sidebar Bottom",
+size:"300×250",
+desc:"Sidebar bottom advertisement"
+},
 
-  return (
-    <div className="p-10 text-white max-w-3xl">
+article_bottom:{
+label:"Article Bottom",
+size:"728×90",
+desc:"End of article"
+},
 
-      <h1 className="text-3xl font-bold mb-8">
-        Create Advertisement
-      </h1>
+//////////////////// CATEGORY ////////////////////
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+category_top:{
+label:"Category Top",
+size:"970×180",
+desc:"Top of category page"
+},
 
-        <input
-          required
-          placeholder="Ad Title"
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.title}
-          onChange={(e) =>
-            setForm({ ...form, title: e.target.value })
-          }
-        />
+category_after_3_posts:{
+label:"Category After 3 Posts",
+size:"728×90",
+desc:"After first 3 articles"
+},
 
-        <select
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.type}
-          onChange={(e) =>
-            setForm({ ...form, type: e.target.value })
-          }
-        >
-          <option value="image">Image Ad</option>
-          <option value="adsense">Adsense Code</option>
-        </select>
+category_after_6_posts:{
+label:"Category After 6 Posts",
+size:"728×90",
+desc:"After 6 articles"
+},
 
-        {/* Placement */}
+category_sidebar:{
+label:"Category Sidebar",
+size:"300×250",
+desc:"Category sidebar ad"
+},
 
-        <select
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.placement}
-          onChange={(e) =>
-            setForm({ ...form, placement: e.target.value })
-          }
-        >
-          {AD_PLACEMENTS.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.label} ({p.size})
-            </option>
-          ))}
-        </select>
+category_bottom:{
+label:"Category Bottom",
+size:"970×180",
+desc:"Bottom of category page"
+},
 
-        {selectedPlacement && (
-          <div className="bg-gray-800 p-3 rounded text-sm">
-            Recommended size: {selectedPlacement.size}
-          </div>
-        )}
+//////////////////// GLOBAL ////////////////////
 
-        {/* Image Upload */}
+header_banner:{
+label:"Header Banner",
+size:"728×90",
+desc:"Header navigation banner"
+},
 
-        {form.type === "image" && (
-          <>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="w-full p-3 bg-gray-800 rounded"
-            />
+footer_banner:{
+label:"Footer Banner",
+size:"970×180",
+desc:"Footer banner"
+},
 
-            {uploading && <p>Uploading image...</p>}
+sticky_bottom:{
+label:"Sticky Bottom",
+size:"320×100",
+desc:"Mobile sticky advertisement"
+},
 
-            {form.imageUrl && (
-              <img
-                src={form.imageUrl}
-                className="max-h-40 border rounded"
-              />
-            )}
+popup:{
+label:"Popup Advertisement",
+size:"Variable",
+desc:"Popup modal advertisement"
+}
 
-            <input
-              placeholder="Target URL"
-              className="w-full p-3 bg-gray-800 rounded"
-              value={form.link}
-              onChange={(e) =>
-                setForm({ ...form, link: e.target.value })
-              }
-            />
-          </>
-        )}
+}
 
-        {form.type === "adsense" && (
-          <textarea
-            placeholder="Paste Adsense Code"
-            className="w-full p-3 bg-gray-800 rounded h-32"
-            value={form.adsenseCode}
-            onChange={(e) =>
-              setForm({ ...form, adsenseCode: e.target.value })
-            }
-          />
-        )}
+//////////////////////////////////////////////////////
+// COMPONENT
+//////////////////////////////////////////////////////
 
-        <input
-          type="date"
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.startDate}
-          onChange={(e) =>
-            setForm({ ...form, startDate: e.target.value })
-          }
-        />
+export default function CreateAd(){
 
-        <input
-          type="date"
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.endDate}
-          onChange={(e) =>
-            setForm({ ...form, endDate: e.target.value })
-          }
-        />
+const [title,setTitle]=useState("")
+const [placement,setPlacement]=useState("homepage_after_hero")
+const [type,setType]=useState("image")
+const [link,setLink]=useState("")
+const [file,setFile]=useState<File|null>(null)
+const [preview,setPreview]=useState("")
+const [adsenseCode,setAdsenseCode]=useState("")
+const [startDate,setStartDate]=useState("")
+const [endDate,setEndDate]=useState("")
+const [loading,setLoading]=useState(false)
 
-        <input
-          type="number"
-          placeholder="Priority"
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.priority}
-          onChange={(e) =>
-            setForm({ ...form, priority: Number(e.target.value) })
-          }
-        />
+//////////////////////////////////////////////////////
+// IMAGE PREVIEW
+//////////////////////////////////////////////////////
 
-        <input
-          type="number"
-          placeholder="Budget"
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.totalBudget}
-          onChange={(e) =>
-            setForm({ ...form, totalBudget: e.target.value })
-          }
-        />
+function handleFile(e:React.ChangeEvent<HTMLInputElement>){
 
-        <input
-          type="number"
-          placeholder="CPC"
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.cpc}
-          onChange={(e) =>
-            setForm({ ...form, cpc: e.target.value })
-          }
-        />
+const f=e.target.files?.[0]
+if(!f) return
 
-        <input
-          type="number"
-          placeholder="Max Clicks"
-          className="w-full p-3 bg-gray-800 rounded"
-          value={form.maxClicks}
-          onChange={(e) =>
-            setForm({ ...form, maxClicks: e.target.value })
-          }
-        />
+setFile(f)
 
-        <button
-          disabled={loading}
-          className="bg-orange-500 px-8 py-3 rounded hover:bg-orange-600 transition"
-        >
-          {loading ? "Creating..." : "Create Ad"}
-        </button>
+const reader=new FileReader()
 
-      </form>
+reader.onload=(ev)=>{
+setPreview(ev.target?.result as string)
+}
 
-    </div>
-  );
+reader.readAsDataURL(f)
+
+}
+
+//////////////////////////////////////////////////////
+// SUBMIT
+//////////////////////////////////////////////////////
+
+async function handleSubmit(e:React.FormEvent){
+
+e.preventDefault()
+
+if(!title){
+alert("Ad title required")
+return
+}
+
+setLoading(true)
+
+try{
+
+let imageUrl=""
+
+//////////////////////////////////////////////////////
+// IMAGE UPLOAD
+//////////////////////////////////////////////////////
+
+if(type==="image" && file){
+
+const formData=new FormData()
+formData.append("file",file)
+
+const upload=await fetch("/api/upload",{method:"POST",body:formData})
+
+const result=await upload.json()
+
+if(!result.success){
+alert("Image upload failed")
+setLoading(false)
+return
+}
+
+imageUrl=result.url
+
+}
+
+//////////////////////////////////////////////////////
+// CREATE AD
+//////////////////////////////////////////////////////
+
+const res=await fetch("/api/ads",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+title,
+placement,
+type,
+imageUrl,
+link,
+adsenseCode,
+
+startDate:startDate ? new Date(startDate) : null,
+endDate:endDate ? new Date(endDate) : null
+
+})
+
+})
+
+if(!res.ok) throw new Error("Ad creation failed")
+
+alert("Advertisement created")
+
+window.location.href="/admin/ads"
+
+}catch(err){
+
+console.error(err)
+alert("Failed to create ad")
+
+}
+
+setLoading(false)
+
+}
+
+const selected=placements[placement]
+
+//////////////////////////////////////////////////////
+// UI
+//////////////////////////////////////////////////////
+
+return(
+
+<div className="max-w-2xl space-y-6">
+
+<h1 className="text-2xl font-bold text-white">
+Create Advertisement
+</h1>
+
+<form onSubmit={handleSubmit} className="space-y-5">
+
+{/* TITLE */}
+
+<input
+required
+placeholder="Ad Title"
+className="w-full p-3 rounded bg-white text-black"
+value={title}
+onChange={(e)=>setTitle(e.target.value)}
+/>
+
+{/* PLACEMENT */}
+
+<select
+className="w-full p-3 rounded bg-white text-black"
+value={placement}
+onChange={(e)=>setPlacement(e.target.value)}
+>
+
+{Object.entries(placements).map(([key,val])=>(
+
+<option key={key} value={key}>
+{val.label} ({val.size})
+</option>
+
+))}
+
+</select>
+
+{/* INFO */}
+
+<div className="bg-white/10 border border-white/20 p-4 rounded text-sm text-white">
+
+<p><b>Placement:</b> {selected.label}</p>
+<p><b>Recommended Size:</b> {selected.size}</p>
+<p><b>Description:</b> {selected.desc}</p>
+
+</div>
+
+{/* TYPE */}
+
+<select
+className="w-full p-3 rounded bg-white text-black"
+value={type}
+onChange={(e)=>setType(e.target.value)}
+>
+
+<option value="image">Image Banner</option>
+<option value="adsense">Google Adsense</option>
+
+</select>
+
+{/* IMAGE */}
+
+{type==="image" &&(
+
+<>
+
+<input
+type="file"
+accept="image/*"
+className="w-full p-3 rounded bg-white text-black"
+onChange={handleFile}
+/>
+
+{preview &&(
+
+<img
+src={preview}
+className="rounded border mt-2 max-h-60"
+/>
+
+)}
+
+<input
+placeholder="Target Link"
+className="w-full p-3 rounded bg-white text-black"
+value={link}
+onChange={(e)=>setLink(e.target.value)}
+/>
+
+</>
+
+)}
+
+{/* ADSENSE */}
+
+{type==="adsense" &&(
+
+<textarea
+rows={6}
+placeholder="Paste Adsense code"
+className="w-full p-3 rounded bg-white text-black"
+value={adsenseCode}
+onChange={(e)=>setAdsenseCode(e.target.value)}
+/>
+
+)}
+
+{/* DATE RANGE */}
+
+<div className="grid grid-cols-2 gap-4">
+
+<div>
+
+<label className="text-sm text-gray-300 block mb-1">
+Start Date
+</label>
+
+<input
+type="date"
+className="w-full p-3 rounded bg-white text-black"
+value={startDate}
+onChange={(e)=>setStartDate(e.target.value)}
+/>
+
+</div>
+
+<div>
+
+<label className="text-sm text-gray-300 block mb-1">
+End Date
+</label>
+
+<input
+type="date"
+className="w-full p-3 rounded bg-white text-black"
+value={endDate}
+onChange={(e)=>setEndDate(e.target.value)}
+/>
+
+</div>
+
+</div>
+
+<button
+type="submit"
+disabled={loading}
+className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded"
+>
+
+{loading ? "Creating..." : "Create Advertisement"}
+
+</button>
+
+</form>
+
+</div>
+
+)
+
 }

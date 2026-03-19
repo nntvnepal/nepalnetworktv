@@ -1,200 +1,391 @@
-import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
-import Link from "next/link";
-import Image from "next/image";
-import AdRenderer from "@/components/AdRenderer";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-interface Props {
-  params: { slug: string };
+import { prisma } from "@/lib/prisma"
+import { notFound } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
+import AdRenderer from "@/components/ads/AdRenderer"
+import CategoryFeed from "@/components/category/CategoryFeed"
+import type { Metadata } from "next"
+
+export const dynamic="force-dynamic"
+
+interface Props{
+params:{slug:string}
 }
 
-/* ================= SEO METADATA ================= */
+/* ================= METADATA ================= */
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({params}:Props):Promise<Metadata>{
 
-  const category = await prisma.category.findUnique({
-    where: { slug: params.slug },
-  });
+const category=await prisma.category.findUnique({
+where:{slug:params.slug}
+})
 
-  if (!category) {
-    return { title: "Nation Path" };
-  }
+if(!category) return {}
 
-  const url = `https://www.nationpathindia.com/category/${category.slug}`;
+const canonical=`https://www.nntvnepal.com/category/${category.slug}`
 
-  return {
-    title: `${category.name} News, Breaking & Analysis | Nation Path`,
-    description:
-      `Latest ${category.name} news, updates, expert analysis and breaking stories from Nation Path.`,
-    alternates: { canonical: url },
-    openGraph: {
-      title: `${category.name} News | Nation Path`,
-      description:
-        `Latest ${category.name} news, updates and in-depth coverage.`,
-      url,
-      siteName: "Nation Path",
-      type: "website",
-      locale: "en_IN",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${category.name} News | Nation Path`,
-      description:
-        `Latest ${category.name} news, updates and expert analysis.`,
-    },
-  };
+return{
+
+title:`${category.name} News | Nepal Network Television`,
+description:`Latest ${category.name} news from Nepal Network Television.`,
+alternates:{canonical},
+
+openGraph:{
+title:`${category.name} News`,
+url:canonical,
+siteName:"Nepal Network Television",
+type:"website"
+}
+
+}
+
 }
 
 /* ================= PAGE ================= */
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({params}:Props){
 
-  const category = await prisma.category.findUnique({
-    where: { slug: params.slug },
-  });
+const category=await prisma.category.findUnique({
+where:{slug:params.slug}
+})
 
-  if (!category) return notFound();
+if(!category) return notFound()
 
-  const articles = await prisma.article.findMany({
-    where: {
-      categoryId: category.id,
-      status: "approved",
-      isDeleted: false,
-      isAstrology: false,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+const articles=await prisma.article.findMany({
 
-  const categoryUrl = `https://www.nationpathindia.com/category/${category.slug}`;
+where:{
+categoryId:category.id,
+status:"approved",
+isDeleted:false
+},
 
-  /* ================= STRUCTURED DATA ================= */
+orderBy:{createdAt:"desc"},
+take:30
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: `${category.name} News`,
-    url: categoryUrl,
-  };
+})
 
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://www.nationpathindia.com",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: category.name,
-        item: categoryUrl,
-      },
-    ],
-  };
+const trending=await prisma.article.findMany({
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
+where:{
+categoryId:category.id,
+status:"approved",
+isDeleted:false
+},
 
-      {/* JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+orderBy:{views:"desc"},
+take:5
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
+})
 
-      {/* CATEGORY HEADER */}
-      <h1 className="text-5xl font-serif mb-4">
-        {category.name}
-      </h1>
+const hero=articles[0]
+const side=articles.slice(1,3)
+const grid=articles.slice(3,9)
+const quick=articles.slice(0,5)
 
-      <p className="text-gray-600 mb-10 max-w-2xl">
-        Latest {category.name} news, expert insights, breaking developments
-        and in-depth analysis from Nation Path.
-      </p>
+const canonical=`https://www.nntvnepal.com/category/${category.slug}`
 
-      {/* TOP AD */}
-      <div className="flex justify-center mb-10">
-        <AdRenderer placement="category_top" />
-      </div>
+/* ================= SCHEMA ================= */
 
-      <hr className="mb-10" />
+const schema={
+"@context":"https://schema.org",
+"@type":"CollectionPage",
+name:category.name,
+url:canonical
+}
 
-      {/* CONTENT + SIDEBAR */}
-      <div className="grid lg:grid-cols-4 gap-12">
+return(
 
-        {/* ARTICLES */}
-        <div className="lg:col-span-3">
+<div className="max-w-7xl mx-auto px-6 py-8">
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+<script
+type="application/ld+json"
+dangerouslySetInnerHTML={{__html:JSON.stringify(schema)}}
+/>
 
-            {articles.map((article, index) => (
-              <div key={article.id}>
+{/* BREADCRUMB */}
 
-                <Link
-                  href={`/${category.slug}/${article.slug}`}
-                  className="group"
-                >
+<div className="text-sm text-gray-500 mb-3">
 
-                  {article.images?.[0] && (
-                    <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
-                      <Image
-                        src={article.images[0]}
-                        alt={article.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition"
-                      />
-                    </div>
-                  )}
+<Link href="/">Home</Link>
 
-                  <h2 className="text-xl font-medium group-hover:text-[#0b2a6f]">
-                    {article.title}
-                  </h2>
+{" > "}
 
-                  <p className="text-sm text-gray-500 mt-2">
-                    {new Date(article.createdAt).toLocaleDateString("en-IN")}
-                  </p>
+{category.name}
 
-                </Link>
+</div>
 
-                {/* AFTER 3 POSTS AD */}
-                {index === 2 && (
-                  <div className="my-12 flex justify-center">
-                    <AdRenderer placement="category_after_3_posts" />
-                  </div>
-                )}
+{/* CATEGORY TITLE */}
 
-              </div>
-            ))}
+<h1 className="text-4xl font-serif mb-6">
 
-          </div>
+{category.name}
 
-        </div>
+</h1>
 
-        {/* SIDEBAR */}
-        <aside className="space-y-10">
+{/* HERO + SIDE */}
 
-          <div className="flex justify-center">
-            <AdRenderer placement="category_sidebar" />
-          </div>
+{hero&&(
 
-        </aside>
+<div className="grid lg:grid-cols-3 gap-6 mb-10">
 
-      </div>
+{/* HERO */}
 
-      {/* BOTTOM AD */}
-      <div className="flex justify-center mt-16">
-        <AdRenderer placement="category_bottom" />
-      </div>
+<Link
+href={`/${params.slug}/${hero.slug}`}
+className="lg:col-span-2 group"
+>
 
-    </div>
-  );
+{hero.images?.[0]&&(
+
+<div className="relative aspect-[16/9] rounded-xl overflow-hidden mb-3">
+
+<Image
+src={hero.images[0]}
+alt={hero.title}
+fill
+className="object-cover group-hover:scale-105 transition"
+/>
+
+</div>
+
+)}
+
+<h2 className="text-2xl font-bold leading-snug group-hover:text-purple-700">
+
+{hero.title}
+
+</h2>
+
+<div className="text-xs text-gray-500 mt-2">
+
+👁 {hero.views} • ❤ {hero.likes}
+
+</div>
+
+</Link>
+
+{/* SIDE STORIES */}
+
+<div className="space-y-5">
+
+{side.map(article=>(
+
+<Link
+key={article.id}
+href={`/${params.slug}/${article.slug}`}
+className="flex gap-4 group"
+>
+
+{article.images?.[0]&&(
+
+<div className="relative w-28 h-20 rounded overflow-hidden">
+
+<Image
+src={article.images[0]}
+alt={article.title}
+fill
+className="object-cover"
+/>
+
+</div>
+
+)}
+
+<div>
+
+<h3 className="font-semibold leading-snug line-clamp-2 group-hover:text-purple-700">
+
+{article.title}
+
+</h3>
+
+<div className="text-xs text-gray-500 mt-1">
+
+👁 {article.views} • ❤ {article.likes}
+
+</div>
+
+</div>
+
+</Link>
+
+))}
+
+</div>
+
+</div>
+
+)}
+
+{/* ================= MAIN HEADLINES ================= */}
+
+{quick.length>0&&(
+
+<div className="border rounded-xl p-5 mb-8 bg-white">
+
+<div className="flex items-center gap-2 mb-4">
+
+<span className="w-1 h-6 bg-yellow-500 rounded"></span>
+
+<h3 className="font-semibold text-lg">
+
+ मुख्य समाचार
+
+</h3>
+
+</div>
+
+<div className="space-y-3">
+
+{quick.map((item,index)=>(
+
+<Link
+key={item.id}
+href={`/${params.slug}/${item.slug}`}
+className="flex gap-3 border-b pb-2 last:border-none hover:text-purple-700"
+>
+
+<span className="text-purple-700 font-bold w-5">
+
+{index+1}
+
+</span>
+
+<span className="text-sm leading-snug">
+
+{item.title}
+
+</span>
+
+</Link>
+
+))}
+
+</div>
+
+</div>
+
+)}
+
+{/* ================= TRENDING ================= */}
+
+{trending.length>0&&(
+
+<div className="border rounded-xl p-5 mb-10">
+
+<div className="flex items-center gap-2 mb-3">
+
+<span className="w-1 h-6 bg-yellow-500 rounded"></span>
+
+<h3 className="font-semibold text-lg">
+
+यस श्रेणीमा ट्रेन्डिङ
+
+</h3>
+
+</div>
+
+<div className="h-[3px] bg-gradient-to-r from-purple-700 to-purple-500 mb-4"></div>
+
+<div className="space-y-3">
+
+{trending.map((item,index)=>(
+
+<Link
+key={item.id}
+href={`/${params.slug}/${item.slug}`}
+className="flex items-start gap-3 border-b pb-3 last:border-none hover:text-purple-700"
+>
+
+<span className="text-purple-700 font-bold w-4">
+
+{index+1}
+
+</span>
+
+<p className="text-sm leading-snug">
+
+{item.title}
+
+</p>
+
+</Link>
+
+))}
+
+</div>
+
+</div>
+
+)}
+
+{/* ================= GRID ================= */}
+
+<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+{grid.map(article=>(
+
+<Link
+key={article.id}
+href={`/${params.slug}/${article.slug}`}
+className="group"
+>
+
+{article.images?.[0]&&(
+
+<div className="relative aspect-[16/9] rounded-lg overflow-hidden mb-3">
+
+<Image
+src={article.images[0]}
+alt={article.title}
+fill
+className="object-cover group-hover:scale-105 transition"
+/>
+
+</div>
+
+)}
+
+<h3 className="font-semibold leading-snug group-hover:text-purple-700 line-clamp-2">
+
+{article.title}
+
+</h3>
+
+<div className="text-xs text-gray-500 mt-1">
+
+👁 {article.views} • ❤ {article.likes}
+
+</div>
+
+</Link>
+
+))}
+
+</div>
+
+{/* AD */}
+
+<div className="flex justify-center my-10">
+
+<AdRenderer placement="category_after_3_posts"/>
+
+</div>
+
+{/* ================= INFINITE FEED ================= */}
+
+<CategoryFeed slug={params.slug}/>
+
+{/* BOTTOM AD */}
+
+<div className="flex justify-center mt-10">
+
+<AdRenderer placement="category_bottom"/>
+
+</div>
+
+</div>
+
+)
+
 }

@@ -1,63 +1,59 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState } from "react"
 
-export default function NewsletterForm() {
+export default function NewsletterForm(){
 
-  const [email,setEmail] = useState("");
-  const [loading,setLoading] = useState(false);
+const [email,setEmail] = useState("")
+const [loading,setLoading] = useState(false)
 
-  const handleSubmit = async (e:any) => {
+async function submit(e:any){
 
-    e.preventDefault();
+e.preventDefault()
 
-    if(!email) return;
+setLoading(true)
 
-    setLoading(true);
+await fetch("/api/newsletter",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({email})
+})
 
-    const res = await fetch("/api/newsletter",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({ email })
-    });
+setLoading(false)
+setEmail("")
+alert("Subscribed successfully")
 
-    const data = await res.json();
+}
 
-    setLoading(false);
+return(
 
-    alert(data.message);
-
-    if(data.success){
-      setEmail("");
-    }
-
-  };
-
-  return (
-
-<form onSubmit={handleSubmit} className="flex gap-2 mb-6">
+<form
+onSubmit={submit}
+className="flex gap-2"
+>
 
 <input
 type="email"
 required
+placeholder="Enter email"
 value={email}
 onChange={(e)=>setEmail(e.target.value)}
-placeholder="Enter your email"
-className="flex-1 px-3 py-2 text-sm rounded-md bg-[#0a1224] border border-gray-600"
+className="border px-3 py-2"
 />
 
 <button
-type="submit"
-className="bg-red-600 hover:bg-red-700 px-4 py-2 text-sm rounded-md transition"
+disabled={loading}
+className="bg-purple-600 text-white px-4 py-2"
 >
 
-{loading ? "Joining..." : "Join"}
+{loading ? "..." : "Subscribe"}
 
 </button>
 
 </form>
 
-  );
+)
+
 }

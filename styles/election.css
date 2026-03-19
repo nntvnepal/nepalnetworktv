@@ -1,0 +1,1889 @@
+/* =================================
+   FONT
+================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+
+/* =================================
+   DESIGN SYSTEM
+================================= */
+
+:root{
+
+--brand-gradient:linear-gradient(135deg,#6b0f63,#3f0a57);
+--brand-gradient-soft:linear-gradient(135deg,#7b1680,#4b0d66);
+
+--brand:#6b0f63;
+--brand-dark:#3f0a57;
+
+--accent:#facc15;
+
+--bg:#f3f4f6;
+--card:#ffffff;
+
+--text:#111827;
+--muted:#6b7280;
+
+--border:#e5e7eb;
+
+--shadow-sm:0 4px 12px rgba(0,0,0,0.05);
+--shadow-md:0 12px 30px rgba(0,0,0,0.08);
+--shadow-lg:0 20px 50px rgba(0,0,0,0.12);
+
+}
+
+
+/* =================================
+   GLOBAL
+================================= */
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+
+font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+
+background:linear-gradient(180deg,#f3f4f6,#eef2ff);
+
+color:var(--text);
+line-height:1.5;
+
+}
+
+.election-page{
+padding:0 0 40px;
+min-height:100vh;
+}
+
+.container{
+max-width:1280px;
+margin:auto;
+padding:0 18px;
+}
+
+
+/* =================================
+   LIVE ELECTION TICKER
+================================= */
+
+.live-election-ticker{
+
+background:var(--brand-gradient);
+
+color:white;
+
+padding:10px 20px;
+
+border-radius:12px;
+
+margin:14px 0 22px;
+
+box-shadow:0 8px 20px rgba(0,0,0,0.15);
+
+width:100%;
+
+}
+
+.live-election-inner{
+
+display:flex;
+
+align-items:center;
+
+gap:28px;
+
+font-size:14px;
+
+flex-wrap:wrap;
+
+}
+
+.live-dot{
+
+width:10px;
+height:10px;
+
+background:#ef4444;
+
+border-radius:50%;
+
+animation:livePulse 1.5s infinite;
+
+}
+
+@keyframes livePulse{
+
+0%{opacity:1}
+50%{opacity:.3}
+100%{opacity:1}
+
+}
+
+.live-label{
+font-weight:700;
+letter-spacing:.3px;
+}
+
+.live-update{
+margin-left:auto;
+font-size:12px;
+opacity:.85;
+}
+
+
+/* =================================
+   HEADER
+================================= */
+
+.election-header{
+
+background:var(--brand-gradient);
+
+color:white;
+
+padding:28px 32px;
+
+border-radius:16px;
+
+text-align:center;
+
+box-shadow:0 14px 35px rgba(63,10,87,0.35);
+
+margin-bottom:24px;
+
+}
+
+.election-header h1{
+
+font-size:28px;
+
+font-weight:700;
+
+letter-spacing:-0.2px;
+
+color:white;
+
+}
+
+.election-subtitle{
+
+margin-top:6px;
+
+font-size:14px;
+
+color:#e9d5ff;
+
+}
+
+
+/* =================================
+   FILTER ROW
+================================= */
+
+.filter-row{
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+gap:20px;
+
+margin-bottom:26px;
+
+flex-wrap:wrap;
+
+}
+
+
+/* =================================
+   FILTER BAR
+================================= */
+
+.search-bar{
+
+display:flex;
+
+gap:12px;
+
+align-items:center;
+
+flex-wrap:wrap;
+
+}
+
+.search-bar select,
+.search-bar button{
+
+padding:10px 14px;
+
+border-radius:8px;
+
+border:1px solid var(--border);
+
+font-size:14px;
+
+background:white;
+
+transition:0.2s;
+
+}
+
+.search-bar select:focus{
+outline:none;
+border-color:var(--brand);
+}
+
+.search-bar button{
+
+background:var(--brand-gradient);
+
+color:white;
+
+border:none;
+
+cursor:pointer;
+
+font-weight:600;
+
+}
+
+.search-bar button:hover{
+opacity:.9;
+}
+
+
+/* =================================
+   MOMENTUM WIDGET
+================================= */
+
+.momentum-widget{
+
+background:white;
+
+padding:14px 18px;
+
+border-radius:12px;
+
+box-shadow:var(--shadow-sm);
+
+min-width:220px;
+
+}
+
+.momentum-title{
+
+font-weight:600;
+
+margin-bottom:8px;
+
+color:var(--brand-dark);
+
+}
+
+.momentum-row{
+
+display:flex;
+
+justify-content:space-between;
+
+padding:4px 0;
+
+font-size:14px;
+
+}
+
+.momentum-up{
+color:#16a34a;
+font-weight:600;
+}
+
+.momentum-down{
+color:#dc2626;
+font-weight:600;
+}
+
+
+/* =================================
+   SUMMARY CARDS
+================================= */
+
+.summary-grid{
+
+display:grid;
+
+grid-template-columns:repeat(3,1fr);
+
+gap:18px;
+
+margin-bottom:24px;
+
+}
+
+.summary-card{
+
+background:white;
+
+padding:22px;
+
+border-radius:14px;
+
+text-align:center;
+
+box-shadow:var(--shadow-sm);
+
+transition:.25s;
+
+}
+
+.summary-card:hover{
+
+transform:translateY(-4px);
+
+box-shadow:var(--shadow-md);
+
+}
+
+.summary-total{
+
+background:var(--brand-gradient);
+
+color:white;
+
+box-shadow:0 14px 35px rgba(63,10,87,0.35);
+
+}
+
+.summary-title{
+font-size:13px;
+color:var(--muted);
+}
+
+.summary-total .summary-title{
+color:#e9d5ff;
+}
+
+.summary-value{
+font-size:36px;
+font-weight:700;
+margin-top:4px;
+}
+
+
+/* =================================
+   PARTY CARDS
+================================= */
+
+.party-cards{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+gap:18px;
+
+margin-top:20px;
+
+}
+
+.party-card{
+
+background:white;
+
+padding:20px;
+
+border-radius:14px;
+
+text-align:center;
+
+box-shadow:var(--shadow-sm);
+
+transition:.25s;
+
+position:relative;
+
+}
+
+.party-card::before{
+
+content:"";
+
+position:absolute;
+
+top:0;
+left:0;
+
+width:100%;
+height:4px;
+
+background:var(--brand-gradient);
+
+}
+
+.party-card:hover{
+
+transform:translateY(-5px);
+
+box-shadow:var(--shadow-md);
+
+}
+
+.party-seat-count{
+
+font-size:30px;
+
+font-weight:700;
+
+color:var(--brand);
+
+}
+
+.party-seat-label{
+
+font-size:12px;
+
+color:var(--muted);
+
+}
+
+
+/* =================================
+   PARTY SEAT BAR
+================================= */
+
+.party-bar-container{
+margin-top:26px;
+}
+
+.party-bar-row{
+
+display:grid;
+
+grid-template-columns:220px 1fr 70px;
+
+align-items:center;
+
+gap:12px;
+
+margin-bottom:10px;
+
+}
+
+.party-bar-track{
+
+background:#e5e7eb;
+
+height:10px;
+
+border-radius:6px;
+
+overflow:hidden;
+
+}
+
+.party-bar-fill{
+
+background:var(--brand-gradient-soft);
+
+height:100%;
+
+border-radius:6px;
+
+transition:width .5s ease;
+
+}
+
+.party-bar-value{
+
+font-weight:600;
+
+color:var(--brand-dark);
+
+}
+
+.party-bar-percent{
+
+font-size:11px;
+
+color:var(--muted);
+
+}
+
+
+/* =================================
+   MAP GRID
+================================= */
+
+.map-grid{
+
+display:grid;
+
+grid-template-columns:2fr 1fr;
+
+gap:24px;
+
+margin-top:36px;
+
+}
+
+.card{
+
+background:white;
+
+padding:22px;
+
+border-radius:16px;
+
+box-shadow:var(--shadow-sm);
+
+transition:.25s;
+
+}
+
+.card:hover{
+
+transform:translateY(-4px);
+
+box-shadow:var(--shadow-md);
+
+}
+
+.card-title{
+
+font-size:18px;
+
+font-weight:700;
+
+margin-bottom:14px;
+
+}
+
+.map-box{
+
+height:580px;
+
+border-radius:14px;
+
+background:var(--brand-gradient);
+
+display:flex;
+
+align-items:center;
+justify-content:center;
+
+box-shadow:0 20px 45px rgba(0,0,0,0.3);
+
+overflow:hidden;
+
+}
+
+
+/* =================================
+   SECTION TITLE
+================================= */
+
+.section-title{
+
+margin-top:55px;
+
+margin-bottom:18px;
+
+font-size:21px;
+
+font-weight:700;
+
+border-left:4px solid var(--brand);
+
+padding-left:10px;
+
+}
+
+
+/* =================================
+   HOT SEATS
+================================= */
+
+.hot-seats{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+
+gap:20px;
+
+margin-top:22px;
+
+}
+
+.hot-seat-panel{
+
+background:white;
+
+border-radius:14px;
+
+padding:16px;
+
+box-shadow:var(--shadow-sm);
+
+}
+
+.hot-seat-header{
+
+background:#ef4444;
+
+color:white;
+
+font-size:12px;
+
+padding:4px 10px;
+
+border-radius:6px;
+
+display:inline-block;
+
+margin-bottom:10px;
+
+}
+
+.hot-seat-row{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:8px 0;
+
+border-bottom:1px dashed #eee;
+
+}
+
+.hot-seat-avatar{
+
+width:32px;
+
+height:32px;
+
+border-radius:50%;
+
+object-fit:cover;
+
+}
+
+.hot-seat-button{
+
+width:100%;
+
+margin-top:10px;
+
+background:#f3f4f6;
+
+border:none;
+
+padding:8px;
+
+border-radius:6px;
+
+cursor:pointer;
+
+}
+
+
+/* =================================
+   DISTRICT RESULTS
+================================= */
+
+.district-results{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+gap:20px;
+
+margin-top:24px;
+
+}
+
+.district-card{
+
+background:white;
+
+padding:18px;
+
+border-radius:14px;
+
+box-shadow:var(--shadow-sm);
+
+transition:.25s;
+
+}
+
+.district-card:hover{
+
+transform:translateY(-4px);
+
+box-shadow:var(--shadow-md);
+
+}
+
+.district-row{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:8px 0;
+
+border-bottom:1px solid #f3f4f6;
+
+}
+
+.district-rank{
+
+font-weight:700;
+
+color:var(--brand);
+
+margin-right:6px;
+
+}
+
+.district-winner{
+
+background:#f5f3ff;
+
+border-left:4px solid var(--brand);
+
+padding:6px 8px;
+
+border-radius:6px;
+
+}
+
+.district-percent{
+
+font-size:11px;
+
+color:var(--muted);
+
+}
+
+
+/* =================================
+   RESULTS TABLE
+================================= */
+
+.table-wrapper{
+overflow-x:auto;
+margin-top:20px;
+}
+
+.results-table{
+
+width:100%;
+
+border-collapse:collapse;
+
+font-size:14px;
+
+background:white;
+
+border-radius:16px;
+
+overflow:hidden;
+
+box-shadow:var(--shadow-sm);
+
+}
+
+.results-table th{
+
+text-align:left;
+
+padding:14px;
+
+background:#fafafa;
+
+border-bottom:2px solid #eee;
+
+font-weight:700;
+
+}
+
+.results-table td{
+
+padding:14px;
+
+border-bottom:1px solid #f1f1f1;
+
+}
+
+.results-table tr:hover{
+
+background:#f5f3ff;
+
+}
+
+
+/* =================================
+   RESPONSIVE
+================================= */
+
+@media(max-width:1024px){
+
+.map-grid{
+grid-template-columns:1fr;
+}
+
+.summary-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+@media(max-width:768px){
+
+.election-header h1{
+font-size:24px;
+}
+
+.filter-row{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.search-bar{
+flex-wrap:wrap;
+}
+
+.live-election-inner{
+gap:14px;
+font-size:13px;
+}
+
+.live-update{
+width:100%;
+margin-left:0;
+margin-top:6px;
+}
+
+}
+
+/* =================================
+   BATTLE SECTION
+================================= */
+
+.battle-section{
+margin:45px 0 60px;
+}
+
+
+/* =================================
+   GRID
+================================= */
+
+.battle-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+gap:24px;
+margin-top:24px;
+align-items:stretch;
+}
+
+
+/* =================================
+   CARD
+================================= */
+
+.battle-card{
+
+position:relative;
+
+background:
+linear-gradient(rgba(255,255,255,.92),rgba(255,255,255,.92)),
+url('/texture-light.png');
+
+background-size:cover;
+
+backdrop-filter:blur(16px);
+
+border-radius:16px;
+padding:22px;
+
+border-left:4px solid;
+border-image:linear-gradient(180deg,#6b0f63,#3f0a57)1;
+
+box-shadow:0 12px 28px rgba(0,0,0,.08);
+
+min-height:285px;
+
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+
+transition:all .25s ease;
+
+}
+
+
+/* =================================
+   CARD HOVER
+================================= */
+
+.battle-card:hover{
+
+transform:translateY(-4px);
+
+box-shadow:0 18px 40px rgba(0,0,0,.15);
+
+background:
+linear-gradient(rgba(230,230,230,.95),rgba(230,230,230,.95)),
+url('/texture-light.png');
+
+}
+
+
+/* =================================
+   SEAT RIBBON
+================================= */
+
+.battle-seat{
+
+position:absolute;
+top:-12px;
+left:16px;
+
+background:linear-gradient(135deg,#6b0f63,#3f0a57);
+
+color:white;
+font-size:12px;
+font-weight:700;
+
+padding:6px 14px;
+
+border-radius:6px;
+
+box-shadow:0 4px 12px rgba(0,0,0,.25);
+
+}
+
+
+/* =================================
+   STATUS BADGE
+================================= */
+
+.battle-status{
+
+position:absolute;
+top:12px;
+right:16px;
+
+font-size:11px;
+font-weight:700;
+
+padding:4px 10px;
+
+border-radius:20px;
+
+display:flex;
+align-items:center;
+gap:4px;
+
+}
+
+
+/* LEADING */
+
+.battle-status.leading{
+
+background:#e8f4ff;
+color:#2563eb;
+
+animation:statusShift 4s ease-in-out infinite;
+
+}
+
+
+/* WON */
+
+.battle-status.won{
+
+background:#e6f9ed;
+color:#16a34a;
+
+}
+
+
+/* STATUS ANIMATION */
+
+@keyframes statusShift{
+
+0%{
+background:#e8f4ff;
+color:#2563eb;
+}
+
+50%{
+background:#e6f9ed;
+color:#166534;
+}
+
+100%{
+background:#e8f4ff;
+color:#2563eb;
+}
+
+}
+
+
+
+/* =================================
+   MAIN ROW
+================================= */
+
+.battle-main{
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+margin-top:22px;
+
+}
+
+
+
+/* =================================
+   CANDIDATE
+================================= */
+
+.battle-candidate{
+
+text-align:center;
+width:40%;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+}
+
+
+
+/* =================================
+   LEADING CANDIDATE
+================================= */
+
+.battle-candidate.leading img{
+
+border-color:#16a34a;
+
+box-shadow:
+0 0 0 3px rgba(22,163,74,.25),
+0 6px 14px rgba(0,0,0,.28);
+
+}
+
+
+
+/* =================================
+   PHOTO
+================================= */
+
+.battle-candidate img{
+
+width:56px;
+height:56px;
+
+border-radius:50%;
+object-fit:cover;
+
+border:3px solid #d4af37;
+
+box-shadow:
+0 0 0 2px white,
+0 6px 14px rgba(0,0,0,.25);
+
+margin-bottom:8px;
+
+}
+
+
+
+/* =================================
+   NAME
+================================= */
+
+.battle-name{
+
+font-size:13px;
+font-weight:600;
+line-height:1.35;
+text-align:center;
+
+}
+
+
+
+/* =================================
+   PARTY
+================================= */
+
+.battle-party{
+
+font-size:11px;
+color:#777;
+margin-top:2px;
+
+}
+
+
+
+/* =================================
+   VOTE COLORS
+================================= */
+
+.vote-first{
+color:#16a34a;
+font-weight:700;
+}
+
+.vote-second{
+color:#b08900;
+font-weight:700;
+}
+
+.vote-third{
+color:#dc2626;
+font-weight:700;
+}
+
+
+
+/* =================================
+   VS BADGE
+================================= */
+
+.battle-vs{
+
+width:26px;
+height:26px;
+
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:10px;
+font-weight:700;
+
+background:linear-gradient(145deg,#4b5563,#d1d5db);
+
+color:white;
+
+box-shadow:
+0 2px 6px rgba(0,0,0,.15),
+inset 0 1px 2px rgba(255,255,255,.4);
+
+animation:vsBreath 3.5s ease-in-out infinite;
+
+}
+
+
+@keyframes vsBreath{
+
+0%{transform:scale(1);opacity:.9;}
+50%{transform:scale(1.07);opacity:1;}
+100%{transform:scale(1);opacity:.9;}
+
+}
+
+
+
+/* =================================
+   VOTE BARS
+================================= */
+
+.battle-bars{
+margin-top:18px;
+}
+
+
+.bar{
+
+height:6px;
+border-radius:6px;
+
+margin-bottom:8px;
+
+position:relative;
+overflow:hidden;
+
+}
+
+
+
+/* LEADING BAR */
+
+.bar1{
+
+background:#6b0f63;
+
+animation:barBreath 3.5s ease-in-out infinite;
+
+}
+
+
+
+/* SECOND BAR */
+
+.bar2{
+
+background:#d8d8d8;
+
+}
+
+
+
+@keyframes barBreath{
+
+0%{transform:scaleX(1);}
+50%{transform:scaleX(1.05);}
+100%{transform:scaleX(1);}
+
+}
+
+
+
+/* HIGHLIGHT SWEEP */
+
+.bar1::after{
+
+content:"";
+
+position:absolute;
+top:0;
+left:-60%;
+
+width:60%;
+height:100%;
+
+background:linear-gradient(
+90deg,
+transparent,
+rgba(255,255,255,.6),
+transparent
+);
+
+animation:sweep 3.2s infinite;
+
+}
+
+
+@keyframes sweep{
+
+0%{left:-60%;}
+100%{left:120%;}
+
+}
+
+
+
+/* =================================
+   THIRD CANDIDATE
+================================= */
+
+.battle-third{
+
+display:flex;
+align-items:center;
+
+gap:8px;
+
+margin-top:14px;
+
+font-size:12px;
+
+}
+
+
+
+.third-circle{
+
+width:24px;
+height:24px;
+
+border-radius:50%;
+
+background:#f3f3f3;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:11px;
+font-weight:700;
+
+color:#333;
+
+border:1px solid #ddd;
+
+}
+
+
+
+/* =================================
+   MARGIN
+================================= */
+
+.battle-margin{
+
+margin-top:12px;
+
+font-size:12px;
+font-weight:700;
+
+color:#e65100;
+
+}
+
+
+
+/* =================================
+   VIEW LINK
+================================= */
+
+.battle-more{
+
+margin-top:12px;
+
+font-size:12px;
+font-weight:600;
+
+color:#6b0f63;
+
+text-decoration:none;
+
+}
+
+.battle-more:hover{
+text-decoration:underline;
+}
+
+
+
+/* =================================
+   RESPONSIVE
+================================= */
+
+@media(max-width:1200px){
+
+.battle-grid{
+grid-template-columns:repeat(5,1fr);
+}
+
+}
+
+@media(max-width:768px){
+
+.battle-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+@media(max-width:480px){
+
+.battle-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+
+
+/* =================================
+   BATTLE CAROUSEL
+================================= */
+
+.battle-carousel{
+overflow:hidden;
+position:relative;
+}
+
+.battle-grid{
+transition:all .6s ease;
+}
+
+/* ===================================================
+   SEAT SUMMARY SYSTEM
+   Production Ready / Future Safe
+=================================================== */
+
+/* ===================================================
+   SEAT SUMMARY WRAPPER
+=================================================== */
+
+.seat-summary{
+margin-top:40px;
+}
+
+
+/* ===================================================
+   METRIC CARDS
+=================================================== */
+
+.seat-metrics{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:18px;
+margin:22px 0 28px;
+}
+
+.metric-card{
+
+background:#fff;
+border-radius:14px;
+
+padding:20px;
+text-align:center;
+
+box-shadow:0 8px 22px rgba(0,0,0,.07);
+
+border-top:4px solid #6b0f63;
+
+transition:.25s ease;
+
+}
+
+.metric-card:hover{
+transform:translateY(-5px);
+box-shadow:0 18px 30px rgba(0,0,0,.12);
+}
+
+.metric-value{
+font-size:36px;
+font-weight:700;
+color:#111;
+margin-bottom:4px;
+}
+
+.metric-label{
+font-size:11px;
+color:#777;
+text-transform:uppercase;
+letter-spacing:.7px;
+}
+
+.metric-card.majority{
+border-top:4px solid #d4af37;
+}
+
+
+/* ===================================================
+   MAIN GRID
+=================================================== */
+
+.seat-summary-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:24px;
+margin-top:20px;
+}
+
+
+/* ===================================================
+   PARTY CONTROL
+=================================================== */
+
+.party-seat-distribution{
+
+background:#fff;
+border-radius:14px;
+
+padding:22px;
+
+box-shadow:0 8px 22px rgba(0,0,0,.07);
+
+display:flex;
+flex-direction:column;
+
+}
+
+.party-seat-distribution .card-title{
+font-size:16px;
+font-weight:600;
+margin-bottom:16px;
+}
+
+.party-bars{
+
+display:flex;
+flex-direction:column;
+gap:14px;
+
+}
+
+/* PARTY ROW */
+
+.party-row{
+
+display:grid;
+
+grid-template-columns:160px 1fr 50px;
+
+align-items:center;
+
+gap:12px;
+
+}
+
+.party-name{
+font-size:13px;
+font-weight:600;
+color:#222;
+line-height:1.35;
+}
+
+
+/* BAR BACKGROUND */
+
+.party-bar{
+
+height:10px;
+
+background:#ececec;
+
+border-radius:6px;
+
+overflow:hidden;
+
+position:relative;
+
+}
+
+
+/* BAR FILL */
+
+.party-bar-fill{
+
+height:100%;
+
+background:linear-gradient(135deg,#6b0f63,#3f0a57);
+
+border-radius:6px;
+
+transition:width .8s ease;
+
+position:relative;
+
+}
+
+/* animated shine */
+
+.party-bar-fill::after{
+
+content:"";
+
+position:absolute;
+
+top:0;
+left:-40%;
+
+width:40%;
+height:100%;
+
+background:linear-gradient(
+90deg,
+transparent,
+rgba(255,255,255,.4),
+transparent
+);
+
+animation:partyBarShine 4s infinite;
+
+}
+
+@keyframes partyBarShine{
+
+0%{ left:-40%; }
+
+100%{ left:140%; }
+
+}
+
+
+/* MAJORITY PARTY */
+
+.party-majority .party-bar-fill{
+background:linear-gradient(135deg,#d4af37,#b88a00);
+}
+
+
+/* SEAT NUMBER */
+
+.party-seats{
+
+display:flex;
+flex-direction:column;
+align-items:flex-end;
+
+}
+
+.party-seat-number{
+font-weight:700;
+font-size:14px;
+color:#111;
+}
+
+.party-seat-percent{
+font-size:11px;
+color:#777;
+}
+
+
+/* ===================================================
+   SEAT VISUALIZATION
+=================================================== */
+
+.seat-visualization-card{
+
+background:#fff;
+
+border-radius:14px;
+
+padding:22px;
+
+box-shadow:0 8px 22px rgba(0,0,0,.07);
+
+display:flex;
+flex-direction:column;
+
+gap:16px;
+
+}
+
+.seat-visualization-card .card-title{
+font-size:16px;
+font-weight:600;
+}
+
+
+/* ===================================================
+   SEAT GRID
+=================================================== */
+
+.seat-grid{
+
+display:grid;
+
+grid-template-columns:repeat(30,14px);
+
+gap:6px;
+
+justify-content:center;
+
+margin-top:10px;
+
+}
+
+
+/* SEAT BLOCK */
+
+.seat-block{
+
+width:14px;
+height:14px;
+
+border-radius:3px;
+
+transition:.2s ease;
+
+}
+
+.seat-block:hover{
+
+transform:scale(1.35);
+
+box-shadow:0 0 6px rgba(0,0,0,.25);
+
+}
+
+
+/* ===================================================
+   VISUALIZATION META
+=================================================== */
+
+.seat-visualization-meta{
+
+display:grid;
+
+grid-template-columns:repeat(3,1fr);
+
+border-top:1px solid #e6e6e6;
+
+padding-top:14px;
+
+text-align:center;
+
+}
+
+.meta-box{
+
+display:flex;
+flex-direction:column;
+align-items:center;
+
+font-size:12px;
+color:#777;
+
+}
+
+.meta-box strong{
+
+font-size:20px;
+color:#111;
+margin-top:4px;
+
+}
+
+
+/* ===================================================
+   LOCAL SEAT BREAKDOWN
+=================================================== */
+
+.local-seat-breakdown{
+
+background:#fff;
+
+border-radius:14px;
+
+padding:22px;
+
+box-shadow:0 8px 22px rgba(0,0,0,.07);
+
+margin-top:22px;
+
+}
+
+.local-seat-grid{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:16px;
+
+margin-top:16px;
+
+}
+
+.local-seat-card{
+
+background:#f8f9fb;
+
+border-radius:12px;
+
+padding:22px;
+
+text-align:center;
+
+border-left:4px solid #6b0f63;
+
+transition:.25s;
+
+}
+
+.local-seat-card:hover{
+background:#f3f4f6;
+}
+
+.local-seat-number{
+
+font-size:28px;
+font-weight:700;
+
+margin-bottom:6px;
+
+}
+
+.local-seat-label{
+
+font-size:12px;
+color:#666;
+
+}
+
+
+/* ===================================================
+   RESPONSIVE
+=================================================== */
+
+@media(max-width:1100px){
+
+.seat-metrics{
+grid-template-columns:repeat(3,1fr);
+}
+
+}
+
+@media(max-width:900px){
+
+.seat-summary-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+@media(max-width:600px){
+
+.seat-metrics{
+grid-template-columns:repeat(2,1fr);
+}
+
+.local-seat-grid{
+grid-template-columns:1fr;
+}
+
+}
+/* ===================================================
+  MAP OF NEPAL 
+=================================================== */
+.election-map-card {
+  width: 100%;
+}
+
+.map-box {
+  width: 100%;
+}
+
+.maplibregl-map {
+  width: 100% !important;
+  height: 100% !important;
+}
+.map-wrapper{
+  width:100%;
+  height:600px;
+  position:relative;
+}
+
+.map-container{
+  width:100%;
+  height:100%;
+}
+
+.maplibregl-map{
+  width:100%!important;
+  height:100%!important;
+}

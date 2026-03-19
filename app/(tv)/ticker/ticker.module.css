@@ -1,0 +1,161 @@
+/* =====================================
+TV SCREEN (MASTER CONTAINER)
+===================================== */
+
+.tvScreen{
+  width:100vw;
+  height:100vh;
+
+  background:#000;
+
+  display:flex;
+  align-items:flex-end;
+
+  padding-bottom:28px;
+
+  position:relative;
+  overflow:hidden;
+}
+
+/* =====================================
+LAYER CONTROL (IMPORTANT)
+===================================== */
+
+/* Flash should always be on top */
+.flashLayer{
+  position:absolute;
+  z-index:30;
+  width:100%;
+}
+
+/* Breaking below flash */
+.breakingLayer{
+  position:absolute;
+  z-index:20;
+  width:100%;
+}
+
+/* Scroll base layer */
+.scrollLayer{
+  position:absolute;
+  bottom:0;
+  left:0;
+
+  width:100%;
+  z-index:10;
+}
+
+/* =====================================
+SAFE AREA (TV BROADCAST)
+===================================== */
+
+.safeArea{
+  position:absolute;
+  bottom:110px; /* aligns with flash */
+
+  width:100%;
+  display:flex;
+  justify-content:center;
+
+  pointer-events:none;
+}
+
+/* =====================================
+RESET ANY OLD STYLES (IMPORTANT CLEANUP)
+===================================== */
+
+/* remove old ticker styles completely */
+.tickerBar,
+.tickerScroll,
+.tickerTrack,
+.tickerItem,
+.leftStack,
+.labelBox,
+.glass,
+.glassMove{
+  all:unset;
+}
+
+/* =====================================
+BREAKING / FLASH FULLSCREEN (IF USED)
+===================================== */
+
+.breakingScreen{
+  width:100vw;
+  height:100vh;
+  background:#8b0000;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  color:white;
+}
+
+.breakingBox{
+  font-size:42px;
+  font-weight:800;
+  margin-bottom:20px;
+
+  animation:blink 1s infinite;
+}
+
+.breakingText{
+  font-size:36px;
+  font-weight:600;
+  text-align:center;
+  padding:0 40px;
+}
+
+.flashScreen{
+  width:100vw;
+  height:100vh;
+
+  background:#111;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  color:white;
+}
+
+.flashLabel{
+  background:#ffcc00;
+  color:black;
+
+  padding:10px 20px;
+  font-weight:700;
+  margin-bottom:20px;
+}
+
+.flashText{
+  font-size:32px;
+  font-weight:600;
+  text-align:center;
+  padding:0 40px;
+}
+
+/* =====================================
+ANIMATION
+===================================== */
+
+@keyframes blink{
+  0%{opacity:1;}
+  50%{opacity:0.4;}
+  100%{opacity:1;}
+}
+
+/* =====================================
+GLOBAL CLEANUP (VERY IMPORTANT)
+===================================== */
+
+.tvScreen :global(header),
+.tvScreen :global(footer),
+.tvScreen :global(.nntv-bg),
+.tvScreen :global(.scroll-indicator),
+.tvScreen :global(.max-w-7xl) {
+  display: none !important;
+}

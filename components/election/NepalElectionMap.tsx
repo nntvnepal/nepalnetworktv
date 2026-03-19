@@ -5,16 +5,16 @@ import { useEffect, useState, useRef } from "react"
 import "leaflet/dist/leaflet.css"
 
 //////////////////////////////////////////////////////
-// DYNAMIC IMPORT (🔥 MAIN FIX)
+// DYNAMIC IMPORT (SSR SAFE)
 //////////////////////////////////////////////////////
 
 const MapContainer = dynamic(
-  async () => (await import("react-leaflet")).MapContainer,
+  () => import("react-leaflet").then((m) => m.MapContainer),
   { ssr: false }
 )
 
 const GeoJSON = dynamic(
-  async () => (await import("react-leaflet")).GeoJSON,
+  () => import("react-leaflet").then((m) => m.GeoJSON),
   { ssr: false }
 )
 
@@ -82,9 +82,7 @@ export default function NepalElectionMap() {
   useEffect(() => {
 
     async function load() {
-
       try {
-
         const [geoRes, resultRes] = await Promise.all([
           fetch("/maps/nepal-districts.geojson"),
           fetch("/api/elections/map-results")
@@ -232,7 +230,7 @@ export default function NepalElectionMap() {
         {/* MAP */}
 
         <MapContainer
-          center={[28.4, 84.1]}
+          center={[28.4, 84.1] as any}   // 🔥 FIX
           zoom={7}
           scrollWheelZoom={false}
           dragging={false}

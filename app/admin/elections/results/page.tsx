@@ -12,23 +12,41 @@ import DistrictResults from "@/components/election/DistrictResults"
 
 import "@/styles/election.css"
 
+// ✅ IMPORTANT (SSR issue fix)
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 const NepalElectionMap = dynamic(
   () => import("@/components/election/NepalElectionMap"),
   { ssr: false }
 )
 
 interface Props {
-  params: { slug: string }
+  params: { slug?: string }
 }
 
 export default async function ElectionPage({ params }: Props) {
+
+  //////////////////////////////////////////////////////
+  // SAFETY CHECK (VERY IMPORTANT)
+  //////////////////////////////////////////////////////
+
+  const slug = params?.slug
+
+  if (!slug) {
+    return (
+      <div className="container">
+        <h1>Invalid election URL</h1>
+      </div>
+    )
+  }
 
   //////////////////////////////////////////////////////
   // FETCH ELECTION
   //////////////////////////////////////////////////////
 
   const election = await prisma.election.findUnique({
-    where: { slug: params.slug }
+    where: { slug }
   })
 
   if (!election) {
@@ -40,7 +58,7 @@ export default async function ElectionPage({ params }: Props) {
   }
 
   //////////////////////////////////////////////////////
-  // FETCH RESULTS
+  // FETCH RESULTS (NULL SAFE)
   //////////////////////////////////////////////////////
 
   const results = await prisma.electionResult.findMany({
@@ -62,7 +80,7 @@ export default async function ElectionPage({ params }: Props) {
   })
 
   //////////////////////////////////////////////////////
-  // CALCULATIONS (OPTIMIZED)
+  // CALCULATIONS (SAFE)
   //////////////////////////////////////////////////////
 
   const seatWinners: Record<string, any> = {}
@@ -70,19 +88,18 @@ export default async function ElectionPage({ params }: Props) {
 
   for (const r of results) {
 
+    // ✅ skip invalid data (DB protection)
+    if (!r.seatId || !r.candidate) continue
+
     const seatId = r.seatId
 
-    // WINNER LOGIC
     if (!seatWinners[seatId] || r.votes > seatWinners[seatId].votes) {
       seatWinners[seatId] = r
     }
-
   }
 
-  // PARTY COUNT
   Object.values(seatWinners).forEach((r: any) => {
     const party = r?.candidate?.party?.name || "Independent"
-
     partySeats[party] = (partySeats[party] || 0) + 1
   })
 
@@ -93,35 +110,22 @@ export default async function ElectionPage({ params }: Props) {
   //////////////////////////////////////////////////////
 
   return (
-
     <div className="election-page">
 
       <div className="container">
 
         {/* HEADER */}
-
         <div className="election-header">
           <h1>{election.name}</h1>
-
           <p className="election-subtitle">
             Election Year {election.year}
           </p>
         </div>
 
-
-        {/* FILTER BAR */}
-
+        {/* FILTER */}
         <div className="search-bar">
-
           <select>
             <option>प्रदेश</option>
-            <option>कोशी</option>
-            <option>मधेश</option>
-            <option>बागमती</option>
-            <option>गण्डकी</option>
-            <option>लुम्बिनी</option>
-            <option>कर्णाली</option>
-            <option>सुदूरपश्चिम</option>
           </select>
 
           <select>
@@ -133,68 +137,41 @@ export default async function ElectionPage({ params }: Props) {
           </select>
 
           <button>खोज्नुहोस्</button>
-
         </div>
 
-
         {/* SUMMARY */}
-
-        {/* ✅ FIX: props hata diye */}
         <ResultSummary />
 
-
-        {/* PARTY CARDS */}
+        {/* PARTY */}
         <PartyCards results={results} />
-
-
-        {/* PARTY SEAT BAR */}
         <PartySeatBar results={results} />
 
-
-        {/* MAP + PARTY STANDINGS */}
-
+        {/* MAP */}
         <div className="map-grid">
 
           <div className="card">
-
             <h3 className="card-title">Election Map</h3>
-
             <div className="map-box">
               <NepalElectionMap />
             </div>
-
           </div>
 
           <div className="card">
-
             <h3 className="card-title">Party Standings</h3>
-
             <PartyStandings results={results} />
-
           </div>
 
         </div>
 
-
-        {/* PROVINCE RESULTS */}
-
+        {/* RESULTS */}
         <h2 className="section-title">Province Results</h2>
         <ProvinceResults results={results} />
-
-
-        {/* HOT SEATS */}
 
         <h2 className="section-title">Hot Seats</h2>
         <HotSeats results={results} />
 
-
-        {/* DISTRICT RESULTS */}
-
         <h2 className="section-title">District Results</h2>
         <DistrictResults results={results} />
-
-
-        {/* LATEST SEAT RESULTS */}
 
         <h2 className="section-title">Latest Seat Results</h2>
         <SeatResultsTable results={results} />
@@ -202,6 +179,5 @@ export default async function ElectionPage({ params }: Props) {
       </div>
 
     </div>
-
   )
 }

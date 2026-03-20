@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import dynamic from "next/dynamic"
+import dynamicImport from "next/dynamic"
 
 import PartyCards from "@/components/election/PartyCards"
 import ResultSummary from "@/components/election/ResultSummary"
@@ -12,23 +12,24 @@ import DistrictResults from "@/components/election/DistrictResults"
 
 import "@/styles/election.css"
 
-// ✅ IMPORTANT (SSR issue fix)
+// ✅ NEXT FIXES (VERY IMPORTANT)
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-const NepalElectionMap = dynamic(
+// ✅ SAFE DYNAMIC IMPORT
+const NepalElectionMap = dynamicImport(
   () => import("@/components/election/NepalElectionMap"),
   { ssr: false }
 )
 
 interface Props {
-  params: { slug?: string }
+  params?: { slug?: string }
 }
 
 export default async function ElectionPage({ params }: Props) {
 
   //////////////////////////////////////////////////////
-  // SAFETY CHECK (VERY IMPORTANT)
+  // SAFE PARAM
   //////////////////////////////////////////////////////
 
   const slug = params?.slug
@@ -42,12 +43,18 @@ export default async function ElectionPage({ params }: Props) {
   }
 
   //////////////////////////////////////////////////////
-  // FETCH ELECTION
+  // FETCH ELECTION (SAFE)
   //////////////////////////////////////////////////////
 
-  const election = await prisma.election.findUnique({
-    where: { slug }
-  })
+  let election = null
+
+  try {
+    election = await prisma.election.findUnique({
+      where: { slug }
+    })
+  } catch (err) {
+    console.error("ELECTION FETCH ERROR:", err)
+  }
 
   if (!election) {
     return (
@@ -58,29 +65,36 @@ export default async function ElectionPage({ params }: Props) {
   }
 
   //////////////////////////////////////////////////////
-  // FETCH RESULTS (NULL SAFE)
+  // FETCH RESULTS (ULTRA SAFE)
   //////////////////////////////////////////////////////
 
-  const results = await prisma.electionResult.findMany({
-    where: {
-      electionId: election.id
-    },
-    include: {
-      candidate: {
-        include: {
-          party: true
-        }
+  let results: any[] = []
+
+  try {
+    results = await prisma.electionResult.findMany({
+      where: {
+        electionId: election.id
       },
-      seat: {
-        include: {
-          region: true
+      include: {
+        candidate: {
+          include: {
+            party: true
+          }
+        },
+        seat: {
+          include: {
+            region: true
+          }
         }
       }
-    }
-  })
+    })
+  } catch (err) {
+    console.error("RESULT FETCH ERROR:", err)
+    results = []
+  }
 
   //////////////////////////////////////////////////////
-  // CALCULATIONS (SAFE)
+  // SAFE CALCULATIONS
   //////////////////////////////////////////////////////
 
   const seatWinners: Record<string, any> = {}
@@ -88,8 +102,8 @@ export default async function ElectionPage({ params }: Props) {
 
   for (const r of results) {
 
-    // ✅ skip invalid data (DB protection)
-    if (!r.seatId || !r.candidate) continue
+    // 🚨 DB DIRTY DATA GUARD
+    if (!r?.seatId || !r?.candidate || typeof r?.votes !== "number") continue
 
     const seatId = r.seatId
 
@@ -143,8 +157,8 @@ export default async function ElectionPage({ params }: Props) {
         <ResultSummary />
 
         {/* PARTY */}
-        <PartyCards results={results} />
-        <PartySeatBar results={results} />
+        <PartyCards results={results || []} />
+        <PartySeatBar results={results || []} />
 
         {/* MAP */}
         <div className="map-grid">
@@ -158,23 +172,23 @@ export default async function ElectionPage({ params }: Props) {
 
           <div className="card">
             <h3 className="card-title">Party Standings</h3>
-            <PartyStandings results={results} />
+            <PartyStandings results={results || []} />
           </div>
 
         </div>
 
         {/* RESULTS */}
         <h2 className="section-title">Province Results</h2>
-        <ProvinceResults results={results} />
+        <ProvinceResults results={results || []} />
 
         <h2 className="section-title">Hot Seats</h2>
-        <HotSeats results={results} />
+        <HotSeats results={results || []} />
 
         <h2 className="section-title">District Results</h2>
-        <DistrictResults results={results} />
+        <DistrictResults results={results || []} />
 
         <h2 className="section-title">Latest Seat Results</h2>
-        <SeatResultsTable results={results} />
+        <SeatResultsTable results={results || []} />
 
       </div>
 

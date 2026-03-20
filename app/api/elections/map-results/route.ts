@@ -1,76 +1,37 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
+// ✅ build fix
+export const dynamic = "force-dynamic"
+
 //////////////////////////////////////////////////////
 // UTILS
 //////////////////////////////////////////////////////
 
 function normalize(name: string) {
-  return name.toLowerCase().replace(/\s/g, "")
+  return name?.toLowerCase().replace(/\s/g, "") || ""
 }
-
-//////////////////////////////////////////////////////
-// FIND DISTRICT FROM REGION HIERARCHY
-//////////////////////////////////////////////////////
 
 function resolveDistrict(region: any): string | null {
-
   if (!region) return null
-
-  if (region.type === "DISTRICT") {
-    return region.name
-  }
-
-  if (region.parent) {
-    return resolveDistrict(region.parent)
-  }
-
-  return null
+  if (region.type === "DISTRICT") return region.name
+  return resolveDistrict(region.parent)
 }
-
-//////////////////////////////////////////////////////
-// FIND PROVINCE FROM REGION HIERARCHY
-//////////////////////////////////////////////////////
 
 function resolveProvince(region: any): string | null {
-
   if (!region) return null
-
-  if (region.type === "PROVINCE") {
-    return region.name
-  }
-
-  if (region.parent) {
-    return resolveProvince(region.parent)
-  }
-
-  return null
+  if (region.type === "PROVINCE") return region.name
+  return resolveProvince(region.parent)
 }
 
-//////////////////////////////////////////////////////
-// FIND MUNICIPALITY FROM REGION HIERARCHY
-//////////////////////////////////////////////////////
-
 function resolveMunicipality(region: any): string | null {
-
   if (!region) return null
 
-  const types = [
-    "METRO",
-    "SUB_METRO",
-    "MUNICIPALITY",
-    "RURAL_MUNICIPALITY"
-  ]
+  const types = ["METRO", "SUB_METRO", "MUNICIPALITY", "RURAL_MUNICIPALITY"]
 
-  if (types.includes(region.type)) {
-    return region.name
-  }
+  if (types.includes(region.type)) return region.name
 
-  if (region.parent) {
-    return resolveMunicipality(region.parent)
-  }
-
-  return null
+  return resolveMunicipality(region.parent)
 }
 
 //////////////////////////////////////////////////////
@@ -102,13 +63,15 @@ export async function GET() {
     }
 
     //////////////////////////////////////////////////////
-    // RESULTS
+    // RESULTS (SAFE FILTER)
     //////////////////////////////////////////////////////
 
     const results = await prisma.electionResult.findMany({
 
       where: {
-        electionId: election.id
+        electionId: election.id,
+        seatId: { not: null },
+        candidateId: { not: null }
       },
 
       include: {
@@ -135,17 +98,19 @@ export async function GET() {
     // GROUP BY SEAT
     //////////////////////////////////////////////////////
 
-    const seatMap: any = {}
+    const seatMap: Record<string, any[]> = {}
 
-    results.forEach(r => {
+    for (const r of results) {
+
+      // ✅ skip bad data
+      if (!r.seatId || !r.seat || !r.candidate) continue
 
       if (!seatMap[r.seatId]) {
         seatMap[r.seatId] = []
       }
 
       seatMap[r.seatId].push(r)
-
-    })
+    }
 
     //////////////////////////////////////////////////////
     // RESULT STRUCTURES
@@ -154,7 +119,6 @@ export async function GET() {
     const districtResults: any = {}
     const provinceResults: any = {}
     const municipalityResults: any = {}
-
     const partySeats: any = {}
     const seats: any[] = []
 
@@ -162,11 +126,12 @@ export async function GET() {
     // PROCESS EACH SEAT
     //////////////////////////////////////////////////////
 
-    Object.values(seatMap).forEach((seatResults: any) => {
+    Object.values(seatMap).forEach((seatResults: any[]) => {
 
-      const sorted = seatResults.sort((a: any, b: any) => b.votes - a.votes)
-
+      const sorted = seatResults.sort((a, b) => (b.votes || 0) - (a.votes || 0))
       const leader = sorted[0]
+
+      if (!leader || !leader.seat || !leader.candidate) return
 
       const district = resolveDistrict(leader.seat.region)
       const province = resolveProvince(leader.seat.region)
@@ -177,101 +142,67 @@ export async function GET() {
       const dKey = normalize(district)
 
       //////////////////////////////////////////////////////
-      // DISTRICT RESULT (EXISTING)
+      // DISTRICT
       //////////////////////////////////////////////////////
 
       districtResults[dKey] = {
-
         district,
-
         party: leader.party?.name || "Independent",
-
         color: leader.party?.color || "#888888",
-
-        candidate: leader.candidate.name,
-
-        votes: leader.votes,
-
-        votePercent: leader.votePercent,
-
+        candidate: leader.candidate?.name || "Unknown",
+        votes: leader.votes ?? 0,
+        votePercent: leader.votePercent ?? 0,
         seatId: leader.seatId
-
       }
 
       //////////////////////////////////////////////////////
-      // PROVINCE RESULT (NEW)
+      // PROVINCE
       //////////////////////////////////////////////////////
 
       if (province) {
-
         const pKey = normalize(province)
 
         provinceResults[pKey] = {
-
           province,
-
           party: leader.party?.name || "Independent",
-
           color: leader.party?.color || "#888888"
-
         }
-
       }
 
       //////////////////////////////////////////////////////
-      // MUNICIPALITY RESULT (NEW)
+      // MUNICIPALITY
       //////////////////////////////////////////////////////
 
       if (municipality) {
-
         const mKey = normalize(municipality)
 
         municipalityResults[mKey] = {
-
           municipality,
-
           party: leader.party?.name || "Independent",
-
           color: leader.party?.color || "#888888"
-
         }
-
       }
 
       //////////////////////////////////////////////////////
-      // PARTY SEAT COUNT (EXISTING)
+      // PARTY COUNT
       //////////////////////////////////////////////////////
 
       const party = leader.party?.name || "Independent"
-
-      if (!partySeats[party]) {
-        partySeats[party] = 0
-      }
-
-      partySeats[party]++
+      partySeats[party] = (partySeats[party] || 0) + 1
 
       //////////////////////////////////////////////////////
-      // SEAT RESULTS (EXISTING)
+      // SEATS
       //////////////////////////////////////////////////////
 
       seats.push({
-
         seatId: leader.seatId,
-
-        seatName: leader.seat.name,
-
+        seatName: leader.seat?.name || "Unknown",
         district,
-
-        winner: leader.candidate.name,
-
-        party: leader.party?.name || "Independent",
-
+        winner: leader.candidate?.name || "Unknown",
+        party,
         color: leader.party?.color || "#888888",
-
-        votes: leader.votes,
-
-        votePercent: leader.votePercent
-
+        votes: leader.votes ?? 0,
+        votePercent: leader.votePercent ?? 0
       })
 
     })
@@ -290,22 +221,15 @@ export async function GET() {
       },
 
       totalDistricts: Object.keys(districtResults).length,
-
       districtResults,
-
       provinceResults,
-
       municipalityResults,
-
       partySeats,
-
       seats
 
     })
 
-  }
-
-  catch (error) {
+  } catch (error) {
 
     console.error("MAP RESULTS ERROR:", error)
 

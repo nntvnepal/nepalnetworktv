@@ -1,43 +1,76 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
-export async function GET(){
+// ✅ build + dynamic fix
+export const dynamic = "force-dynamic"
 
-const election = await prisma.election.findFirst({
-where:{ isActive:true }
-})
+export async function GET() {
 
-if(!election){
-return NextResponse.json([])
-}
+  try {
 
-const candidates = await prisma.candidate.findMany({
+    //////////////////////////////////////////////////////
+    // ACTIVE ELECTION
+    //////////////////////////////////////////////////////
 
-where:{
-electionId:election.id
-},
+    const election = await prisma.election.findFirst({
+      where: { isActive: true }
+    })
 
-include:{
-seat:true,
-party:true,
-results:{
-where:{ electionId:election.id }
-}
-}
+    if (!election) {
+      return NextResponse.json([])
+    }
 
-})
+    //////////////////////////////////////////////////////
+    // GET CANDIDATES (SAFE)
+    //////////////////////////////////////////////////////
 
-const rows = candidates.map(c=>({
+    const candidates = await prisma.candidate.findMany({
 
-candidateId:c.id,
-seatId:c.seatId,
-seat:c.seat?.name,
-candidate:c.name,
-party:c.party?.name || "",
-votes:c.results?.[0]?.votes || 0
+      where: {
+        electionId: election.id,
+        // ✅ safety filters
+        seatId: { not: null }
+      },
 
-}))
+      include: {
+        seat: true,
+        party: true,
+        results: {
+          where: {
+            electionId: election.id
+          }
+        }
+      }
 
-return NextResponse.json(rows)
+    })
+
+    //////////////////////////////////////////////////////
+    // FORMAT DATA (SAFE)
+    //////////////////////////////////////////////////////
+
+    const rows = candidates.map((c) => ({
+
+      candidateId: c.id,
+      seatId: c.seatId || null,
+      seat: c.seat?.name || "Unknown",
+      candidate: c.name || "Unknown",
+      party: c.party?.name || "Independent",
+      votes: c.results?.[0]?.votes ?? 0
+
+    }))
+
+    //////////////////////////////////////////////////////
+    // RESPONSE
+    //////////////////////////////////////////////////////
+
+    return NextResponse.json(rows)
+
+  } catch (error) {
+
+    console.error("VOTE BULK API ERROR:", error)
+
+    return NextResponse.json([], { status: 500 })
+
+  }
 
 }

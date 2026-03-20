@@ -1,82 +1,96 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
-export async function GET(){
+// ✅ IMPORTANT (build crash fix)
+export const dynamic = "force-dynamic"
 
-//////////////////////////////////////////////////////
-// ACTIVE ELECTION
-//////////////////////////////////////////////////////
+export async function GET() {
 
-const election = await prisma.election.findFirst({
-where:{ isActive:true }
-})
+  try {
 
-if(!election){
+    //////////////////////////////////////////////////////
+    // ACTIVE ELECTION
+    //////////////////////////////////////////////////////
 
-return NextResponse.json({
-results:[]
-})
+    const election = await prisma.election.findFirst({
+      where: { isActive: true }
+    })
 
-}
+    if (!election) {
+      return NextResponse.json({
+        results: [],
+        updatedAt: new Date()
+      })
+    }
 
-//////////////////////////////////////////////////////
-// GET ALL RESULTS FOR ELECTION
-//////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
+    // GET RESULTS (SAFE FILTER)
+    //////////////////////////////////////////////////////
 
-const results = await prisma.electionResult.findMany({
+    const results = await prisma.electionResult.findMany({
 
-where:{
-electionId:election.id
-},
+      where: {
+        electionId: election.id,
+        // ✅ EXTRA SAFETY (important)
+        seatId: { not: null },
+        candidateId: { not: null }
+      },
 
-include:{
-candidate:{
-include:{
-party:true
-}
-},
-seat:{
-include:{
-region:true,
-ward:true,
-constituency:true
-}
-}
-}
+      include: {
+        candidate: {
+          include: {
+            party: true
+          }
+        },
+        seat: {
+          include: {
+            region: true,
+            ward: true,
+            constituency: true
+          }
+        }
+      }
 
-})
+    })
 
-//////////////////////////////////////////////////////
-// CALCULATE SEAT WINNERS
-//////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
+    // CALCULATE WINNERS (SAFE)
+    //////////////////////////////////////////////////////
 
-const seatWinners:any = {}
+    const seatWinners: Record<string, any> = {}
 
-results.forEach((r:any)=>{
+    for (const r of results) {
 
-const seat = r.seatId
+      // ✅ skip bad data
+      if (!r.seatId || !r.candidate) continue
 
-if(!seatWinners[seat]){
-seatWinners[seat] = r
-return
-}
+      const seat = r.seatId
 
-if(r.votes > seatWinners[seat].votes){
-seatWinners[seat] = r
-}
+      if (!seatWinners[seat] || r.votes > seatWinners[seat].votes) {
+        seatWinners[seat] = r
+      }
 
-})
+    }
 
-//////////////////////////////////////////////////////
-// RESPONSE
-//////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
+    // RESPONSE
+    //////////////////////////////////////////////////////
 
-return NextResponse.json({
+    return NextResponse.json({
+      results: Object.values(seatWinners),
+      updatedAt: new Date()
+    })
 
-results:Object.values(seatWinners),
+  } catch (error) {
 
-updatedAt:new Date()
+    console.error("LIVE API ERROR:", error)
 
-})
+    return NextResponse.json({
+      results: [],
+      updatedAt: new Date(),
+      error: "Internal Server Error"
+    }, { status: 500 })
+
+  }
 
 }

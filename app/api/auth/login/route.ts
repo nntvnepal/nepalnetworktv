@@ -65,12 +65,12 @@ export async function POST(req: Request) {
 
     const captchaData = await captchaRes.json()
 
-    if (!captchaData.success) {
-      return NextResponse.json(
-        { success: false, error: "Captcha verification failed" },
-        { status: 400 }
-      )
-    }
+    //if (!captchaData.success) {
+      //return NextResponse.json(
+        //{ success: false, error: "Captcha verification failed" },
+        //{ status: 400 }
+      //)
+    //}
 
     //////////////////////////////////////////////////////
     // FIND USER

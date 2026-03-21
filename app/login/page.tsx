@@ -180,6 +180,36 @@ export default function LoginPage(){
     setLoading(false)
   }
 }
+async function handleVerify(e:any){
+  e.preventDefault()
+
+  try{
+    const res = await fetch("/api/auth/verify-otp",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        email: emailForOtp,
+        code: otp
+      })
+    })
+
+    const data = await res.json()
+    console.log("VERIFY RESPONSE:", data)
+
+    if(!res.ok){
+      setError(data.error || "Invalid OTP")
+      return
+    }
+
+    // ✅ SUCCESS LOGIN
+    router.push("/admin")
+
+  }catch(err){
+    console.error("VERIFY ERROR:", err)
+    setError("OTP verification failed")
+  }
+}
+
   //////////////////////////////////////////////////////
   // UI
   //////////////////////////////////////////////////////

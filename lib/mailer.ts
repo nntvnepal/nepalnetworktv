@@ -24,7 +24,7 @@ export async function sendOTPEmail(email: string, otp: string) {
     // SEND EMAIL
     //////////////////////////////////////////////////////
     const response = await resend.emails.send({
-      from: "NNTV Security <onboarding@resend.dev>", // later custom domain lagayenge
+      from: "NNTV <no-reply@nntvnepal.com>",// later custom domain lagayenge
       to: email,
       subject: "Your NNTV Verification Code",
       html: `

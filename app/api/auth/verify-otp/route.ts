@@ -37,17 +37,29 @@ export async function POST(req: Request) {
     // FIND OTP (LATEST ONLY 🔥)
     //////////////////////////////////////////////////////
 
-    const otpRecord = await prisma.oTP.findFirst({
-      where: { email, code },
-      orderBy: { createdAt: "desc" },
-    })
+    import { compare } from "bcryptjs" // 👈 already ho sakta hai, warna add kar
 
-    if (!otpRecord) {
-      return NextResponse.json(
-        { success: false, error: "Invalid OTP" },
-        { status: 400 }
-      )
-    }
+const otpRecord = await prisma.oTP.findFirst({
+  where: { email },
+  orderBy: { createdAt: "desc" },
+})
+
+if (!otpRecord) {
+  return NextResponse.json(
+    { success: false, error: "Invalid OTP" },
+    { status: 400 }
+  )
+}
+
+// 🔥 compare hashed
+const isValid = await compare(code, otpRecord.code)
+
+if (!isValid) {
+  return NextResponse.json(
+    { success: false, error: "Invalid OTP" },
+    { status: 400 }
+  )
+}
 
     //////////////////////////////////////////////////////
     // CHECK EXPIRY

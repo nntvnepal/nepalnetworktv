@@ -1,40 +1,30 @@
-import nodemailer from "nodemailer"
+import { Resend } from "resend"
 
 //////////////////////////////////////////////////////
-// TRANSPORTER (CREATE ONCE)
+// INIT
 //////////////////////////////////////////////////////
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 //////////////////////////////////////////////////////
-// VERIFY CONNECTION (SAFE MODE)
-//////////////////////////////////////////////////////
-
-if (process.env.NODE_ENV === "development") {
-  transporter.verify((error, success) => {
-    if (error) {
-      console.error("❌ SMTP ERROR:", error)
-    } else {
-      console.log("✅ SMTP Ready")
-    }
-  })
-}
-
-//////////////////////////////////////////////////////
-// SEND OTP EMAIL
+// SEND OTP EMAIL (PRODUCTION READY)
 //////////////////////////////////////////////////////
 
 export async function sendOTPEmail(email: string, otp: string) {
   try {
+    //////////////////////////////////////////////////////
+    // BASIC VALIDATION
+    //////////////////////////////////////////////////////
+    if (!email || !otp) {
+      console.error("❌ Missing email or OTP")
+      return false
+    }
 
-    const info = await transporter.sendMail({
-      from: `"NNTV Security" <${process.env.EMAIL_USER}>`,
+    //////////////////////////////////////////////////////
+    // SEND EMAIL
+    //////////////////////////////////////////////////////
+    const response = await resend.emails.send({
+      from: "NNTV Security <onboarding@resend.dev>", // later custom domain lagayenge
       to: email,
       subject: "Your NNTV Verification Code",
       html: `
@@ -86,13 +76,21 @@ export async function sendOTPEmail(email: string, otp: string) {
       `,
     })
 
+    //////////////////////////////////////////////////////
+    // LOGGING
+    //////////////////////////////////////////////////////
+    if (response.error) {
+      console.error("❌ EMAIL ERROR:", response.error)
+      return false
+    }
+
     console.log("✅ OTP Email Sent:", email)
-    console.log("📨 Message ID:", info.messageId)
+    console.log("📨 ID:", response.data?.id)
 
     return true
 
   } catch (error) {
-    console.error("❌ EMAIL ERROR:", error)
-    return false // ❗ important change (no crash)
+    console.error("❌ EMAIL FAILED:", error)
+    return false
   }
 }

@@ -77,33 +77,30 @@ export async function POST(req: Request) {
     // GENERATE OTP
     //////////////////////////////////////////////////////
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString()
-console.log("🔥 OTP:", otp)   // ✅ YE LINE ADD KAR
-    const expiresAt = new Date(
-      Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000
-    )
+   import { hash } from "bcryptjs" // 👈 top pe add kar
 
-    await prisma.oTP.create({
-      data: {
-        email: user.email,
-        code: otp,
-        expiresAt,
-      },
-    })
+const otp = Math.floor(100000 + Math.random() * 900000).toString()
 
-    //////////////////////////////////////////////////////
-    // 🔥 SEND EMAIL (SAFE MODE)
-    //////////////////////////////////////////////////////
+const hashedOTP = await hash(otp, 10)
 
-    try {
-      await sendOTPEmail(user.email, otp)
-      console.log("✅ EMAIL SENT")
-    } catch (err) {
-      console.error("❌ EMAIL ERROR:", err)
+await prisma.oTP.create({
+  data: {
+    email: user.email,
+    code: hashedOTP, // 🔐 hashed save
+    expiresAt,
+  },
+})
 
-      // 🔥 fallback (IMPORTANT)
-      console.log("📲 OTP (fallback):", otp)
-    }
+   //////////////////////////////////////////////////////
+// 🔥 SEND EMAIL (NON-BLOCKING)
+//////////////////////////////////////////////////////
+
+sendOTPEmail(user.email, otp)
+  .then(() => console.log("✅ EMAIL SENT"))
+  .catch((err) => {
+    console.error("❌ EMAIL ERROR:", err)
+    console.log("📲 OTP (fallback):", otp)
+  })
 
     //////////////////////////////////////////////////////
     // RESPONSE

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { SignJWT } from "jose"
+import { compare } from "bcryptjs" 
 
 export const runtime = "nodejs" // 🔥 fix edge warning
 
@@ -37,8 +38,7 @@ export async function POST(req: Request) {
     // FIND OTP (LATEST ONLY 🔥)
     //////////////////////////////////////////////////////
 
-    import { compare } from "bcryptjs" // 👈 already ho sakta hai, warna add kar
-
+  
 const otpRecord = await prisma.oTP.findFirst({
   where: { email },
   orderBy: { createdAt: "desc" },

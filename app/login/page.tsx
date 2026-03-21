@@ -124,66 +124,62 @@ export default function LoginPage(){
   //////////////////////////////////////////////////////
 
   async function handleLogin(e:any){
-    e.preventDefault()
+  e.preventDefault()
 
-    if(!captchaToken){
-      setError("Verify captcha")
+  if(!captchaToken){
+    setError("Verify captcha")
+    return
+  }
+
+  setLoading(true)
+  setError("")
+
+  try{
+    console.log("🚀 Sending request...")
+
+    const res = await fetch("/api/auth/login",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ email,password,captchaToken })
+    })
+
+    console.log("✅ Response received:", res.status)
+
+    let data = null
+
+    try{
+      data = await res.json()
+      console.log("📦 DATA:", data)
+    }catch(err){
+      console.error("❌ JSON PARSE ERROR:", err)
+      setError("Server response error")
+      setLoading(false)
       return
     }
 
-    setLoading(true)
-    setError("")
-
-    try{
-      const res = await fetch("/api/auth/login",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ email,password,captchaToken })
-      })
-
-      const data = await res.json()
-      console.log("LOGIN RESPONSE:", data)
-
-      if(!res.ok){
-        setError(data.error || "Login failed")
-        setLoading(false)
-        return
-      }
-
-      if(data.step==="otp_required"){
-        setEmailForOtp(data.email)
-        setStep("otp")
-      }
-
-    }catch(err){
-      console.error(err)
-      setError("Network error")
+    if(!res.ok){
+      setError(data?.error || "Login failed")
+      setLoading(false)
+      return
     }
 
+    if(data?.step==="otp_required"){
+      console.log("👉 OTP STEP TRIGGERED")
+      setEmailForOtp(data.email)
+      setStep("otp")
+      setLoading(false)
+      return
+    }
+
+    setError("Unexpected response")
+    setLoading(false)
+
+  }catch(err){
+    console.error("❌ FETCH ERROR:", err)
+    setError("Network error")
     setLoading(false)
   }
-
-  async function handleVerify(e:any){
-    e.preventDefault()
-
-    try{
-      const res = await fetch("/api/auth/verify-otp",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ email:emailForOtp,code:otp })
-      })
-
-      if(res.ok){
-        router.push("/admin")
-      }else{
-        setError("Invalid OTP")
-      }
-
-    }catch{
-      setError("OTP verification failed")
-    }
-  }
-
+}
   //////////////////////////////////////////////////////
   // UI
   //////////////////////////////////////////////////////

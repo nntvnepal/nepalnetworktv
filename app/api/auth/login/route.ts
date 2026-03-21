@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { sendOTPEmail } from "@/lib/mailer"
-import { hash } from "bcryptjs" 
+import { compare, hash } from "bcryptjs" 
 
 const OTP_EXPIRY_MINUTES = 5
 

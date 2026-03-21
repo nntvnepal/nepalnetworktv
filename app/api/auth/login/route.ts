@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     const email = String(body.email || "").trim().toLowerCase()
     const password = String(body.password || "").trim()
-    const captchaToken = body.captchaToken
+    
 
     //////////////////////////////////////////////////////
     // VALIDATION
@@ -29,49 +29,7 @@ export async function POST(req: Request) {
       )
     }
 
-    if (!captchaToken) {
-      return NextResponse.json(
-        { success: false, error: "Captcha required" },
-        { status: 400 }
-      )
-    }
-
-    //////////////////////////////////////////////////////
-    // CAPTCHA VERIFY
-    //////////////////////////////////////////////////////
-
-    if (!process.env.RECAPTCHA_SECRET_KEY) {
-      console.error("❌ RECAPTCHA_SECRET_KEY missing")
-      return NextResponse.json(
-        { success: false, error: "Server config error" },
-        { status: 500 }
-      )
-    }
-
-    const params = new URLSearchParams()
-    params.append("secret", process.env.RECAPTCHA_SECRET_KEY)
-    params.append("response", captchaToken)
-
-    const captchaRes = await fetch(
-      "https://www.google.com/recaptcha/api/siteverify",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: params.toString(),
-      }
-    )
-
-    const captchaData = await captchaRes.json()
-
-    //if (!captchaData.success) {
-      //return NextResponse.json(
-        //{ success: false, error: "Captcha verification failed" },
-        //{ status: 400 }
-      //)
-    //}
-
+        
     //////////////////////////////////////////////////////
     // FIND USER
     //////////////////////////////////////////////////////

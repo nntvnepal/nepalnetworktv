@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import ReCAPTCHA from "react-google-recaptcha"
 
 export default function LoginPage(){
 
@@ -19,7 +18,7 @@ export default function LoginPage(){
   const [password,setPassword] = useState("")
   const [emailForOtp,setEmailForOtp] = useState("")
   const [otp,setOtp] = useState("")
-  const [captchaToken,setCaptchaToken] = useState<string | null>(null)
+  
 
   const [error,setError] = useState("")
   const [loading,setLoading] = useState(false)
@@ -126,11 +125,7 @@ export default function LoginPage(){
   async function handleLogin(e:any){
   e.preventDefault()
 
-  if(!captchaToken){
-    setError("Verify captcha")
-    return
-  }
-
+  
   setLoading(true)
   setError("")
 
@@ -140,7 +135,7 @@ export default function LoginPage(){
     const res = await fetch("/api/auth/login",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ email,password,captchaToken })
+      body: JSON.stringify({ email,password})
     })
 
     console.log("✅ Response received:", res.status)
@@ -334,11 +329,7 @@ async function handleVerify(e:any){
             placeholder="Password"
             className="w-full p-3 bg-black/40 rounded"/>
 
-          <ReCAPTCHA
-            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
-            onChange={(t)=>setCaptchaToken(t)}
-          />
-
+          
           <button disabled={loading}
             className="w-full bg-orange-500 py-3 rounded">
             {loading ? "Processing..." : "Continue"}

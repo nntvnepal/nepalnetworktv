@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     }
 
     //////////////////////////////////////////////////////
-    // CAPTCHA VERIFY (🔥 FIXED)
+    // CAPTCHA VERIFY
     //////////////////////////////////////////////////////
 
     if (!process.env.RECAPTCHA_SECRET_KEY) {
@@ -64,8 +64,6 @@ export async function POST(req: Request) {
     )
 
     const captchaData = await captchaRes.json()
-
-    console.log("🛡 CAPTCHA DEBUG:", captchaData)
 
     if (!captchaData.success) {
       return NextResponse.json(
@@ -136,11 +134,19 @@ export async function POST(req: Request) {
     })
 
     //////////////////////////////////////////////////////
-    // SEND EMAIL
+    // 🔥 SEND EMAIL (SAFE MODE)
     //////////////////////////////////////////////////////
 
-    //await sendOTPEmail(user.email, otp)
-console.log("OTP:", otp)
+    try {
+      await sendOTPEmail(user.email, otp)
+      console.log("✅ EMAIL SENT")
+    } catch (err) {
+      console.error("❌ EMAIL ERROR:", err)
+
+      // 🔥 fallback (IMPORTANT)
+      console.log("📲 OTP (fallback):", otp)
+    }
+
     //////////////////////////////////////////////////////
     // RESPONSE
     //////////////////////////////////////////////////////

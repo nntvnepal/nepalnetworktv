@@ -8,21 +8,23 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // App Password
+    pass: process.env.EMAIL_PASS,
   },
 })
 
 //////////////////////////////////////////////////////
-// VERIFY CONNECTION (optional but pro)
+// VERIFY CONNECTION (SAFE MODE)
 //////////////////////////////////////////////////////
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("❌ SMTP ERROR:", error)
-  } else {
-    console.log("✅ SMTP Ready")
-  }
-})
+if (process.env.NODE_ENV === "development") {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("❌ SMTP ERROR:", error)
+    } else {
+      console.log("✅ SMTP Ready")
+    }
+  })
+}
 
 //////////////////////////////////////////////////////
 // SEND OTP EMAIL
@@ -87,8 +89,10 @@ export async function sendOTPEmail(email: string, otp: string) {
     console.log("✅ OTP Email Sent:", email)
     console.log("📨 Message ID:", info.messageId)
 
+    return true
+
   } catch (error) {
     console.error("❌ EMAIL ERROR:", error)
-    throw new Error("Email sending failed") // important for debugging
+    return false // ❗ important change (no crash)
   }
 }

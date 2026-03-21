@@ -125,7 +125,6 @@ export default function LoginPage(){
   async function handleLogin(e:any){
   e.preventDefault()
 
-  
   setLoading(true)
   setError("")
 
@@ -135,7 +134,7 @@ export default function LoginPage(){
     const res = await fetch("/api/auth/login",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ email,password})
+      body: JSON.stringify({ email,password })
     })
 
     console.log("✅ Response received:", res.status)
@@ -148,13 +147,11 @@ export default function LoginPage(){
     }catch(err){
       console.error("❌ JSON PARSE ERROR:", err)
       setError("Server response error")
-      setLoading(false)
       return
     }
 
     if(!res.ok){
       setError(data?.error || "Login failed")
-      setLoading(false)
       return
     }
 
@@ -162,21 +159,25 @@ export default function LoginPage(){
       console.log("👉 OTP STEP TRIGGERED")
       setEmailForOtp(data.email)
       setStep("otp")
-      setLoading(false)
       return
     }
 
     setError("Unexpected response")
-    setLoading(false)
 
   }catch(err){
     console.error("❌ FETCH ERROR:", err)
     setError("Network error")
+  }
+  finally{
+    // 🔥 MOST IMPORTANT FIX
     setLoading(false)
   }
 }
 async function handleVerify(e:any){
   e.preventDefault()
+
+  setLoading(true)
+  setError("")
 
   try{
     const res = await fetch("/api/auth/verify-otp",{
@@ -196,15 +197,16 @@ async function handleVerify(e:any){
       return
     }
 
-    // ✅ SUCCESS LOGIN
     router.push("/admin")
 
   }catch(err){
     console.error("VERIFY ERROR:", err)
     setError("OTP verification failed")
   }
+  finally{
+    setLoading(false)
+  }
 }
-
   //////////////////////////////////////////////////////
   // UI
   //////////////////////////////////////////////////////
@@ -346,9 +348,10 @@ async function handleVerify(e:any){
             placeholder="Enter OTP"
             className="w-full p-3 text-center bg-black/40 rounded"/>
 
-          <button className="w-full bg-green-600 py-3 rounded">
-            Verify
-          </button>
+          <button disabled={loading}
+  className="w-full bg-green-600 py-3 rounded">
+  {loading ? "Verifying..." : "Verify"}
+</button>
 
         </form>
       )}

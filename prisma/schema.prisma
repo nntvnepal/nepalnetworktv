@@ -95,6 +95,7 @@ model User {
 
   @@index([role])
 }
+
 model OTP {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 

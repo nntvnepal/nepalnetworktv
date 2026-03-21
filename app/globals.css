@@ -1477,3 +1477,12 @@ color:#7e22ce;
   padding-bottom:80px; /* ticker ke upar space */
 }
 
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+
+.perspective-800 {
+  perspective: 800px;
+}

@@ -31,6 +31,21 @@ const [data,setData] = useState<DashboardData | null>(null)
 const [loading,setLoading] = useState(true)
 
 //////////////////////////////////////////////////////
+// 🔔 TOAST NOTIFICATION (NEW)
+//////////////////////////////////////////////////////
+
+const [toast,setToast] = useState<string | null>(null)
+const [lastAppId,setLastAppId] = useState<string | null>(null)
+
+function showToast(msg:string){
+  setToast(msg)
+
+  setTimeout(()=>{
+    setToast(null)
+  },3000)
+}
+
+//////////////////////////////////////////////////////
 // FETCH DASHBOARD
 //////////////////////////////////////////////////////
 
@@ -47,7 +62,9 @@ cache:"no-store",
 signal:controller.signal
 })
 
-if(!res.ok) throw new Error("Dashboard fetch failed")
+if(!res.ok){
+  throw new Error("Dashboard fetch failed")
+}
 
 const json = await res.json()
 
@@ -70,6 +87,47 @@ load()
 return ()=>controller.abort()
 
 },[])
+
+//////////////////////////////////////////////////////
+// 🔔 APPLICATION REALTIME (FIXED)
+//////////////////////////////////////////////////////
+
+useEffect(()=>{
+
+  const interval = setInterval(async ()=>{
+
+    try{
+
+      const res = await fetch("/api/applications",{ cache:"no-store" })
+      const data = await res.json()
+
+      if(!data.success) return
+
+      const latest = data.applications?.[0]
+
+      if(!lastAppId && latest){
+        // first load → no toast
+        setLastAppId(latest.id)
+        return
+      }
+
+      if(latest && latest.id !== lastAppId){
+
+        setLastAppId(latest.id)
+
+        showToast(`🚀 New Application: ${latest.name}`)
+
+      }
+
+    }catch(err){
+      console.error("Notification error",err)
+    }
+
+  },4000)
+
+  return ()=>clearInterval(interval)
+
+},[lastAppId])
 
 //////////////////////////////////////////////////////
 // LOADING
@@ -132,7 +190,14 @@ categories = []
 
 return(
 
-<div className="p-8 space-y-10 text-white">
+<div className="p-8 space-y-10 text-white relative">
+
+{/* 🔔 TOAST UI */}
+{toast && (
+<div className="fixed top-6 right-6 z-50 bg-black/80 border border-white/10 px-5 py-3 rounded-xl shadow-xl animate-slide-in">
+  {toast}
+</div>
+)}
 
 {/* HEADER */}
 
@@ -176,9 +241,7 @@ Newsroom control panel
 
 <div className="grid lg:grid-cols-2 gap-8">
 
-{/* TRAFFIC */}
-
-<div className="bg-[#0e1726] border border-gray-800 rounded-xl p-8">
+<div className="bg-[#0e1726] border border-gray-800 rounded-xl p-8 hover:border-orange-400 transition">
 
 <h2 className="text-lg font-semibold mb-6">
 Traffic Analytics
@@ -210,9 +273,7 @@ dot={false}
 
 </div>
 
-{/* CATEGORY DISTRIBUTION */}
-
-<div className="bg-[#0e1726] border border-gray-800 rounded-xl p-8">
+<div className="bg-[#0e1726] border border-gray-800 rounded-xl p-8 hover:border-orange-400 transition">
 
 <h2 className="text-lg font-semibold mb-6">
 Content Distribution
@@ -245,27 +306,17 @@ Content Distribution
 <div className="grid lg:grid-cols-2 gap-8">
 
 <Panel title="Latest Articles">
-
-{latest.length===0 ? (
-<Empty message="No articles yet"/>
-) : (
+{latest.length===0 ? <Empty message="No articles yet"/> :
 latest.map((a:any)=>(
 <Row key={a.id} title={a.title}/>
-))
-)}
-
+))}
 </Panel>
 
 <Panel title="Most Viewed">
-
-{top.length===0 ? (
-<Empty message="No popular articles"/>
-) : (
+{top.length===0 ? <Empty message="No popular articles"/> :
 top.map((a:any)=>(
 <Row key={a.id} title={a.title} value={`${a.views} views`}/>
-))
-)}
-
+))}
 </Panel>
 
 </div>
@@ -275,27 +326,17 @@ top.map((a:any)=>(
 <div className="grid lg:grid-cols-2 gap-8">
 
 <Panel title="Trending News">
-
-{trending.length===0 ? (
-<Empty message="No trending news"/>
-) : (
+{trending.length===0 ? <Empty message="No trending news"/> :
 trending.map((a:any)=>(
 <Row key={a.id} title={a.title} value={`score ${a.trendingScore || 0}`}/>
-))
-)}
-
+))}
 </Panel>
 
 <Panel title="Viral Articles">
-
-{viral.length===0 ? (
-<Empty message="No viral articles"/>
-) : (
+{viral.length===0 ? <Empty message="No viral articles"/> :
 viral.map((a:any)=>(
 <Row key={a.id} title={a.title} value={`${a.views} views`}/>
-))
-)}
-
+))}
 </Panel>
 
 </div>
@@ -314,10 +355,7 @@ Recent Activity
 <Empty message="No activity yet"/>
 ) : (
 activity.map((a:any)=>(
-<div
-key={a.id}
-className="flex justify-between border-b border-gray-800 pb-2"
->
+<div key={a.id} className="flex justify-between border-b border-gray-800 pb-2">
 <span>{a.title}</span>
 <span className="text-gray-400 text-sm">{a.time}</span>
 </div>
@@ -328,6 +366,17 @@ className="flex justify-between border-b border-gray-800 pb-2"
 
 </div>
 
+{/* 🔥 ANIMATION */}
+<style jsx global>{`
+@keyframes slide-in {
+  0% { transform: translateY(-20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+`}</style>
+
 </div>
 
 )
@@ -335,87 +384,40 @@ className="flex justify-between border-b border-gray-800 pb-2"
 }
 
 //////////////////////////////////////////////////////
-// CARD
+// COMPONENTS
 //////////////////////////////////////////////////////
 
 function Card({title,value}:{title:string,value:number}){
-
 return(
-
-<div className="bg-[#0e1726] border border-gray-800 rounded-xl p-5 hover:border-orange-400 transition">
-
+<div className="bg-[#0e1726] border border-gray-800 rounded-xl p-5 hover:border-orange-400 hover:scale-[1.02] transition">
 <p className="text-gray-400 text-sm">{title}</p>
-
 <h3 className="text-2xl font-bold mt-2">
 {value?.toLocaleString?.() || 0}
 </h3>
-
 </div>
-
 )
-
 }
-
-//////////////////////////////////////////////////////
-// PANEL
-//////////////////////////////////////////////////////
 
 function Panel({title,children}:{title:string,children:any}){
-
 return(
-
-<div className="bg-[#0e1726] border border-gray-800 rounded-xl p-6">
-
-<h2 className="text-lg font-semibold mb-4">
-{title}
-</h2>
-
-<div className="space-y-3">
-{children}
+<div className="bg-[#0e1726] border border-gray-800 rounded-xl p-6 hover:border-orange-400 transition">
+<h2 className="text-lg font-semibold mb-4">{title}</h2>
+<div className="space-y-3">{children}</div>
 </div>
-
-</div>
-
 )
-
 }
-
-//////////////////////////////////////////////////////
-// ROW
-//////////////////////////////////////////////////////
 
 function Row({title,value}:{title:string,value?:string}){
-
 return(
-
-<div className="flex justify-between border-b border-gray-800 pb-2">
-
-<span className="hover:text-orange-400 cursor-pointer">
-{title}
-</span>
-
-<span className="text-gray-400 text-sm">
-{value}
-</span>
-
+<div className="flex justify-between border-b border-gray-800 pb-2 hover:text-orange-400 transition cursor-pointer">
+<span>{title}</span>
+<span className="text-gray-400 text-sm">{value}</span>
 </div>
-
 )
-
 }
 
-//////////////////////////////////////////////////////
-// EMPTY
-//////////////////////////////////////////////////////
-
 function Empty({message}:{message:string}){
-
 return(
-
-<p className="text-gray-500 text-sm">
-{message}
-</p>
-
+<p className="text-gray-500 text-sm">{message}</p>
 )
-
 }

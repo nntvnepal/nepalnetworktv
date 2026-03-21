@@ -10,12 +10,34 @@ type UserType = {
   email: string
   role: Role
   isActive: boolean
-  avatar?: string | null
+  isVerified?: boolean
 }
 
 type Props = {
   currentUser: UserType
   user: UserType
+}
+
+//////////////////////////////////////////////////////
+// 🔥 ROLE HELPER
+//////////////////////////////////////////////////////
+
+const ROLE_LEVEL: any = {
+  super_admin: 7,
+  admin: 6,
+  tv_admin: 5,
+  editor: 4,
+  tv_operator: 3,
+  reporter: 2,
+  advertiser: 1,
+}
+
+function canManage(currentRole: string, targetRole: string) {
+  return ROLE_LEVEL[currentRole] > ROLE_LEVEL[targetRole]
+}
+
+function canAssign(currentRole: string, targetRole: string) {
+  return ROLE_LEVEL[currentRole] > ROLE_LEVEL[targetRole]
 }
 
 export default function EditUserForm({ currentUser, user }: Props) {
@@ -26,11 +48,19 @@ export default function EditUserForm({ currentUser, user }: Props) {
   // STATE
   //////////////////////////////////////////////////////
 
-  const [name, setName] = useState<string>(user.name || "")
-  const [email, setEmail] = useState<string>(user.email || "")
+  const [name, setName] = useState(user.name || "")
+  const [email, setEmail] = useState(user.email || "")
   const [role, setRole] = useState<Role>(user.role)
-  const [isActive, setIsActive] = useState<boolean>(user.isActive)
+  const [isActive, setIsActive] = useState(user.isActive)
   const [loading, setLoading] = useState(false)
+
+  //////////////////////////////////////////////////////
+  // ROLE FILTER 🔥
+  //////////////////////////////////////////////////////
+
+  const allowedRoles = Object.values(Role).filter(r =>
+    canAssign(currentUser.role, r)
+  )
 
   //////////////////////////////////////////////////////
   // SUBMIT
@@ -42,7 +72,7 @@ export default function EditUserForm({ currentUser, user }: Props) {
     try {
       setLoading(true)
 
-      const res = await fetch(`/api/users/${user.id}`, {
+      const res = await fetch(`/api/admin/user/${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -55,18 +85,17 @@ export default function EditUserForm({ currentUser, user }: Props) {
         }),
       })
 
-      if (!res.ok) {
-        throw new Error("Failed to update user")
-      }
+      const data = await res.json()
+
+      if (!res.ok) throw new Error(data.error)
 
       alert("User updated successfully")
 
       router.push("/admin/user")
       router.refresh()
 
-    } catch (err) {
-      console.error(err)
-      alert("Update failed")
+    } catch (err: any) {
+      alert(err.message || "Update failed")
     } finally {
       setLoading(false)
     }
@@ -88,7 +117,6 @@ export default function EditUserForm({ currentUser, user }: Props) {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          required
           className="w-full px-4 py-2 bg-purple-900 border border-purple-700 rounded text-white"
         />
       </div>
@@ -97,66 +125,75 @@ export default function EditUserForm({ currentUser, user }: Props) {
       <div>
         <label className="block text-sm mb-1">Email</label>
         <input
-          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
           className="w-full px-4 py-2 bg-purple-900 border border-purple-700 rounded text-white"
         />
+      </div>
+
+      {/* VERIFIED */}
+      <div>
+        <label className="block text-sm mb-1">Verification</label>
+        <div className={`px-3 py-2 rounded text-sm font-medium ${
+          user.isVerified
+            ? "bg-green-500/20 text-green-400"
+            : "bg-yellow-500/20 text-yellow-400"
+        }`}>
+          {user.isVerified ? "Verified" : "Pending Verification"}
+        </div>
       </div>
 
       {/* ROLE */}
       <div>
         <label className="block text-sm mb-1">Role</label>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value as Role)}
-          className="w-full px-4 py-2 bg-purple-900 border border-purple-700 rounded text-white"
-        >
-          {Object.values(Role).map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
+
+        {canManage(currentUser.role, user.role) ? (
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value as Role)}
+            className="w-full px-4 py-2 bg-purple-900 border border-purple-700 rounded text-white"
+          >
+            {allowedRoles.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        ) : (
+          <div className="px-3 py-2 bg-gray-800 rounded text-sm">
+            {user.role}
+          </div>
+        )}
+
       </div>
 
       {/* STATUS */}
       <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={isActive}
-          disabled={currentUser.id === user.id} // 🔥 self-disable protection
-          onChange={(e) => setIsActive(e.target.checked)}
-        />
-        <label>Active</label>
+        {canManage(currentUser.role, user.role) ? (
+          <>
+            <input
+              type="checkbox"
+              checked={isActive}
+              disabled={currentUser.id === user.id}
+              onChange={(e) => setIsActive(e.target.checked)}
+            />
+            <label>Active</label>
+          </>
+        ) : (
+          <span className="text-sm opacity-60">
+            {user.isActive ? "Active" : "Inactive"}
+          </span>
+        )}
       </div>
 
-      {/* ACTIONS */}
-      <div className="flex gap-4">
-
+      {/* ACTION */}
+      {canManage(currentUser.role, user.role) && (
         <button
           type="submit"
           disabled={loading}
-          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white"
+          className="w-full bg-green-600 hover:bg-green-700 px-4 py-3 rounded text-white font-semibold"
         >
           {loading ? "Saving..." : "Update User"}
         </button>
-
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="bg-gray-600 px-4 py-2 rounded text-white"
-        >
-          Cancel
-        </button>
-
-      </div>
-
-      {/* FOOTER INFO */}
-      <div className="text-xs text-purple-300">
-        Logged in as: {currentUser.name}
-      </div>
+      )}
 
     </form>
   )

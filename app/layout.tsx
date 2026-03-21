@@ -42,12 +42,19 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
 
-  /* ================= ROUTE DETECTION (SAFE) ================= */
+  /* ================= ROUTE DETECTION (FIXED) ================= */
 
   let pathname = ""
 
   try {
-    pathname = headers().get("referer") || ""
+    const h = headers()
+
+    // ✅ multi-source fallback (THIS IS THE FIX)
+    pathname =
+      h.get("x-invoke-path") ||
+      h.get("next-url") ||
+      h.get("referer") ||
+      ""
   } catch {
     pathname = ""
   }
@@ -68,8 +75,6 @@ export default async function RootLayout({
       categories = await prisma.category.findMany({
         where: { status: "active" },
         orderBy: { priority: "asc" },
-
-        // ✅ CRASH FIX (skip bad fields)
         select: {
           id: true,
           name: true,
@@ -81,7 +86,7 @@ export default async function RootLayout({
       })
     } catch (err) {
       console.error("CATEGORY LOAD ERROR:", err)
-      categories = [] // fallback
+      categories = []
     }
   }
 
@@ -154,7 +159,6 @@ export default async function RootLayout({
 
                   </Link>
 
-                  {/* ✅ SAFE PASS */}
                   <HeaderMenu categories={categories || []} />
 
                 </div>
@@ -173,7 +177,6 @@ export default async function RootLayout({
               <footer className="nntv-bg text-gray-300 mt-20">
                 <div className="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-10">
 
-                  {/* ABOUT */}
                   <div>
                     <h3 className="logo-title text-white text-lg font-semibold">
                       नेपाल नेटवर्क टेलिभिजन <span className="ml-2">NNTV</span>
@@ -184,10 +187,8 @@ export default async function RootLayout({
                     </p>
                   </div>
 
-                  {/* SECTIONS */}
                   <div>
                     <h4 className="text-white mb-3 font-semibold">खण्डहरू</h4>
-
                     <ul className="space-y-2 text-sm">
                       <li><Link href="/category/news">समाचार</Link></li>
                       <li><Link href="/category/entertainment">मनोरञ्जन</Link></li>
@@ -196,10 +197,8 @@ export default async function RootLayout({
                     </ul>
                   </div>
 
-                  {/* COMPANY */}
                   <div>
                     <h4 className="text-white mb-3 font-semibold">कम्पनी</h4>
-
                     <ul className="space-y-2 text-sm">
                       <li><Link href="/about">हाम्रो बारेमा</Link></li>
                       <li><Link href="/contact">सम्पर्क</Link></li>
@@ -209,7 +208,6 @@ export default async function RootLayout({
                     </ul>
                   </div>
 
-                  {/* NEWSLETTER */}
                   <div>
                     <h4 className="text-white mb-3 font-semibold">न्युजलेटर</h4>
 
@@ -227,7 +225,7 @@ export default async function RootLayout({
                 </div>
 
                 <div className="text-center text-xs py-4 border-t border-purple-900">
-                  © {new Date().getFullYear()} नेपाल नेटवर्क टेलिभिजन (NNTV) DAR Group of Industries द्वारा सञ्चालित, Designed by TitanArt Studio-Mumbai
+                  © {new Date().getFullYear()} नेपाल नेटवर्क टेलिभिजन (NNTV) DAR Group of Industries द्वारा सञ्चालित, Designed by TitanArt Studio-Chennai
                 </div>
 
               </footer>

@@ -1,0 +1,17 @@
+.clipTopLeft {
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.clipTopRight {
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+.clipBottomLeft {
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+
+.clipBottomRight {
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+

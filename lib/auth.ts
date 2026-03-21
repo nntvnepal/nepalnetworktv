@@ -1,15 +1,37 @@
-import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken"
+import bcrypt from "bcryptjs"
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+const JWT_SECRET = process.env.JWT_SECRET as string
 
-export function signToken(payload: any) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+//////////////////////////////////////////////////////
+// PASSWORD
+//////////////////////////////////////////////////////
+
+export async function hashPassword(password: string) {
+  return bcrypt.hash(password, 10)
+}
+
+export async function comparePassword(password: string, hash: string) {
+  return bcrypt.compare(password, hash)
+}
+
+//////////////////////////////////////////////////////
+// TOKEN
+//////////////////////////////////////////////////////
+
+export function signToken(payload: { userId: string; role: string }) {
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: "7d",
+  })
 }
 
 export function verifyToken(token: string) {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, JWT_SECRET) as {
+      userId: string
+      role: string
+    }
   } catch {
-    return null;
+    return null
   }
 }

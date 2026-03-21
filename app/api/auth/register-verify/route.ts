@@ -2,10 +2,9 @@ import { prisma } from "@/lib/prisma"
 import { hashPassword } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
-export const runtime = "nodejs" // 🔥 avoid edge issues
-
 export async function POST(req: Request) {
   try {
+
     const body = await req.json()
 
     const name = String(body.name || "").trim()
@@ -23,13 +22,6 @@ export async function POST(req: Request) {
       )
     }
 
-    if (!email.includes("@")) {
-      return NextResponse.json(
-        { error: "Invalid email format" },
-        { status: 400 }
-      )
-    }
-
     if (password.length < 6) {
       return NextResponse.json(
         { error: "Password must be at least 6 characters" },
@@ -38,7 +30,7 @@ export async function POST(req: Request) {
     }
 
     //////////////////////////////////////////////////////
-    // CHECK EXISTING USER (EMAIL ONLY)
+    // CHECK EXISTING USER
     //////////////////////////////////////////////////////
 
     const existingUser = await prisma.user.findUnique({
@@ -59,33 +51,34 @@ export async function POST(req: Request) {
     const hashedPassword = await hashPassword(password)
 
     //////////////////////////////////////////////////////
+    // CREATE USER (UNVERIFIED)
+    //////////////////////////////////////////////////////
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        isVerified: false,
+      },
+    })
+
+    //////////////////////////////////////////////////////
     // GENERATE OTP
     //////////////////////////////////////////////////////
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
 
-    //////////////////////////////////////////////////////
-    // REMOVE OLD OTP (IMPORTANT 🔥)
-    //////////////////////////////////////////////////////
-
-    await prisma.oTP.deleteMany({
-      where: { email },
-    })
-
-    //////////////////////////////////////////////////////
-    // STORE OTP (EMAIL BASED)
-    //////////////////////////////////////////////////////
-
     await prisma.oTP.create({
       data: {
         email,
         code: otp,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       },
     })
 
     //////////////////////////////////////////////////////
-    // DEBUG (REMOVE IN PROD)
+    // DEBUG (REMOVE LATER)
     //////////////////////////////////////////////////////
     console.log("📧 REGISTER OTP:", otp)
 
@@ -93,19 +86,13 @@ export async function POST(req: Request) {
     // RESPONSE
     //////////////////////////////////////////////////////
 
-    return NextResponse.json(
-      {
-        success: true,
-        step: "otp_required",
-        message: "OTP sent to email",
-        data: {
-          name,
-          email,
-          password: hashedPassword, // temp pass forward
-        },
-      },
-      { status: 200 }
-    )
+    return NextResponse.json({
+      success: true,
+      step: "otp_required",
+      email,
+      message: "OTP sent to email",
+    })
+
   } catch (error) {
     console.error("REGISTER ERROR:", error)
 

@@ -1,119 +1,150 @@
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
-import { signToken } from "@/lib/auth";
+import { prisma } from "@/lib/prisma"
+import { compare } from "bcryptjs"
+import { NextResponse } from "next/server"
+import { sendOTPEmail } from "@/lib/mailer"
 
-export const dynamic = "force-dynamic";
+const OTP_EXPIRY_MINUTES = 5
 
 export async function POST(req: Request) {
-
   try {
 
-    /* ================= SAFE BODY PARSE ================= */
+    //////////////////////////////////////////////////////
+    // PARSE BODY
+    //////////////////////////////////////////////////////
 
-    let body;
+    const body = await req.json()
+      const email = String(body.email || "").trim().toLowerCase()
+    const password = String(body.password || "").trim()
+    const captchaToken = body.captchaToken
 
-    try {
-      body = await req.json();
-    } catch {
+    //////////////////////////////////////////////////////
+    // CAPTCHA VERIFY
+    //////////////////////////////////////////////////////
+
+    if (!captchaToken) {
       return NextResponse.json(
-        { success: false, error: "Invalid request body" },
+        { success: false, error: "Captcha required" },
         { status: 400 }
-      );
+      )
     }
 
-    const { email, password } = body;
+    const captchaRes = await fetch(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`,
+      }
+    )
 
-    /* ================= VALIDATION ================= */
+    const captchaData = await captchaRes.json()
+
+    if (!captchaData.success) {
+      return NextResponse.json(
+        { success: false, error: "Captcha verification failed" },
+        { status: 400 }
+      )
+    }
+
+    //////////////////////////////////////////////////////
+    // VALIDATION
+    //////////////////////////////////////////////////////
 
     if (!email || !password) {
       return NextResponse.json(
         { success: false, error: "Email and password required" },
         { status: 400 }
-      );
+      )
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-
-    /* ================= FIND USER ================= */
+    //////////////////////////////////////////////////////
+    // FIND USER
+    //////////////////////////////////////////////////////
 
     const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-        role: true,
-        isActive: true
-      }
-    });
+      where: { email },
+    })
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Invalid credentials" },
-        { status: 401 }
-      );
+        { success: false, error: "Invalid email or password" },
+        { status: 400 }
+      )
     }
-
-    /* ================= PASSWORD CHECK ================= */
-
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match) {
-      return NextResponse.json(
-        { success: false, error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
-
-    /* ================= ACCOUNT STATUS ================= */
 
     if (!user.isActive) {
       return NextResponse.json(
-        { success: false, error: "Account blocked" },
+        { success: false, error: "Account disabled" },
         { status: 403 }
-      );
+      )
     }
 
-    /* ================= CREATE TOKEN ================= */
+    //////////////////////////////////////////////////////
+    // PASSWORD CHECK
+    //////////////////////////////////////////////////////
 
-    const token = signToken({
-      id: user.id,
-      role: user.role
-    });
+    const isMatch = await compare(password, user.password)
 
-    /* ================= RESPONSE ================= */
+    if (!isMatch) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email or password" },
+        { status: 400 }
+      )
+    }
 
-    const response = NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
+    //////////////////////////////////////////////////////
+    // CLEAN OLD OTPs (EMAIL BASED)
+    //////////////////////////////////////////////////////
+
+    await prisma.oTP.deleteMany({
+      where: {
         email: user.email,
-        role: user.role
-      }
-    });
+      },
+    })
 
-    /* ================= COOKIE ================= */
+    //////////////////////////////////////////////////////
+    // GENERATE OTP
+    //////////////////////////////////////////////////////
 
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7 // 7 days
-    });
+    const otp = Math.floor(100000 + Math.random() * 900000).toString()
 
-    return response;
+    const expiresAt = new Date(
+      Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000
+    )
+
+    await prisma.oTP.create({
+      data: {
+        email: user.email,
+        code: otp,
+        expiresAt,
+      },
+    })
+
+    //////////////////////////////////////////////////////
+    // SEND EMAIL 🔥
+    //////////////////////////////////////////////////////
+
+    await sendOTPEmail(user.email, otp)
+
+    //////////////////////////////////////////////////////
+    // RESPONSE
+    //////////////////////////////////////////////////////
+
+    return NextResponse.json({
+      success: true,
+      message: "OTP sent to your email",
+      step: "otp_required",
+      email: user.email,
+    })
 
   } catch (error) {
-
-    console.error("LOGIN ERROR:", error);
+    console.error("❌ LOGIN ERROR:", error)
 
     return NextResponse.json(
-      { success: false, error: "Server error" },
+      { success: false, error: "Internal server error" },
       { status: 500 }
-    );
-
+    )
   }
-
 }

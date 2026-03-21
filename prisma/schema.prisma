@@ -6,16 +6,22 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
-
 //////////////////////////////////////////////////////
 // ENUMS
 //////////////////////////////////////////////////////
 
 enum Role {
+  super_admin
   admin
+
   editor
   reporter
+
   advertiser
+
+  tv_admin
+  tv_operator
+
   user
 }
 
@@ -27,77 +33,122 @@ enum PostStatus {
   archived
 }
 
+enum AdStatus {
+  active
+  paused
+  expired
+  pending
+}
+
 //////////////////////////////////////////////////////
-// CATEGORY
+// USER
 //////////////////////////////////////////////////////
-model Category {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+model User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name     String?
+  email    String  @unique
+  password String
 
   //////////////////////////////////////////////////////
-  // BASIC
+  // AUTH (OTP READY)
   //////////////////////////////////////////////////////
 
-  name        String
-  slug        String   @unique
-  description String?
+  mobile String? @unique
+
+  role     Role    @default(user)
+  isActive Boolean @default(true)
+
+  avatar String?
 
   //////////////////////////////////////////////////////
-  // UI / DISPLAY
+  // SECURITY
   //////////////////////////////////////////////////////
 
-  color       String?  
-  icon        String?  
+  lastLogin  DateTime?
+  isVerified Boolean   @default(false)
 
-  //////////////////////////////////////////////////////
-  // STATUS & ORDER
-  //////////////////////////////////////////////////////
-
-  status      String   @default("active")
-  priority    Int      @default(0)
-
-  isFeatured  Boolean  @default(false)
-  isBreaking  Boolean  @default(false)
-
-  //////////////////////////////////////////////////////
-  // SEO
-  //////////////////////////////////////////////////////
-
-  seoTitle       String?
-  seoDescription String?
-  seoKeywords    String?
-
-  //////////////////////////////////////////////////////
-  // ANALYTICS
-  //////////////////////////////////////////////////////
-
-  totalArticles  Int      @default(0)
-  totalViews     Int      @default(0)
+  resetToken       String?
+  resetTokenExpiry DateTime?
 
   //////////////////////////////////////////////////////
   // RELATIONS
   //////////////////////////////////////////////////////
 
-  articles Article[]
+  articles         Article[] @relation("UserArticles")
+  articlesApproved Article[] @relation("ApprovedArticles")
+
+  ads Ad[] @relation("UserAds")
+
+  activity ActivityLog[]
+
+  sentMessages     ChatMessage[] @relation("MessageSender")
+  receivedMessages ChatMessage[] @relation("MessageReceiver")
 
   //////////////////////////////////////////////////////
   // TIMESTAMPS
   //////////////////////////////////////////////////////
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@index([role])
+}
+model OTP {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  email String
+  code String
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([email])   // 🔥 IMPORTANT
+  @@index([expiresAt])
+}
+
+//////////////////////////////////////////////////////
+// CATEGORY
+//////////////////////////////////////////////////////
+
+model Category {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String
+  slug        String  @unique
+  description String?
+
+  color String?
+  icon  String?
+
+  status   String @default("active")
+  priority Int    @default(0)
+
+  isFeatured Boolean @default(false)
+  isBreaking Boolean @default(false)
+
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+
+  totalArticles Int @default(0)
+  totalViews    Int @default(0)
+
+  articles Article[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  //////////////////////////////////////////////////////
-  // INDEXES
-  //////////////////////////////////////////////////////
 
   @@index([status])
   @@index([priority])
   @@index([isFeatured])
-  // ❌ slug index removed (already @unique)
 }
+
 //////////////////////////////////////////////////////
 // ARTICLE
 //////////////////////////////////////////////////////
+
 model Article {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
@@ -165,55 +216,35 @@ model Article {
   showAuthor Boolean @default(true)
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime?
+  updatedAt DateTime? @updatedAt
+
+  //////////////////////////////////////////////////////
+  // RELATIONS
+  //////////////////////////////////////////////////////
 
   categoryId String?   @db.ObjectId
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  category   Category? @relation(fields: [categoryId], references: [id])
 
   authorId String? @db.ObjectId
-  author   User?   @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
+  author   User?   @relation("UserArticles", fields: [authorId], references: [id])
 
-//////////////////////////////////////////////////////
-// BREAKING NEWS
-//////////////////////////////////////////////////////
+  approvedById String? @db.ObjectId
+  approvedBy   User?   @relation("ApprovedArticles", fields: [approvedById], references: [id])
 
-model BreakingNews {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  headline  String?
-  priority  Int       @default(1)
-  isActive  Boolean   @default(true)
-  expireAt  DateTime?
-  createdBy String?   @db.ObjectId
-  createdAt DateTime  @default(now())
-  updatedAt DateTime?
-}
+  //////////////////////////////////////////////////////
+  // EXTRA
+  //////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////
-// USER
-//////////////////////////////////////////////////////
+  scheduledAt DateTime?
 
-model User {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+  //////////////////////////////////////////////////////
+  // INDEXES
+  //////////////////////////////////////////////////////
 
-  name     String?
-  email    String  @unique
-  password String
-
-  role Role @default(user)
-
-  isActive Boolean @default(true)
-
-  avatar String?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime?
-
-  articles Article[]
-  activity ActivityLog[]
-
-  sentMessages     ChatMessage[] @relation("MessageSender")
-  receivedMessages ChatMessage[] @relation("MessageReceiver")
+  @@index([status])
+  @@index([publishedAt])
+  @@index([breaking])
+  @@index([flash])
 }
 
 //////////////////////////////////////////////////////
@@ -224,10 +255,10 @@ model ChatMessage {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   senderId String? @db.ObjectId
-  sender   User?   @relation("MessageSender", fields: [senderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sender   User?   @relation("MessageSender", fields: [senderId], references: [id])
 
   receiverId String? @db.ObjectId
-  receiver   User?   @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  receiver   User?   @relation("MessageReceiver", fields: [receiverId], references: [id])
 
   message String
   isRead  Boolean @default(false)
@@ -254,6 +285,11 @@ model Ad {
   priority Int    @default(1)
   status   String @default("active")
 
+  statusEnum AdStatus @default(active)
+
+  advertiserId String? @db.ObjectId
+  advertiser   User?   @relation("UserAds", fields: [advertiserId], references: [id])
+
   startDate DateTime?
   endDate   DateTime?
 
@@ -267,7 +303,10 @@ model Ad {
   completed Boolean @default(false)
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime?
+  updatedAt DateTime? @updatedAt
+
+  @@index([status])
+  @@index([placement])
 }
 
 //////////////////////////////////////////////////////
@@ -275,61 +314,34 @@ model Ad {
 //////////////////////////////////////////////////////
 
 enum AdPlacement {
-  //////////////////////////////////////////////////////
-  // HOMEPAGE
-  //////////////////////////////////////////////////////
-
   homepage_top
   homepage_after_hero
-
   homepage_block_1
   homepage_block_2
   homepage_block_3
   homepage_block_4
-
   homepage_mid
   homepage_after_list
-
   homepage_sidebar_top
   homepage_sidebar_bottom
-
   homepage_bottom
-
-  //////////////////////////////////////////////////////
-  // ARTICLE PAGE
-  //////////////////////////////////////////////////////
 
   article_top
   article_after_hero
-
   article_after_paragraph
   article_mid
-
   article_sidebar_top
   article_sidebar_bottom
-
   article_bottom
 
-  //////////////////////////////////////////////////////
-  // CATEGORY PAGE
-  //////////////////////////////////////////////////////
-
   category_top
-
   category_after_3_posts
   category_after_6_posts
-
   category_sidebar
-
   category_bottom
-
-  //////////////////////////////////////////////////////
-  // GLOBAL / SITE WIDE
-  //////////////////////////////////////////////////////
 
   header_banner
   footer_banner
-
   sticky_bottom
   popup
 }
@@ -352,22 +364,26 @@ model ActivityLog {
   entityId String?
 
   userId String? @db.ObjectId
-  user   User?   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user   User?   @relation(fields: [userId], references: [id])
+
+  metadata Json?
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 //////////////////////////////////////////////////////
 // NEWSLETTER
 //////////////////////////////////////////////////////
+
 model NewsletterSubscriber {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  email String @unique
-
+  email  String @unique
   status String @default("active")
 
-  source String? // footer / popup / article
+  source String?
 
   ip        String?
   userAgent String?
@@ -384,9 +400,10 @@ model NewsletterSubscriber {
 model VisitorChat {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name      String?
-  email     String?
-  message   String
+  name    String?
+  email   String?
+  message String
+
   ip        String?
   userAgent String?
 
@@ -397,8 +414,51 @@ model VisitorChat {
 }
 
 //////////////////////////////////////////////////////
-// TV CONTROL
+// Breaking News
 //////////////////////////////////////////////////////
+model BreakingNews {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  headline  String?
+  priority  Int      @default(1)
+  isActive  Boolean  @default(true)
+  expireAt  DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+
+//////////////////////////////////////////////////////
+// JOIN TEAM
+//////////////////////////////////////////////////////
+model Application {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+
+  // BASIC INFO
+  name        String
+  email       String
+  phone       String
+
+  // ROLE
+  role        String   // reporter, editor, designer, tv_operator
+
+  // DETAILS
+  experience  String?
+  portfolio   String?
+  message     String?
+
+  // FILE (future)
+  resumeUrl   String?
+
+  // SYSTEM
+  status      String   @default("pending") // pending, approved, rejected
+  source      String   @default("website") // future: referral, linkedin etc
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+
 //////////////////////////////////////////////////////
 // TICKER MODES
 //////////////////////////////////////////////////////
@@ -436,7 +496,7 @@ model Ticker {
 
   duration Int? // seconds for flash / breaking
 
-  createdAt DateTime @default(now())
+    createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
@@ -557,6 +617,7 @@ model PollVote {
 
   createdAt DateTime @default(now())
 }
+
 //////////////////////////////////////////////////////
 // ENUMS
 //////////////////////////////////////////////////////

@@ -13,40 +13,10 @@ export async function POST(req: Request) {
     //////////////////////////////////////////////////////
 
     const body = await req.json()
-      const email = String(body.email || "").trim().toLowerCase()
+
+    const email = String(body.email || "").trim().toLowerCase()
     const password = String(body.password || "").trim()
     const captchaToken = body.captchaToken
-
-    //////////////////////////////////////////////////////
-    // CAPTCHA VERIFY
-    //////////////////////////////////////////////////////
-
-    if (!captchaToken) {
-      return NextResponse.json(
-        { success: false, error: "Captcha required" },
-        { status: 400 }
-      )
-    }
-
-    const captchaRes = await fetch(
-      "https://www.google.com/recaptcha/api/siteverify",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`,
-      }
-    )
-
-    const captchaData = await captchaRes.json()
-
-    if (!captchaData.success) {
-      return NextResponse.json(
-        { success: false, error: "Captcha verification failed" },
-        { status: 400 }
-      )
-    }
 
     //////////////////////////////////////////////////////
     // VALIDATION
@@ -55,6 +25,51 @@ export async function POST(req: Request) {
     if (!email || !password) {
       return NextResponse.json(
         { success: false, error: "Email and password required" },
+        { status: 400 }
+      )
+    }
+
+    if (!captchaToken) {
+      return NextResponse.json(
+        { success: false, error: "Captcha required" },
+        { status: 400 }
+      )
+    }
+
+    //////////////////////////////////////////////////////
+    // CAPTCHA VERIFY (🔥 FIXED)
+    //////////////////////////////////////////////////////
+
+    if (!process.env.RECAPTCHA_SECRET_KEY) {
+      console.error("❌ RECAPTCHA_SECRET_KEY missing")
+      return NextResponse.json(
+        { success: false, error: "Server config error" },
+        { status: 500 }
+      )
+    }
+
+    const params = new URLSearchParams()
+    params.append("secret", process.env.RECAPTCHA_SECRET_KEY)
+    params.append("response", captchaToken)
+
+    const captchaRes = await fetch(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      }
+    )
+
+    const captchaData = await captchaRes.json()
+
+    console.log("🛡 CAPTCHA DEBUG:", captchaData)
+
+    if (!captchaData.success) {
+      return NextResponse.json(
+        { success: false, error: "Captcha verification failed" },
         { status: 400 }
       )
     }
@@ -95,13 +110,11 @@ export async function POST(req: Request) {
     }
 
     //////////////////////////////////////////////////////
-    // CLEAN OLD OTPs (EMAIL BASED)
+    // CLEAN OLD OTPs
     //////////////////////////////////////////////////////
 
     await prisma.oTP.deleteMany({
-      where: {
-        email: user.email,
-      },
+      where: { email: user.email },
     })
 
     //////////////////////////////////////////////////////
@@ -123,7 +136,7 @@ export async function POST(req: Request) {
     })
 
     //////////////////////////////////////////////////////
-    // SEND EMAIL 🔥
+    // SEND EMAIL
     //////////////////////////////////////////////////////
 
     await sendOTPEmail(user.email, otp)

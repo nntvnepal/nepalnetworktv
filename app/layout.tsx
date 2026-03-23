@@ -1,18 +1,17 @@
 import "leaflet/dist/leaflet.css"
 import Providers from "./providers"
 import "./globals.css"
-
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
 import { headers } from "next/headers"
-
 import TopDateTime from "@/components/TopDateTime"
 import DarkModeToggle from "@/components/DarkModeToggle"
 import NewsletterForm from "@/components/NewsletterForm"
 import HeaderMenu from "@/components/HeaderMenu"
-
 import { prisma } from "@/lib/prisma"
+
+
 
 import {
   Facebook,
@@ -65,12 +64,12 @@ export default async function RootLayout({
     pathname.includes("/ticker") ||
     pathname.includes("/tv") ||
     pathname.includes("/teleprompter")
-
+const isKids = pathname.includes("/kids")
   /* ================= FETCH CATEGORIES (SAFE) ================= */
 
   let categories: any[] = []
 
-  if (!isAdmin && !isTV) {
+  if (!isAdmin && !isTV && !isKids) {
     try {
       categories = await prisma.category.findMany({
         where: { status: "active" },
@@ -102,9 +101,9 @@ export default async function RootLayout({
 
           {/* ================= ADMIN / TV MODE ================= */}
 
-          {(isAdmin || isTV) ? (
-            children
-          ) : (
+          {(isAdmin || isTV || isKids) ? (
+  children
+) : (
             <>
               {/* ================= TOP BAR ================= */}
 

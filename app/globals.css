@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+body {
+  font-family: 'Fredoka', 'Poppins', sans-serif;
+}
+@import url('https://fonts.googleapis.com/css2?family=Schoolbell&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,6 +21,9 @@ font-size:16px;
 -webkit-font-smoothing:antialiased;
 }
 
+body {
+  font-family: 'Baloo 2', 'Poppins', sans-serif;
+}
 /* =================================
 TYPOGRAPHY
 ================================= */
@@ -1486,3 +1495,10 @@ color:#7e22ce;
 .perspective-800 {
   perspective: 800px;
 }
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
